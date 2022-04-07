@@ -1,22 +1,29 @@
-interface PlayMusicInstruction {
+export interface PlayMusicInstruction {
     type: "playMusic";
     musicURI: string;
 }
 
-type BaseStageInstruction = PlayMusicInstruction;
+export type BaseStageInstruction = PlayMusicInstruction;
 
-type StageInstruction = BaseStageInstruction & {
+export type StageInstruction = BaseStageInstruction & {
     at: number;
+    executed?: boolean;
 };
 
-type Phase = {
+export type Phase = {
     delayAfter: number;
     instructions: StageInstruction[];
 };
 
+export interface StageMeshDefinition {
+    url: string;
+    length: number;
+}
+
 export interface StageDefinition {
     title: string;
     subtitle: string;
+    stageMeshes: StageMeshDefinition[];
     phases: Phase[];
 }
 
