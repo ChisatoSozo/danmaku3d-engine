@@ -2,9 +2,13 @@ import { Vector3 } from "@babylonjs/core";
 import React, { useEffect, useMemo, useState } from "react";
 import { useExecutor } from "../hooks/useExecutor";
 import { GameDefinition, PlayMusicInstruction, SpawnEnemyInstruction } from "../types/gameDefinition/GameDefinition";
+import { Camera } from "./Camera";
+import { ControlsToState } from "./ControlsToState";
 import { Enemy } from "./Enemy";
 import { FadeText } from "./FadeText";
 import { Music } from "./Music";
+import { Player } from "./Player";
+import { PlayerMovement } from "./PlayerMovement";
 import { StageMesh } from "./StageMesh";
 
 interface StageProps {
@@ -41,10 +45,12 @@ export const Stage: React.FC<StageProps> = ({ stageIndex, setStageIndex, gameDef
         }
     }, phaseDefinition.instructions);
 
+    const [focused, setFocused] = useState(false);
+
     return (
         <>
+            <ControlsToState setFocused={setFocused} />
             <hemisphericLight name="light1" intensity={0.7} direction={Vector3.Up()} />
-            <arcRotateCamera name="camera1" target={Vector3.Zero()} alpha={Math.PI / 2} beta={Math.PI / 4} radius={8} />
             <FadeText text={stageDefinition.title} position={TITLE_POSITION} size={8} fontSize={0.1} />
             <FadeText text={stageDefinition.subtitle} position={SUBTITLE_POSITION} size={8} fontSize={0.08} />
             <StageMesh stageDefinition={stageDefinition} />
@@ -54,6 +60,13 @@ export const Stage: React.FC<StageProps> = ({ stageIndex, setStageIndex, gameDef
             {enemies.map((enemy) => (
                 <Enemy key={enemy.key} enemyInstruction={enemy.enemyInstruction} />
             ))}
+            <PlayerMovement
+                stageDefinition={stageDefinition}
+                playableCharacterDefinition={gameDefinition.playableCharacters[0]}
+            >
+                <Player focused={focused} playableCharacterDefinition={gameDefinition.playableCharacters[0]} />
+                <Camera mode="player" />
+            </PlayerMovement>
         </>
     );
 };

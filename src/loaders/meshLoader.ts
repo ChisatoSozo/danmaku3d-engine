@@ -1,7 +1,7 @@
-import { AssetContainer, Scene, SceneLoader } from "@babylonjs/core";
-import { Assets } from "../containers/GameContainer";
+import { Scene, SceneLoader } from "@babylonjs/core";
 import { getAsset, useAssets } from "../hooks/useAsset";
-import { MeshAssetDefinition } from "../types/gameDefinition/GameDefinition";
+import { Assets, MeshAdditionalData, MeshAsset } from "../types/Assets";
+import { MeshAssetDefinition } from "../types/gameDefinition/AssetDefinition";
 
 export const hashMesh = (meshAssetDefinition: MeshAssetDefinition) => {
     return meshAssetDefinition.url;
@@ -13,6 +13,7 @@ export const meshLoaded = (assetDefinition: MeshAssetDefinition, assets: Assets)
 
     const hash = hashMesh(assetDefinition);
     if (assets.meshes[hash]) {
+        assetDefinition.hash = hash;
         return true;
     }
 
@@ -25,23 +26,32 @@ export const loadMesh = (
     assets: Assets
 ) => {
     return new Promise<boolean>((resolve) => {
-        if (assetDefinition.hash) {
-            resolve(false);
-            return;
-        }
-
         const hash = hashMesh(assetDefinition);
-        if (assets.meshes[hash]) {
-            assetDefinition.hash = hash;
-            resolve(false);
-            return;
-        }
-
         const root = `/games/${gameDefinitionName}/meshes/`;
         const URI = assetDefinition.url;
-        SceneLoader.LoadAssetContainer(root, URI, scene, (container) => {
-            assets.meshes[hash] = container;
+        SceneLoader.LoadAssetContainer(root, URI, scene, async (container) => {
             assetDefinition.hash = hash;
+
+            let additionalData: MeshAdditionalData | undefined;
+
+            const URINoExtension = URI.substring(0, URI.lastIndexOf("."));
+            const JSONURI = `${root}${URINoExtension}.json`;
+            const response = await fetch(JSONURI);
+
+            if (response.ok) {
+                try {
+                    const json = await response.json();
+                    additionalData = json;
+                } catch (e) {
+                    //nothing
+                }
+            }
+
+            assets.meshes[hash] = {
+                container,
+                additionalData,
+            };
+
             resolve(true);
         });
     });
@@ -49,10 +59,10 @@ export const loadMesh = (
 
 export const useMeshAsset = (assetDefinition: MeshAssetDefinition) => {
     const assets = useAssets();
-    return getAsset(assets, assetDefinition) as AssetContainer;
+    return getAsset(assets, assetDefinition) as MeshAsset;
 };
 
 export const useMeshAssetArray = (assetDefinitions: MeshAssetDefinition[]) => {
     const assets = useAssets();
-    return assetDefinitions.map((assetDefinition) => getAsset(assets, assetDefinition)) as AssetContainer[];
+    return assetDefinitions.map((assetDefinition) => getAsset(assets, assetDefinition)) as MeshAsset[];
 };

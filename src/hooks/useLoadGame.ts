@@ -1,70 +1,75 @@
 import { Scene } from "@babylonjs/core";
-import { useEffect, useState } from "react";
-import { Assets } from "../containers/GameContainer";
+import { useEffect, useMemo, useState } from "react";
+import { glslLoaded, loadGLSL } from "../loaders/glslLoader";
 import { loadMesh, meshLoaded } from "../loaders/meshLoader";
 import { loadSound, soundLoaded } from "../loaders/soundLoader";
-import { chisatoSozo } from "../test/chisatoSozo";
+import { Assets, makeDefaultAssets } from "../types/Assets";
+import { AnyAssetDefinition } from "../types/gameDefinition/AssetDefinition";
 import { GameDefinition } from "../types/gameDefinition/GameDefinition";
+import { traverseJsonAsync } from "../utils/ObjectUtils";
 
-export const useLoadGame = (gameDefinitionName: string, scene: Scene | null) => {
+export const useLoadGame = (
+    doLoadGame: boolean,
+    gameDefinition: GameDefinition,
+    gameDefinitionName: string,
+    scene: Scene | null
+) => {
     const [status, setStatus] = useState("");
-    const [subStatus, setSubStatus] = useState("");
-    const [assetName, setAssetName] = useState("");
     const [loadedAssets, setLoadedAssets] = useState<Assets>();
-    const [gameDefinition, setGameDefinition] = useState<GameDefinition>();
+    const returnValue = useMemo(() => ({ status, loadedAssets }), [status, loadedAssets]);
 
     useEffect(() => {
         if (!scene) return;
-        setLoadedAssets(undefined);
+        if (!doLoadGame) return;
         const loadGame = async () => {
             if (!scene) return;
-            const assets = {
-                sounds: {},
-                meshes: {},
-            };
+            const assets = makeDefaultAssets();
 
-            setStatus("loading game definition");
-            const gameDefinition = chisatoSozo;
-            setGameDefinition(gameDefinition);
-
-            for (let stageIndex in gameDefinition.stages) {
-                setStatus(`loading stage ${stageIndex}`);
-                const stage = gameDefinition.stages[stageIndex];
-                for (let stageMeshIndex in stage.stageMeshes) {
-                    const stageMesh = stage.stageMeshes[stageMeshIndex];
-                    if (meshLoaded(stageMesh.asset, assets)) {
-                        continue;
-                    }
-                    setAssetName(stageMesh.asset.url);
-                    await loadMesh(gameDefinitionName, stageMesh.asset, scene, assets);
-                }
-
-                for (let phaseIndex in stage.phases) {
-                    setSubStatus(`loading phase ${phaseIndex}`);
-                    const phase = stage.phases[phaseIndex];
-                    for (let instructionIndex in phase.instructions) {
-                        const instruction = phase.instructions[instructionIndex];
-
-                        switch (instruction.type) {
-                            case "playMusic":
-                                if (soundLoaded(instruction.asset, assets)) break;
-                                setAssetName(instruction.asset.url);
-                                await loadSound(gameDefinitionName, instruction.asset, scene, assets);
-                                break;
-                            case "spawnEnemy":
-                                if (meshLoaded(instruction.asset, assets)) break;
-                                setAssetName(instruction.asset.url);
-                                await loadMesh(gameDefinitionName, instruction.asset, scene, assets);
-                                break;
-                        }
+            await traverseJsonAsync(gameDefinition, async (element, key) => {
+                if (key === "asset") {
+                    const assetDefinition = element as AnyAssetDefinition;
+                    switch (assetDefinition.type) {
+                        case "sound":
+                            if (soundLoaded(assetDefinition, assets)) break;
+                            setStatus(`loading sound ${assetDefinition.url}`);
+                            await loadSound(gameDefinitionName, assetDefinition, scene, assets);
+                            break;
+                        case "mesh":
+                            if (meshLoaded(assetDefinition, assets)) break;
+                            setStatus(`loading mesh ${assetDefinition.url}`);
+                            await loadMesh(gameDefinitionName, assetDefinition, scene, assets);
+                            break;
+                        case "glsl":
+                            if (glslLoaded(assetDefinition, assets)) break;
+                            setStatus(`loading glsl ${assetDefinition.url}`);
+                            await loadGLSL(gameDefinitionName, assetDefinition, scene, assets);
+                            break;
                     }
                 }
-            }
+            });
             setLoadedAssets(assets);
         };
 
         loadGame();
-    }, [gameDefinitionName, scene]);
 
-    return { status, subStatus, assetName, loadedAssets, gameDefinition };
+        return () => {
+            setLoadedAssets((loadedAssets) => {
+                loadedAssets?.meshes &&
+                    Object.values(loadedAssets.meshes).forEach((mesh) => {
+                        mesh.container.dispose();
+                    });
+                loadedAssets?.textures &&
+                    Object.values(loadedAssets.textures).forEach((texture) => {
+                        texture.dispose();
+                    });
+                loadedAssets?.sounds &&
+                    Object.values(loadedAssets.sounds).forEach((sound) => {
+                        sound.dispose();
+                    });
+                return undefined;
+            });
+        };
+    }, [doLoadGame, gameDefinition, gameDefinitionName, scene]);
+
+    return returnValue;
 };

@@ -1,23 +1,8 @@
 import { IVector3Like } from "@babylonjs/core/Maths/math.like";
+import { MeshAssetDefinition, SoundAssetDefinition } from "./AssetDefinition";
 import { Instruction } from "./CommonDefinition";
 import { EnemyInstruction } from "./EnemyDefinition";
-
-export type AssetType = "mesh" | "sound";
-
-export type BaseAssetDefinition<T extends AssetType> = {
-    hash?: string;
-    type: T;
-};
-
-export interface MeshAssetDefinition extends BaseAssetDefinition<"mesh"> {
-    url: string;
-}
-
-export interface SoundAssetDefinition extends BaseAssetDefinition<"sound"> {
-    url: string;
-}
-
-export type AnyAssetDefinition = MeshAssetDefinition | SoundAssetDefinition;
+import { PlayableCharacterDefinition } from "./PlayableCharacterDefinition";
 
 export interface PlayMusicInstruction {
     type: "playMusic";
@@ -57,5 +42,6 @@ export interface StageDefinition {
 }
 
 export interface GameDefinition {
+    playableCharacters: PlayableCharacterDefinition[];
     stages: StageDefinition[];
 }

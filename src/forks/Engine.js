@@ -9,6 +9,7 @@ const canvasStyles = {
 };
 const canvasDivStyles = {
     position: "absolute",
+    cursor: "none",
     top: 0,
     left: 0,
     width: "100vw",

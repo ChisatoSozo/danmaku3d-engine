@@ -74,3 +74,9 @@ export const getRotationMatrix = (transformNode: TransformNode) => {
     quaternion.toRotationMatrix(result);
     return result;
 };
+
+export const clampVectorInPlace = (vec: Vector3, min: Vector3, max: Vector3, padding = 0) => {
+    vec.x = Math.max(min.x + padding, Math.min(max.x - padding, vec.x));
+    vec.y = Math.max(min.y + padding, Math.min(max.y - padding, vec.y));
+    vec.z = Math.max(min.z + padding, Math.min(max.z - padding, vec.z));
+};

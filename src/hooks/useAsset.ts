@@ -1,6 +1,7 @@
 import { useContext } from "react";
-import { Assets, AssetsContext } from "../containers/GameContainer";
-import { AnyAssetDefinition } from "../types/gameDefinition/GameDefinition";
+import { AssetsContext } from "../containers/GameContainer";
+import { Assets } from "../types/Assets";
+import { AnyAssetDefinition } from "../types/gameDefinition/AssetDefinition";
 
 export const useAssets = () => useContext(AssetsContext);
 
@@ -13,6 +14,10 @@ export const getAsset = (assets: Assets, assetDefinition: AnyAssetDefinition) =>
         return assets.sounds[hash];
     } else if (assetDefinition.type === "mesh") {
         return assets.meshes[hash];
+    } else if (assetDefinition.type === "glsl") {
+        return assets.glsl[hash];
+    } else if (assetDefinition.type === "texture") {
+        return assets.textures[hash];
     }
     throw new Error(`Asset ${hash} is not an Asset Type`);
 };
