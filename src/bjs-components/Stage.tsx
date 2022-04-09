@@ -1,9 +1,11 @@
 import { Vector3 } from "@babylonjs/core";
 import React, { useEffect, useMemo, useState } from "react";
-import { useBeforeRender } from "react-babylonjs";
-import { useAssets } from "../containers/GameContainer";
-import { Assets } from "../hooks/useLoadGame";
-import { GameDefinition, PlayMusicInstruction } from "../types/gameDefinition/GameDefinition";
+import { useExecutor } from "../hooks/useExecutor";
+import { GameDefinition, PlayMusicInstruction, SpawnEnemyInstruction } from "../types/gameDefinition/GameDefinition";
+import { Enemy } from "./Enemy";
+import { FadeText } from "./FadeText";
+import { Music } from "./Music";
+import { StageMesh } from "./StageMesh";
 
 interface StageProps {
     stageIndex: number;
@@ -11,41 +13,47 @@ interface StageProps {
     gameDefinition: GameDefinition;
 }
 
-const executePlayMusic = (instruction: PlayMusicInstruction, assets: Assets) => {
-    const sound = assets.sounds[instruction.musicURI];
-    if (sound) {
-        sound.play();
-    } else {
-        throw new Error(`Sound ${instruction.musicURI} not found`);
-    }
-};
+const TITLE_POSITION = new Vector3(0, 4, 0.5);
+const SUBTITLE_POSITION = new Vector3(0, 2, 0.5);
 
 export const Stage: React.FC<StageProps> = ({ stageIndex, setStageIndex, gameDefinition }) => {
-    const assets = useAssets();
-
     const [phaseIndex, setPhaseIndex] = useState(0);
     const stageDefinition = useMemo(() => gameDefinition.stages[stageIndex], [gameDefinition, stageIndex]);
     const phaseDefinition = useMemo(() => stageDefinition.phases[phaseIndex], [stageDefinition, phaseIndex]);
+    const [musics, setMusics] = useState<{ musicInstruction: PlayMusicInstruction; key: number }[]>([]);
+    const [enemies, setEnemies] = useState<{ enemyInstruction: SpawnEnemyInstruction; key: number }[]>([]);
 
-    const [phaseStartTime, setPhaseStartTime] = useState(0);
     useEffect(() => {
-        setPhaseStartTime(Date.now());
-    }, [stageIndex, phaseIndex]);
+        return () => {
+            setMusics([]);
+            setEnemies([]);
+        };
+    }, [stageDefinition]);
 
-    useBeforeRender(() => {
-        const now = Date.now();
-        phaseDefinition.instructions.forEach((instruction) => {
-            if (instruction.executed) return;
-            if (now - phaseStartTime < instruction.at) return;
+    useExecutor((instruction, index) => {
+        switch (instruction.type) {
+            case "playMusic":
+                setMusics((musics) => [...musics, { musicInstruction: instruction, key: index }]);
+                break;
+            case "spawnEnemy":
+                setEnemies((enemies) => [...enemies, { enemyInstruction: instruction, key: index }]);
+                break;
+        }
+    }, phaseDefinition.instructions);
 
-            instruction.executed = true;
-            switch (instruction.type) {
-                case "playMusic":
-                    executePlayMusic(instruction, assets);
-                    break;
-            }
-        });
-    });
-
-    return <arcRotateCamera name="camera1" target={Vector3.Zero()} alpha={Math.PI / 2} beta={Math.PI / 4} radius={8} />;
+    return (
+        <>
+            <hemisphericLight name="light1" intensity={0.7} direction={Vector3.Up()} />
+            <arcRotateCamera name="camera1" target={Vector3.Zero()} alpha={Math.PI / 2} beta={Math.PI / 4} radius={8} />
+            <FadeText text={stageDefinition.title} position={TITLE_POSITION} size={8} fontSize={0.1} />
+            <FadeText text={stageDefinition.subtitle} position={SUBTITLE_POSITION} size={8} fontSize={0.08} />
+            <StageMesh stageDefinition={stageDefinition} />
+            {musics.map((music) => (
+                <Music key={music.key} musicInstruction={music.musicInstruction} />
+            ))}
+            {enemies.map((enemy) => (
+                <Enemy key={enemy.key} enemyInstruction={enemy.enemyInstruction} />
+            ))}
+        </>
+    );
 };

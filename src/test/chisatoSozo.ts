@@ -5,14 +5,24 @@ export const chisatoSozo: GameDefinition = {
         {
             title: "What an Odd World",
             subtitle: "I wonder what we'll find",
+            bounds: {
+                min: { x: -10, y: -10, z: -10 },
+                max: { x: 10, y: 10, z: 10 },
+            },
             stageMeshes: [
                 {
-                    url: "landscapeTileAdraco.glb",
-                    length: 1,
+                    asset: {
+                        type: "mesh",
+                        url: "landscapeTileAdraco.glb",
+                    },
+                    length: 125,
                 },
                 {
-                    url: "landscapeTileBdraco.glb",
-                    length: 1,
+                    asset: {
+                        type: "mesh",
+                        url: "landscapeTileBdraco.glb",
+                    },
+                    length: 125,
                 },
             ],
             phases: [
@@ -22,7 +32,39 @@ export const chisatoSozo: GameDefinition = {
                         {
                             at: 0,
                             type: "playMusic",
-                            musicURI: "eternalMelody.mp3",
+                            asset: {
+                                type: "sound",
+                                url: "eternalMelody.mp3",
+                            },
+                        },
+                        {
+                            at: 1000,
+                            type: "spawnEnemy",
+                            asset: {
+                                type: "mesh",
+                                url: "blueFairy.glb",
+                            },
+                            position: { x: 0, y: 0, z: 0 },
+                            instructions: [
+                                {
+                                    at: 1000,
+                                    type: "moveTo",
+                                    position: { x: 10, y: 10, z: 0 },
+                                    speed: 1,
+                                },
+                                {
+                                    at: 2000,
+                                    type: "moveTo",
+                                    position: { x: -10, y: 10, z: 0 },
+                                    speed: 1,
+                                },
+                                {
+                                    at: 3000,
+                                    type: "moveTo",
+                                    position: { x: 0, y: 0, z: 0 },
+                                    speed: 1,
+                                },
+                            ],
                         },
                     ],
                 },

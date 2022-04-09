@@ -10,14 +10,8 @@ ReactDOM.render(
         <Router>
             <Routes>
                 <Route path={`${process.env.PUBLIC_URL}/`} element={<Home />} />
-                <Route
-                    path={`${process.env.PUBLIC_URL}/games`}
-                    element={<Games />}
-                />
-                <Route
-                    path={`${process.env.PUBLIC_URL}/game/:name`}
-                    element={<Game />}
-                />
+                <Route path={`${process.env.PUBLIC_URL}/games`} element={<Games />} />
+                <Route path={`${process.env.PUBLIC_URL}/game/:name`} element={<Game />} />
             </Routes>
         </Router>
     </React.StrictMode>,

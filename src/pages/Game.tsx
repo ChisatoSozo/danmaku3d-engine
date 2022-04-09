@@ -1,4 +1,5 @@
 import { Vector3 } from "@babylonjs/core";
+import "@babylonjs/loaders";
 import { useState } from "react";
 import { Scene } from "react-babylonjs";
 import { useMatch } from "react-router-dom";
