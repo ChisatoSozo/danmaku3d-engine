@@ -1,59 +1,58 @@
-import { useEffect, useState } from "react";
-import Collapsible from "react-collapsible";
+import { Dispatch, SetStateAction } from "react";
+import { useEditor } from "../containers/EditorContainer";
 import { GameDefinition } from "../types/gameDefinition/GameDefinition";
+import { AssetElement } from "./AssetElement";
+import { Category } from "./Category";
+import { ViewableAsset } from "./GameDefinitionEditor";
 
 interface AssetBrowserProps {
     gameDefinition: GameDefinition;
     gameDefinitionName: string;
+    currentAsset: ViewableAsset | undefined;
+    setCurrentAsset: Dispatch<SetStateAction<ViewableAsset | undefined>>;
 }
 
-interface AssetFiles {
-    meshes: string[];
-    sounds: string[];
-    textures: string[];
-    glsl: string[];
-}
-
-export const AssetBrowser: React.FC<AssetBrowserProps> = ({ gameDefinition, gameDefinitionName }) => {
-    const [assetFiles, setAssetFiles] = useState<AssetFiles>();
-
-    useEffect(() => {
-        const fetchAssetFiles = async () => {
-            const response = await fetch(`http://${window.location.hostname}:5000/listAssets/${gameDefinitionName}`);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch asset files: ${response.statusText}`);
-            }
-            const json = await response.json();
-            setAssetFiles(json);
-        };
-        fetchAssetFiles();
-    }, [gameDefinitionName]);
+export const AssetBrowser: React.FC<AssetBrowserProps> = ({
+    gameDefinition,
+    gameDefinitionName,
+    currentAsset,
+    setCurrentAsset,
+}) => {
+    const { assetFiles } = useEditor();
 
     return (
         <div
             style={{
-                width: "400px",
+                width: "250px",
                 height: "100%",
                 backgroundColor: "rgba(0, 0, 255, 0.1)",
                 pointerEvents: "all",
-                padding: "10px",
+                paddingLeft: "10px",
             }}
         >
             {assetFiles && (
                 <>
-                    <Collapsible trigger="Meshes">
+                    <Category name="Meshes">
                         <div
                             style={{
                                 display: "flex",
                                 flexDirection: "column",
                             }}
                         >
-                            {assetFiles.meshes.map((mesh) => (
-                                <div>{mesh}</div>
-                            ))}
+                            {assetFiles.meshes.map(
+                                (mesh) =>
+                                    !mesh.endsWith(".json") && (
+                                        <AssetElement
+                                            key={mesh}
+                                            assetType="mesh"
+                                            assetURL={mesh}
+                                            setCurrentAsset={setCurrentAsset}
+                                        />
+                                    )
+                            )}
                         </div>
-                    </Collapsible>
-                    <Collapsible trigger="Sounds">
+                    </Category>
+                    <Category name="Sounds">
                         <div
                             style={{
                                 display: "flex",
@@ -61,11 +60,16 @@ export const AssetBrowser: React.FC<AssetBrowserProps> = ({ gameDefinition, game
                             }}
                         >
                             {assetFiles.sounds.map((sound) => (
-                                <div>{sound}</div>
+                                <AssetElement
+                                    key={sound}
+                                    assetType="sound"
+                                    assetURL={sound}
+                                    setCurrentAsset={setCurrentAsset}
+                                />
                             ))}
                         </div>
-                    </Collapsible>
-                    <Collapsible trigger="Textures">
+                    </Category>
+                    <Category name="Textures">
                         <div
                             style={{
                                 display: "flex",
@@ -73,22 +77,32 @@ export const AssetBrowser: React.FC<AssetBrowserProps> = ({ gameDefinition, game
                             }}
                         >
                             {assetFiles.textures.map((texture) => (
-                                <div>{texture}</div>
+                                <AssetElement
+                                    key={texture}
+                                    assetType="texture"
+                                    assetURL={texture}
+                                    setCurrentAsset={setCurrentAsset}
+                                />
                             ))}
                         </div>
-                    </Collapsible>
-                    <Collapsible trigger="GLSL">
+                    </Category>
+                    <Category name="GLSL">
                         <div
                             style={{
                                 display: "flex",
                                 flexDirection: "column",
                             }}
                         >
-                            {assetFiles.glsl.map((name) => (
-                                <div>{name}</div>
+                            {assetFiles.glsl.map((glsl) => (
+                                <AssetElement
+                                    key={glsl}
+                                    assetType="glsl"
+                                    assetURL={glsl}
+                                    setCurrentAsset={setCurrentAsset}
+                                />
                             ))}
                         </div>
-                    </Collapsible>
+                    </Category>
                 </>
             )}
         </div>

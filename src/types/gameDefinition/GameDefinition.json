@@ -1,0 +1,767 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "AnyAssetDefinition": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/MeshAssetDefinition"
+        },
+        {
+          "$ref": "#/definitions/SoundAssetDefinition"
+        },
+        {
+          "$ref": "#/definitions/TextureAssetDefinition"
+        },
+        {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        {
+          "$ref": "#/definitions/BulletPatternAssetDefinition"
+        },
+        {
+          "$ref": "#/definitions/TimingAssetDefinition"
+        },
+        {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        }
+      ]
+    },
+    "AssetType": {
+      "enum": [
+        "mesh",
+        "sound",
+        "texture",
+        "bulletPattern",
+        "glsl",
+        "timing",
+        "vector"
+      ],
+      "type": "string"
+    },
+    "BaseAssetDefinition<\"bulletPattern\">": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "type": {
+          "const": "bulletPattern",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "BaseAssetDefinition<\"glsl\">": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "type": {
+          "const": "glsl",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "BaseAssetDefinition<\"mesh\">": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "type": {
+          "const": "mesh",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "BaseAssetDefinition<\"sound\">": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "type": {
+          "const": "sound",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "BaseAssetDefinition<\"texture\">": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "type": {
+          "const": "texture",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "BaseAssetDefinition<\"timing\">": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "type": {
+          "const": "timing",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "BaseAssetDefinition<\"vector\">": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "type": {
+          "const": "vector",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "BaseStageInstruction": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/PlayMusicInstruction"
+        },
+        {
+          "$ref": "#/definitions/SpawnEnemyInstruction"
+        }
+      ]
+    },
+    "BulletPatternAssetDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "pattern": {
+          "$ref": "#/definitions/BulletPatternDefinition"
+        },
+        "type": {
+          "const": "bulletPattern",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pattern",
+        "type"
+      ],
+      "type": "object"
+    },
+    "BulletPatternDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "collisionFunctionGLSL": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        "initialPositions": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "initialVelocities": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "positionFunctionGLSL": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        "timings": {
+          "$ref": "#/definitions/TimingAssetDefinition"
+        },
+        "velocityFunctionGLSL": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        }
+      },
+      "required": [
+        "initialPositions",
+        "initialVelocities",
+        "timings",
+        "positionFunctionGLSL",
+        "velocityFunctionGLSL",
+        "collisionFunctionGLSL"
+      ],
+      "type": "object"
+    },
+    "BurstVectorGenerator": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "number"
+        },
+        "radius": {
+          "type": "number"
+        },
+        "startTheta": {
+          "type": "number"
+        },
+        "startY": {
+          "type": "number"
+        },
+        "thetaLength": {
+          "type": "number"
+        },
+        "type": {
+          "const": "burst",
+          "type": "string"
+        },
+        "yLength": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "type",
+        "count",
+        "radius",
+        "startTheta",
+        "thetaLength",
+        "startY",
+        "yLength"
+      ],
+      "type": "object"
+    },
+    "CharacterPortraitTexture": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "$ref": "#/definitions/TextureAssetDefinition"
+        }
+      },
+      "required": [
+        "asset"
+      ],
+      "type": "object"
+    },
+    "CharacterPortraitTextures": {
+      "additionalProperties": false,
+      "properties": {
+        "angry": {
+          "$ref": "#/definitions/CharacterPortraitTexture"
+        },
+        "dissapoint": {
+          "$ref": "#/definitions/CharacterPortraitTexture"
+        },
+        "excited": {
+          "$ref": "#/definitions/CharacterPortraitTexture"
+        },
+        "neutral": {
+          "$ref": "#/definitions/CharacterPortraitTexture"
+        },
+        "shocked": {
+          "$ref": "#/definitions/CharacterPortraitTexture"
+        },
+        "special": {
+          "$ref": "#/definitions/CharacterPortraitTexture"
+        },
+        "tired": {
+          "$ref": "#/definitions/CharacterPortraitTexture"
+        }
+      },
+      "required": [
+        "neutral"
+      ],
+      "type": "object"
+    },
+    "EmitterDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "$ref": "#/definitions/MeshAssetDefinition"
+        },
+        "focusPosition": {
+          "$ref": "#/definitions/IVector3"
+        },
+        "mirrored": {
+          "type": "boolean"
+        },
+        "position": {
+          "$ref": "#/definitions/IVector3"
+        }
+      },
+      "required": [
+        "asset",
+        "position",
+        "focusPosition"
+      ],
+      "type": "object"
+    },
+    "EnemyInstruction": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "type": "number"
+        },
+        "position": {
+          "$ref": "#/definitions/IVector3"
+        },
+        "speed": {
+          "type": "number"
+        },
+        "type": {
+          "const": "moveTo",
+          "type": "string"
+        }
+      },
+      "required": [
+        "at",
+        "position",
+        "speed",
+        "type"
+      ],
+      "type": "object"
+    },
+    "GLSLAssetDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "shaderType": {
+          "$ref": "#/definitions/ShaderType"
+        },
+        "type": {
+          "const": "glsl",
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "shaderType",
+        "type",
+        "url"
+      ],
+      "type": "object"
+    },
+    "GameDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "playableCharacters": {
+          "items": {
+            "$ref": "#/definitions/PlayableCharacterDefinition"
+          },
+          "type": "array"
+        },
+        "stages": {
+          "items": {
+            "$ref": "#/definitions/StageDefinition"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "playableCharacters",
+        "stages"
+      ],
+      "type": "object"
+    },
+    "IVector3": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "type": "object"
+    },
+    "Instruction": {
+      "additionalProperties": false,
+      "properties": {
+        "at": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "at"
+      ],
+      "type": "object"
+    },
+    "MeshAssetDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "type": {
+          "const": "mesh",
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "url"
+      ],
+      "type": "object"
+    },
+    "PhaseDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "delayAfter": {
+          "type": "number"
+        },
+        "instructions": {
+          "items": {
+            "$ref": "#/definitions/StageInstruction"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "delayAfter",
+        "instructions"
+      ],
+      "type": "object"
+    },
+    "PlayMusicInstruction": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "$ref": "#/definitions/SoundAssetDefinition"
+        },
+        "type": {
+          "const": "playMusic",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "asset"
+      ],
+      "type": "object"
+    },
+    "PlayableCharacterDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "emitters": {
+          "items": {
+            "$ref": "#/definitions/EmitterDefinition"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "portraits": {
+          "$ref": "#/definitions/CharacterPortraitTextures"
+        },
+        "speed": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "speed",
+        "portraits",
+        "emitters"
+      ],
+      "type": "object"
+    },
+    "ShaderType": {
+      "enum": [
+        "vertex",
+        "fragment",
+        "pixel"
+      ],
+      "type": "string"
+    },
+    "SoundAssetDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "type": {
+          "const": "sound",
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "url"
+      ],
+      "type": "object"
+    },
+    "SpawnEnemyInstruction": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "$ref": "#/definitions/MeshAssetDefinition"
+        },
+        "instructions": {
+          "items": {
+            "$ref": "#/definitions/EnemyInstruction"
+          },
+          "type": "array"
+        },
+        "position": {
+          "$ref": "#/definitions/IVector3"
+        },
+        "type": {
+          "const": "spawnEnemy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "asset",
+        "position",
+        "instructions"
+      ],
+      "type": "object"
+    },
+    "StageDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "bounds": {
+          "additionalProperties": false,
+          "properties": {
+            "max": {
+              "$ref": "#/definitions/IVector3"
+            },
+            "min": {
+              "$ref": "#/definitions/IVector3"
+            }
+          },
+          "required": [
+            "min",
+            "max"
+          ],
+          "type": "object"
+        },
+        "phases": {
+          "items": {
+            "$ref": "#/definitions/PhaseDefinition"
+          },
+          "type": "array"
+        },
+        "stageMeshes": {
+          "items": {
+            "$ref": "#/definitions/StageMeshDefinition"
+          },
+          "type": "array"
+        },
+        "subtitle": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "subtitle",
+        "bounds",
+        "stageMeshes",
+        "phases"
+      ],
+      "type": "object"
+    },
+    "StageInstruction": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "asset": {
+              "$ref": "#/definitions/SoundAssetDefinition"
+            },
+            "at": {
+              "type": "number"
+            },
+            "type": {
+              "const": "playMusic",
+              "type": "string"
+            }
+          },
+          "required": [
+            "asset",
+            "at",
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "asset": {
+              "$ref": "#/definitions/MeshAssetDefinition"
+            },
+            "at": {
+              "type": "number"
+            },
+            "instructions": {
+              "items": {
+                "$ref": "#/definitions/EnemyInstruction"
+              },
+              "type": "array"
+            },
+            "position": {
+              "$ref": "#/definitions/IVector3"
+            },
+            "type": {
+              "const": "spawnEnemy",
+              "type": "string"
+            }
+          },
+          "required": [
+            "asset",
+            "at",
+            "instructions",
+            "position",
+            "type"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "StageMeshDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "$ref": "#/definitions/MeshAssetDefinition"
+        },
+        "length": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "asset",
+        "length"
+      ],
+      "type": "object"
+    },
+    "TextureAssetDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "hash": {
+          "type": "string"
+        },
+        "type": {
+          "const": "texture",
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "url"
+      ],
+      "type": "object"
+    },
+    "TimingAssetDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "generator": {
+          "$ref": "#/definitions/TimingGenerator"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "type": {
+          "const": "timing",
+          "type": "string"
+        }
+      },
+      "required": [
+        "generator",
+        "type"
+      ],
+      "type": "object"
+    },
+    "TimingGenerator": {
+      "$ref": "#/definitions/UniformTimingGenerator"
+    },
+    "UniformTimingGenerator": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "number"
+        },
+        "time": {
+          "type": "number"
+        },
+        "type": {
+          "const": "uniform",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "count",
+        "time"
+      ],
+      "type": "object"
+    },
+    "VectorAssetDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "generator": {
+          "$ref": "#/definitions/VectorGenerator"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "type": {
+          "const": "vector",
+          "type": "string"
+        }
+      },
+      "required": [
+        "generator",
+        "type"
+      ],
+      "type": "object"
+    },
+    "VectorGenerator": {
+      "$ref": "#/definitions/BurstVectorGenerator"
+    }
+  }
+}

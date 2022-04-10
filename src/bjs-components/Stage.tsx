@@ -1,5 +1,5 @@
 import { Vector3 } from "@babylonjs/core";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { useExecutor } from "../hooks/useExecutor";
 import { GameDefinition, PlayMusicInstruction, SpawnEnemyInstruction } from "../types/gameDefinition/GameDefinition";
 import { Camera } from "./Camera";
@@ -12,18 +12,25 @@ import { PlayerMovement } from "./PlayerMovement";
 import { StageMesh } from "./StageMesh";
 
 interface StageProps {
-    stageIndex: number;
-    setStageIndex: React.Dispatch<React.SetStateAction<number>>;
+    currentStage: number;
+    setCurrentStage: Dispatch<SetStateAction<number>>;
+    currentPhase: number;
+    setCurrentPhase: Dispatch<SetStateAction<number>>;
     gameDefinition: GameDefinition;
 }
 
 const TITLE_POSITION = new Vector3(0, 4, 0.5);
 const SUBTITLE_POSITION = new Vector3(0, 2, 0.5);
 
-export const Stage: React.FC<StageProps> = ({ stageIndex, setStageIndex, gameDefinition }) => {
-    const [phaseIndex, setPhaseIndex] = useState(0);
-    const stageDefinition = useMemo(() => gameDefinition.stages[stageIndex], [gameDefinition, stageIndex]);
-    const phaseDefinition = useMemo(() => stageDefinition.phases[phaseIndex], [stageDefinition, phaseIndex]);
+export const Stage: React.FC<StageProps> = ({
+    currentStage,
+    setCurrentStage,
+    currentPhase,
+    setCurrentPhase,
+    gameDefinition,
+}) => {
+    const stageDefinition = useMemo(() => gameDefinition.stages[currentStage], [gameDefinition, currentStage]);
+    const phaseDefinition = useMemo(() => stageDefinition.phases[currentPhase], [stageDefinition, currentPhase]);
     const [musics, setMusics] = useState<{ musicInstruction: PlayMusicInstruction; key: number }[]>([]);
     const [enemies, setEnemies] = useState<{ enemyInstruction: SpawnEnemyInstruction; key: number }[]>([]);
 

@@ -2,20 +2,6 @@ import { Engine, Observable } from "@babylonjs/core";
 import React from "react";
 import { EngineCanvasContext } from "react-babylonjs";
 
-const canvasStyles = {
-    position: "absolute",
-    top: 0,
-    left: 0,
-};
-const canvasDivStyles = {
-    position: "absolute",
-    cursor: "none",
-    top: 0,
-    left: 0,
-    width: "100vw",
-    height: "100vh",
-};
-
 class ReactBabylonjsEngine extends React.Component {
     constructor(props) {
         super(props);
@@ -120,8 +106,8 @@ class ReactBabylonjsEngine extends React.Component {
         // TODO: this.props.portalCanvas does not need to render a canvas.
         return (
             <EngineCanvasContext.Provider value={{ engine: this.engine, canvas: this.canvas }}>
-                <div style={canvasDivStyles}>
-                    <canvas style={canvasStyles} {...opts} ref={this.onCanvasRef}>
+                <div style={{ width, height }}>
+                    <canvas {...opts} ref={this.onCanvasRef}>
                         {this.engine !== null && this.props.children}
                     </canvas>
                 </div>

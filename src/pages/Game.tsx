@@ -25,7 +25,8 @@ export const Game = () => {
     const windowSize = useWindowSize();
     const [gameLoaderOutput, setGameLoaderOutput] = useState<GameLoaderOutput>();
     const [loadGame, setLoadGame] = useState(false);
-    const [stageIndex, setStageIndex] = useState(0);
+    const [currentStage, setCurrentStage] = useState(0);
+    const [currentPhase, setCurrentPhase] = useState(0);
     const [gameDefinition, setGameDefinition] = useState<GameDefinition>();
     useEffect(() => {
         const fetchGameDefinition = async () => {
@@ -45,6 +46,10 @@ export const Game = () => {
                         gameDefinitionName={name}
                         gameDefinition={gameDefinition}
                         setGameDefinition={setGameDefinition}
+                        currentStage={currentStage}
+                        setCurrentStage={setCurrentStage}
+                        currentPhase={currentPhase}
+                        setCurrentPhase={setCurrentPhase}
                     />
                 </Overlay>
             ) : (
@@ -86,8 +91,10 @@ export const Game = () => {
                         <GameContainer assets={gameLoaderOutput.loadedAssets}>
                             <BindControls />
                             <Stage
-                                stageIndex={stageIndex}
-                                setStageIndex={setStageIndex}
+                                currentStage={currentStage}
+                                setCurrentStage={setCurrentStage}
+                                currentPhase={currentPhase}
+                                setCurrentPhase={setCurrentPhase}
                                 gameDefinition={gameDefinition}
                             />
                         </GameContainer>

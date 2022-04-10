@@ -1,47 +1,63 @@
-import { IVector3Like } from "@babylonjs/core/Maths/math.like";
 import { MeshAssetDefinition, SoundAssetDefinition } from "./AssetDefinition";
 import { Instruction } from "./CommonDefinition";
 import { EnemyInstruction } from "./EnemyDefinition";
 import { PlayableCharacterDefinition } from "./PlayableCharacterDefinition";
+import { IVector3 } from "./UtilTypes";
 
-export interface PlayMusicInstruction {
+export type PlayMusicInstruction = {
     type: "playMusic";
     asset: SoundAssetDefinition;
-}
+};
 
-export interface SpawnEnemyInstruction {
+export type SpawnEnemyInstruction = {
     type: "spawnEnemy";
     asset: MeshAssetDefinition;
-    position: IVector3Like;
+    position: IVector3;
     instructions: EnemyInstruction[];
-}
+};
 
 export type BaseStageInstruction = PlayMusicInstruction | SpawnEnemyInstruction;
 
 export type StageInstruction = BaseStageInstruction & Instruction;
 
-export type Phase = {
+export type PhaseDefinition = {
     delayAfter: number;
     instructions: StageInstruction[];
 };
 
-export interface StageMeshDefinition {
+export const makePhaseDefinition = (): PhaseDefinition => ({
+    delayAfter: 0,
+    instructions: [],
+});
+
+export type StageMeshDefinition = {
     asset: MeshAssetDefinition;
     length: number;
-}
+};
 
-export interface StageDefinition {
+export type StageDefinition = {
     title: string;
     subtitle: string;
     bounds: {
-        min: IVector3Like;
-        max: IVector3Like;
+        min: IVector3;
+        max: IVector3;
     };
     stageMeshes: StageMeshDefinition[];
-    phases: Phase[];
-}
+    phases: PhaseDefinition[];
+};
 
-export interface GameDefinition {
+export const makeStageDefinition = (): StageDefinition => ({
+    title: "",
+    subtitle: "",
+    bounds: {
+        min: { x: 10, y: 0, z: 10 },
+        max: { x: -10, y: 0, z: -10 },
+    },
+    stageMeshes: [],
+    phases: [],
+});
+
+export type GameDefinition = {
     playableCharacters: PlayableCharacterDefinition[];
     stages: StageDefinition[];
-}
+};

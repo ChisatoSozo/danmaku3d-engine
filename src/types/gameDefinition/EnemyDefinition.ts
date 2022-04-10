@@ -1,9 +1,9 @@
-import { IVector3Like } from "@babylonjs/core/Maths/math.like";
 import { Instruction } from "./CommonDefinition";
+import { IVector3 } from "./UtilTypes";
 
 type EnemyMoveToInstruction = {
     type: "moveTo";
-    position: IVector3Like;
+    position: IVector3;
     speed: number;
 };
 

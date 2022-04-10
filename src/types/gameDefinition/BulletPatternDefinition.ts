@@ -20,11 +20,11 @@ export type UniformTimingGenerator = {
 
 export type TimingGenerator = UniformTimingGenerator;
 
-export interface BulletPatternDefinition {
+export type BulletPatternDefinition = {
     initialPositions: VectorAssetDefinition;
     initialVelocities: VectorAssetDefinition;
     timings: TimingAssetDefinition;
     positionFunctionGLSL: GLSLAssetDefinition;
     velocityFunctionGLSL: GLSLAssetDefinition;
     collisionFunctionGLSL: GLSLAssetDefinition;
-}
+};

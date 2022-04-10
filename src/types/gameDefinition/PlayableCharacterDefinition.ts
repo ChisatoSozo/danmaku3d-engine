@@ -1,11 +1,11 @@
-import { IVector3Like } from "@babylonjs/core/Maths/math.like";
 import { MeshAssetDefinition, TextureAssetDefinition } from "./AssetDefinition";
+import { IVector3 } from "./UtilTypes";
 
-export interface CharacterPortraitTexture {
+export type CharacterPortraitTexture = {
     asset: TextureAssetDefinition;
-}
+};
 
-export interface CharacterPortraitTextures {
+export type CharacterPortraitTextures = {
     angry?: CharacterPortraitTexture;
     dissapoint?: CharacterPortraitTexture;
     excited?: CharacterPortraitTexture;
@@ -13,18 +13,18 @@ export interface CharacterPortraitTextures {
     shocked?: CharacterPortraitTexture;
     special?: CharacterPortraitTexture;
     tired?: CharacterPortraitTexture;
-}
+};
 
-export interface EmitterDefinition {
+export type EmitterDefinition = {
     asset: MeshAssetDefinition;
-    position: IVector3Like;
-    focusPosition: IVector3Like;
+    position: IVector3;
+    focusPosition: IVector3;
     mirrored?: boolean;
-}
+};
 
-export interface PlayableCharacterDefinition {
+export type PlayableCharacterDefinition = {
     name: string;
     speed: number;
     portraits: CharacterPortraitTextures;
     emitters: EmitterDefinition[];
-}
+};

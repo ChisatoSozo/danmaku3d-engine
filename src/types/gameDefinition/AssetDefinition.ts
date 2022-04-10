@@ -8,34 +8,34 @@ export type BaseAssetDefinition<T extends AssetType> = {
     type: T;
 };
 
-export interface GLSLAssetDefinition extends BaseAssetDefinition<"glsl"> {
+export type GLSLAssetDefinition = BaseAssetDefinition<"glsl"> & {
     shaderType: ShaderType;
     url: string;
-}
+};
 
-export interface BulletPatternAssetDefinition extends BaseAssetDefinition<"bulletPattern"> {
+export type BulletPatternAssetDefinition = BaseAssetDefinition<"bulletPattern"> & {
     pattern: BulletPatternDefinition;
-}
+};
 
-export interface MeshAssetDefinition extends BaseAssetDefinition<"mesh"> {
+export type MeshAssetDefinition = BaseAssetDefinition<"mesh"> & {
     url: string;
-}
+};
 
-export interface SoundAssetDefinition extends BaseAssetDefinition<"sound"> {
+export type SoundAssetDefinition = BaseAssetDefinition<"sound"> & {
     url: string;
-}
+};
 
-export interface TextureAssetDefinition extends BaseAssetDefinition<"texture"> {
+export type TextureAssetDefinition = BaseAssetDefinition<"texture"> & {
     url: string;
-}
+};
 
-export interface TimingAssetDefinition extends BaseAssetDefinition<"timing"> {
+export type TimingAssetDefinition = BaseAssetDefinition<"timing"> & {
     generator: TimingGenerator;
-}
+};
 
-export interface VectorAssetDefinition extends BaseAssetDefinition<"vector"> {
+export type VectorAssetDefinition = BaseAssetDefinition<"vector"> & {
     generator: VectorGenerator;
-}
+};
 
 export type AnyAssetDefinition =
     | MeshAssetDefinition
