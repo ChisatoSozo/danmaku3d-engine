@@ -50,7 +50,9 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({ children, game
     const [assetFiles, setAssetFiles] = useState<AssetFiles>();
 
     const fetchAssetFiles = useCallback(async () => {
-        const response = await fetch(`http://${window.location.hostname}:5000/listAssets/${gameDefinitionName}`);
+        const response = await fetch(
+            `${window.location.protocol}//${window.location.hostname}:5000/listAssets/${gameDefinitionName}`
+        );
         if (!response.ok) {
             throw new Error(`Failed to fetch asset files: ${response.statusText}`);
         }

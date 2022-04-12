@@ -75,6 +75,7 @@ export const StagePhasePicker: React.FC<StagePhasePickerProps> = ({
                 >
                     {stage.phases.map((phase, phaseIndex) => (
                         <div
+                            key={phaseIndex}
                             onClick={() => {
                                 setCurrentStage(stageIndex);
                                 setCurrentPhase(phaseIndex);

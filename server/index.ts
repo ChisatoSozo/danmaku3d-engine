@@ -51,7 +51,7 @@ app.post("/upload-asset", async (req, res) => {
             const files = req.files;
 
             const error = await attemptUpload(files, body);
-
+            console.log(error);
             if (error) {
                 res.send({
                     status: false,
@@ -59,7 +59,6 @@ app.post("/upload-asset", async (req, res) => {
                 });
             } else {
                 res.send({
-                    status: true,
                     message: "File is uploaded",
                 });
             }
@@ -95,6 +94,8 @@ app.get("/listAssets/:gameDefinitionName", async (req, res) => {
         res.send(err);
     }
 });
+
+app.use(express.static("games"));
 
 //start app
 const port = process.env.PORT || 5000;

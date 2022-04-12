@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction } from "react";
 import { useEditor } from "../containers/EditorContainer";
 import { GameDefinition } from "../types/gameDefinition/GameDefinition";
 import { AssetElement } from "./AssetElement";
+import { AssetUpload } from "./AssetUpload";
 import { Category } from "./Category";
 import { ViewableAsset } from "./GameDefinitionEditor";
 
@@ -50,6 +51,7 @@ export const AssetBrowser: React.FC<AssetBrowserProps> = ({
                                         />
                                     )
                             )}
+                            <AssetUpload gameDefinitionName={gameDefinitionName} assetType="mesh" />
                         </div>
                     </Category>
                     <Category name="Sounds">
@@ -67,6 +69,7 @@ export const AssetBrowser: React.FC<AssetBrowserProps> = ({
                                     setCurrentAsset={setCurrentAsset}
                                 />
                             ))}
+                            <AssetUpload gameDefinitionName={gameDefinitionName} assetType="sound" />
                         </div>
                     </Category>
                     <Category name="Textures">
@@ -84,6 +87,7 @@ export const AssetBrowser: React.FC<AssetBrowserProps> = ({
                                     setCurrentAsset={setCurrentAsset}
                                 />
                             ))}
+                            <AssetUpload gameDefinitionName={gameDefinitionName} assetType="texture" />
                         </div>
                     </Category>
                     <Category name="GLSL">
@@ -101,6 +105,7 @@ export const AssetBrowser: React.FC<AssetBrowserProps> = ({
                                     setCurrentAsset={setCurrentAsset}
                                 />
                             ))}
+                            <AssetUpload gameDefinitionName={gameDefinitionName} assetType="glsl" />
                         </div>
                     </Category>
                 </>
