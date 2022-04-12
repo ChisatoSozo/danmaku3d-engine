@@ -1,5 +1,79 @@
 import { Matrix, Quaternion, TransformNode, Vector3 } from "@babylonjs/core";
 
+const glsl = (template: TemplateStringsArray, ...args: (string | number)[]) => {
+    let str = "";
+    for (let i = 0; i < args.length; i++) {
+        str += template[i] + String(args[i]);
+    }
+    return str + template[template.length - 1];
+};
+
+type PixelShaderType = "position" | "velocity";
+
+const constructPixelShader = (main: string, type: PixelShaderType) => {
+    return glsl`
+    uniform float delta;
+    uniform float timeSinceStart;
+    uniform float translationFromParent;
+    uniform float rotationFromParent;
+    uniform float warningTime;  
+    uniform vec2 resolution;
+    uniform vec3 parentPosition;
+    uniform mat4 parentRotation;
+    uniform sampler2D positionSampler;
+    uniform sampler2D velocitySampler;
+    uniform sampler2D collisionSampler;
+    uniform sampler2D initialPositionSampler;
+    uniform sampler2D initialVelocitySampler;
+    uniform sampler2D timingsSampler;
+    uniform sampler2D endTimingsSampler;
+
+    void main() {
+        vec2 uv = gl_FragCoord.xy / resolution.xy;
+        float id = (gl_FragCoord.x - 0.5) + ((gl_FragCoord.y - 0.5) * resolution.x);
+        vec4 timingPosition = texture2D( timingsSampler, uv );
+        
+        vec3 initialPosition = texture2D( initialPositionSampler, uv ).xyz;
+        vec3 position = texture2D( positionSampler, uv ).xyz;
+        vec4 initialVelocity = texture2D( initialVelocitySampler, uv );
+        vec4 currentVelocity = texture2D( velocitySampler, uv );
+        
+        vec4 collision = texture2D( collisionSampler, uv );
+        float timing = timingPosition.w;
+        mat4 parentRotationMatrix = (mat4(1.0) * (1.0 - rotationFromParent)) + (parentRotation * rotationFromParent);
+        initialPosition = initialPosition * mat3(parentRotationMatrix) + translationFromParent * parentPosition;
+        initialVelocity = initialVelocity * parentRotationMatrix;
+        float dTiming = timeSinceStart - timing;
+        float shouldAssignInitialStates = float(dTiming > 0.) * (1. - currentVelocity.w);
+        float shouldPositionReset = float(dTiming > 0. && dTiming < warningTime) * float(parentPosition != vec3(0.,0.,0.));
+        position = mix(position, initialPosition, shouldPositionReset);
+        currentVelocity = mix(currentVelocity, initialVelocity, shouldAssignInitialStates);
+        vec3 velocity = currentVelocity.xyz;
+        float velocityW = currentVelocity.w;
+        vec3 startPosition = position;
+        vec3 startVelocity = velocity;
+        vec3 updatedValue = vec3(1.0, 1.0, 1.0);
+
+        ${main}
+
+        ${
+            type === "position"
+                ? glsl`
+            float collidedWithAnything = clamp(collision.w, 0.0, 1.0);
+            float noCollision = 1. - collidedWithAnything;
+            updatedValue = (collidedWithAnything * vec3(-510., -510., -510.)) + (noCollision * updatedValue);
+
+            gl_FragColor = vec4(updatedValue, 1.0);
+        `
+                : glsl`
+            gl_FragColor = vec4(updatedValue, velocityW);
+        `
+        }
+        
+    }
+`;
+};
+
 const getLines = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {
     var words = text.split(" ");
     var lines = [];

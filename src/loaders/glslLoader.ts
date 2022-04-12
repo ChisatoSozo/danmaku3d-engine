@@ -33,7 +33,7 @@ export const loadGLSL = async (
     assets: Assets
 ) => {
     const hash = hashGLSL(assetDefinition);
-    const URI = `/games/${gameDefinitionName}/glsl/${assetDefinition.url}`;
+    const URI = `${window.location.protocol}//${window.location.hostname}:5000/${gameDefinitionName}/glsl/${assetDefinition.url}`;
     const response = await fetch(URI);
     if (!response.ok) throw new Error(`Failed to load ${URI}: ${response.statusText}`);
     const glsl = await response.text();

@@ -59,7 +59,7 @@ export const MeshViewer: React.FC<MeshViewerProps> = ({ gameDefinitionName, url 
                         <Model
                             onModelLoaded={setModel}
                             name="viewedModel"
-                            rootUrl={`/games/${gameDefinitionName}/meshes/`}
+                            rootUrl={`${window.location.protocol}//${window.location.hostname}:5000/${gameDefinitionName}/meshes/`}
                             sceneFilename={url}
                             position={new Vector3(0, 0, 0)}
                         />

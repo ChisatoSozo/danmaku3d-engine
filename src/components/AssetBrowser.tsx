@@ -5,6 +5,7 @@ import { AssetElement } from "./AssetElement";
 import { AssetUpload } from "./AssetUpload";
 import { Category } from "./Category";
 import { ViewableAsset } from "./GameDefinitionEditor";
+import { NewAsset } from "./NewAsset";
 
 interface AssetBrowserProps {
     gameDefinition: GameDefinition;
@@ -106,6 +107,25 @@ export const AssetBrowser: React.FC<AssetBrowserProps> = ({
                                 />
                             ))}
                             <AssetUpload gameDefinitionName={gameDefinitionName} assetType="glsl" />
+                        </div>
+                    </Category>
+                    <Category name="Bullet Patterns">
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                            }}
+                        >
+                            {assetFiles.bulletPatterns.map((bulletPatterns) => (
+                                <AssetElement
+                                    key={bulletPatterns}
+                                    assetType="bulletPattern"
+                                    assetURL={bulletPatterns}
+                                    setCurrentAsset={setCurrentAsset}
+                                />
+                            ))}
+                            <NewAsset gameDefinitionName={gameDefinitionName} assetType="bulletPattern" />
+                            <AssetUpload gameDefinitionName={gameDefinitionName} assetType="bulletPattern" />
                         </div>
                     </Category>
                 </>

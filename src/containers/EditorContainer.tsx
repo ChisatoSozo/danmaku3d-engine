@@ -1,4 +1,5 @@
 import { createContext, Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { AssetType } from "../types/gameDefinition/AssetDefinition";
 
 interface GameDetails {
     type: "game";
@@ -21,7 +22,16 @@ interface AssetFiles {
     sounds: string[];
     textures: string[];
     glsl: string[];
+    bulletPatterns: string[];
 }
+
+export const assetTypeToAssetFileMap: { [key in AssetType]?: keyof AssetFiles } = {
+    texture: "textures",
+    mesh: "meshes",
+    sound: "sounds",
+    glsl: "glsl",
+    bulletPattern: "bulletPatterns",
+};
 
 interface IEditorContext {
     selectedDetails?: SelectedDetails;

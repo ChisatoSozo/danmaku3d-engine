@@ -20,9 +20,17 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 interface UploadBody {
-    type: "texture" | "mesh" | "sound" | "glsl";
+    type: "texture" | "mesh" | "sound" | "glsl" | "bulletPattern";
     gameDefinitionName: string;
 }
+
+const typeToFolderMap: { [key in UploadBody["type"]]: string } = {
+    texture: "textures",
+    mesh: "meshes",
+    sound: "sounds",
+    glsl: "glsl",
+    bulletPattern: "bulletPatterns",
+};
 
 const attemptUpload = async (files: FileArray, body: UploadBody) => {
     const filesToProcess = Object.values(files);
@@ -34,7 +42,9 @@ const attemptUpload = async (files: FileArray, body: UploadBody) => {
         return "Must upload exactly one file";
     }
 
-    await file.mv("../public/" + file.name);
+    await file.mv(
+        path.join(__dirname, `./games/${body.gameDefinitionName}/${typeToFolderMap[body.type]}/${file.name}`)
+    );
 
     return undefined;
 };
@@ -78,11 +88,12 @@ const readDirOrEmpty = async (dir: string) => {
 };
 
 const listAssets = async (gameDefinitionName: string) => {
-    const meshes = await readDirOrEmpty(path.join(__dirname, `../public/games/${gameDefinitionName}/meshes/`));
-    const textures = await readDirOrEmpty(path.join(__dirname, `../public/games/${gameDefinitionName}/textures/`));
-    const sounds = await readDirOrEmpty(path.join(__dirname, `../public/games/${gameDefinitionName}/sounds/`));
-    const glsl = await readDirOrEmpty(path.join(__dirname, `../public/games/${gameDefinitionName}/glsl/`));
-    return { meshes, textures, sounds, glsl };
+    const meshes = await readDirOrEmpty(path.join(__dirname, `./games/${gameDefinitionName}/meshes/`));
+    const textures = await readDirOrEmpty(path.join(__dirname, `./games/${gameDefinitionName}/textures/`));
+    const sounds = await readDirOrEmpty(path.join(__dirname, `./games/${gameDefinitionName}/sounds/`));
+    const glsl = await readDirOrEmpty(path.join(__dirname, `./games/${gameDefinitionName}/glsl/`));
+    const bulletPatterns = await readDirOrEmpty(path.join(__dirname, `./games/${gameDefinitionName}/bulletPatterns/`));
+    return { meshes, textures, sounds, glsl, bulletPatterns };
 };
 
 app.get("/listAssets/:gameDefinitionName", async (req, res) => {

@@ -1,4 +1,11 @@
-import { GLSLAssetDefinition, TimingAssetDefinition, VectorAssetDefinition } from "./AssetDefinition";
+import {
+    GLSLAssetDefinition,
+    makeGLSLAssetDefinition,
+    makeTimingAssetDefinition,
+    makeVectorAssetDefinition,
+    TimingAssetDefinition,
+    VectorAssetDefinition,
+} from "./AssetDefinition";
 
 export type BurstVectorGenerator = {
     type: "burst";
@@ -28,3 +35,12 @@ export type BulletPatternDefinition = {
     velocityFunctionGLSL: GLSLAssetDefinition;
     collisionFunctionGLSL: GLSLAssetDefinition;
 };
+
+export const makeBulletPatternDefinition = (): BulletPatternDefinition => ({
+    initialPositions: makeVectorAssetDefinition(),
+    initialVelocities: makeVectorAssetDefinition(),
+    timings: makeTimingAssetDefinition(),
+    positionFunctionGLSL: makeGLSLAssetDefinition(),
+    velocityFunctionGLSL: makeGLSLAssetDefinition(),
+    collisionFunctionGLSL: makeGLSLAssetDefinition(),
+});

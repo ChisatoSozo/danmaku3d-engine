@@ -27,7 +27,7 @@ export const loadSound = (
 ) => {
     return new Promise<boolean>((resolve) => {
         const hash = hashSound(assetDefinition);
-        const URI = `/games/${gameDefinitionName}/sounds/${assetDefinition.url}`;
+        const URI = `${window.location.protocol}//${window.location.hostname}:5000/${gameDefinitionName}/sounds/${assetDefinition.url}`;
         const sound = new Sound(
             hash,
             URI,

@@ -30,7 +30,9 @@ export const Game = () => {
     const [gameDefinition, setGameDefinition] = useState<GameDefinition>();
     useEffect(() => {
         const fetchGameDefinition = async () => {
-            const response = await fetch(`/games/${name}/definition.json`);
+            const response = await fetch(
+                `${window.location.protocol}//${window.location.hostname}:5000/${name}/definition.json`
+            );
             const gameDefinition = await response.json();
             setGameDefinition(gameDefinition);
         };
