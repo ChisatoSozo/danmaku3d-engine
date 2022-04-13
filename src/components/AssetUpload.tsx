@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useEditor } from "../containers/EditorContainer";
 import { AssetType } from "../types/gameDefinition/AssetDefinition";
+import { assetHost } from "../utils/Utils";
 
 interface AssetUploadProps {
     gameDefinitionName: string;
@@ -29,7 +30,7 @@ export const AssetUpload: React.FC<AssetUploadProps> = ({ gameDefinitionName, as
                 formData.append("type", assetType);
                 formData.append("gameDefinitionName", gameDefinitionName);
                 setUploading(true);
-                await fetch(`${window.location.protocol}//${window.location.hostname}:5000/upload-asset`, {
+                await fetch(`${assetHost}upload-asset`, {
                     method: "POST",
                     body: formData,
                 });

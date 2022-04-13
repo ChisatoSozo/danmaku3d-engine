@@ -3,17 +3,17 @@ import { TimingGenerator } from "../../types/gameDefinition/BulletPatternDefinit
 import { makeTextureFromScalars } from "./scalarGeneratorUtils";
 import { uniformTimingGenerator } from "./uniformTimingGenerator";
 
-export type TimingGeneratorFunction = (vectorGenerator: TimingGenerator) => number[];
+export type TimingGeneratorFunction = (timingGenerator: TimingGenerator) => number[];
 
-const vectorGeneratorFunctions: { [key in TimingGenerator["type"]]: TimingGeneratorFunction } = {
+const timingGeneratorFunctions: { [key in TimingGenerator["type"]]: TimingGeneratorFunction } = {
     uniform: uniformTimingGenerator,
 };
 
-export const generateTimingTexture = (vectorGenerator: TimingGenerator, scene: Scene) => {
-    const vectorGeneratorFunction = vectorGeneratorFunctions[vectorGenerator.type];
-    if (!vectorGeneratorFunction) {
-        throw new Error(`Timing generator type ${vectorGenerator.type} not supported`);
+export const generateTimingTexture = (timingGenerator: TimingGenerator, scene: Scene) => {
+    const timingGeneratorFunction = timingGeneratorFunctions[timingGenerator.type];
+    if (!timingGeneratorFunction) {
+        throw new Error(`Timing generator type ${timingGenerator.type} not supported`);
     }
-    const vectors = vectorGeneratorFunction(vectorGenerator);
-    return makeTextureFromScalars(vectors, scene);
+    const timings = timingGeneratorFunction(timingGenerator);
+    return makeTextureFromScalars(timings, scene);
 };

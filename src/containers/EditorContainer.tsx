@@ -1,5 +1,7 @@
 import { createContext, Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { AssetType } from "../types/gameDefinition/AssetDefinition";
+import { GameDefinition } from "../types/gameDefinition/GameDefinition";
+import { assetHost } from "../utils/Utils";
 
 interface GameDetails {
     type: "game";
@@ -38,6 +40,8 @@ interface IEditorContext {
     setSelectedDetails: Dispatch<SetStateAction<SelectedDetails | undefined>>;
     assetFiles?: AssetFiles;
     refreshAssetFiles: () => void;
+    overrideGameDefinition?: GameDefinition | undefined;
+    setOverrideGameDefinition?: Dispatch<SetStateAction<GameDefinition | undefined>>;
 }
 
 const makeDefaultIEditor = (): IEditorContext => ({
@@ -53,16 +57,21 @@ export const useEditor = () => {
 
 interface EditorContainerProps {
     gameDefinitionName: string;
+    overrideGameDefinition?: GameDefinition | undefined;
+    setOverrideGameDefinition?: Dispatch<SetStateAction<GameDefinition | undefined>>;
 }
 
-export const EditorContainer: React.FC<EditorContainerProps> = ({ children, gameDefinitionName }) => {
+export const EditorContainer: React.FC<EditorContainerProps> = ({
+    children,
+    gameDefinitionName,
+    overrideGameDefinition,
+    setOverrideGameDefinition,
+}) => {
     const [selectedDetails, setSelectedDetails] = useState<SelectedDetails>();
     const [assetFiles, setAssetFiles] = useState<AssetFiles>();
 
     const fetchAssetFiles = useCallback(async () => {
-        const response = await fetch(
-            `${window.location.protocol}//${window.location.hostname}:5000/listAssets/${gameDefinitionName}`
-        );
+        const response = await fetch(`${assetHost}listAssets/${gameDefinitionName}`);
         if (!response.ok) {
             throw new Error(`Failed to fetch asset files: ${response.statusText}`);
         }
@@ -79,8 +88,22 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({ children, game
     }, [fetchAssetFiles]);
 
     const editorContextValue = useMemo(
-        () => ({ selectedDetails, setSelectedDetails, assetFiles, refreshAssetFiles }),
-        [selectedDetails, setSelectedDetails, assetFiles, refreshAssetFiles]
+        () => ({
+            selectedDetails,
+            setSelectedDetails,
+            assetFiles,
+            refreshAssetFiles,
+            overrideGameDefinition,
+            setOverrideGameDefinition,
+        }),
+        [
+            selectedDetails,
+            setSelectedDetails,
+            assetFiles,
+            refreshAssetFiles,
+            overrideGameDefinition,
+            setOverrideGameDefinition,
+        ]
     );
 
     return <EditorContext.Provider value={editorContextValue}>{children}</EditorContext.Provider>;

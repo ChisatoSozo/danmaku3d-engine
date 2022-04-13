@@ -1,0 +1,42 @@
+{
+    "parented": false,
+    "downsampleCollisions": true,
+    "material": { "asset": { "type": "glsl", "shaderType": "fragment", "url": "fresnel.fs" } },
+    "mesh": { "asset": { "type": "mesh", "url": "sphere.glb" } },
+    "_startPositionsState": { "asset": { "type": "vector", "generator": { "type": "blank", "count": 100 } } },
+    "_startVelocitiesState": { "asset": { "type": "vector", "generator": { "type": "blank", "count": 100 } } },
+    "initialPositions": {
+        "asset": {
+            "type": "vector",
+            "generator": {
+                "type": "burst",
+                "count": 100,
+                "radius": 1,
+                "startTheta": 0,
+                "thetaLength": 6.283185307179586,
+                "startY": 1,
+                "yLength": 2
+            }
+        }
+    },
+    "initialVelocities": {
+        "asset": {
+            "type": "vector",
+            "generator": {
+                "type": "burst",
+                "count": 100,
+                "radius": 1,
+                "startTheta": 0,
+                "thetaLength": 6.283185307179586,
+                "startY": 1,
+                "yLength": 2
+            }
+        }
+    },
+    "_initialCollisions": { "asset": { "type": "vector", "generator": { "type": "blank", "count": 100 } } },
+    "timings": { "asset": { "type": "timing", "generator": { "type": "uniform", "count": 100, "time": 0 } } },
+    "endTimings": { "asset": { "type": "timing", "generator": { "type": "uniform", "count": 100, "time": 10000 } } },
+    "positionFunctionGLSL": { "asset": { "type": "glsl", "shaderType": "pixel", "url": "linearPosition.glsl" } },
+    "velocityFunctionGLSL": { "asset": { "type": "glsl", "shaderType": "pixel", "url": "linearVelocity.glsl" } },
+    "collisionFunctionGLSL": { "asset": { "type": "glsl", "shaderType": "pixel", "url": "collision.glsl" } }
+}

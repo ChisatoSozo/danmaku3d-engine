@@ -8,11 +8,7 @@ import { generateTimingTexture } from "./scalarGenerators";
 export const hashTiming = (vectorAssetDefinition: TimingAssetDefinition) => {
     return hash(vectorAssetDefinition);
 };
-export const vectorLoaded = (assetDefinition: TimingAssetDefinition, assets: Assets) => {
-    if (assetDefinition.hash) {
-        return true;
-    }
-
+export const timingLoaded = (assetDefinition: TimingAssetDefinition, assets: Assets) => {
     const hash = hashTiming(assetDefinition);
     if (assets.textures[hash]) {
         assetDefinition.hash = hash;

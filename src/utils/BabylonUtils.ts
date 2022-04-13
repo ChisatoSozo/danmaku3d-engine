@@ -1,6 +1,7 @@
-import { Matrix, Quaternion, TransformNode, Vector3 } from "@babylonjs/core";
+import { Matrix, Mesh, Quaternion, TransformNode, Vector3 } from "@babylonjs/core";
+import { MAX_BOMBS, MAX_BULLETS_PER_GROUP } from "./EngineConstants";
 
-const glsl = (template: TemplateStringsArray, ...args: (string | number)[]) => {
+export const glsl = (template: TemplateStringsArray, ...args: (string | number)[]) => {
     let str = "";
     for (let i = 0; i < args.length; i++) {
         str += template[i] + String(args[i]);
@@ -10,16 +11,11 @@ const glsl = (template: TemplateStringsArray, ...args: (string | number)[]) => {
 
 type PixelShaderType = "position" | "velocity";
 
-const constructPixelShader = (main: string, type: PixelShaderType) => {
-    return glsl`
+const uniforms = glsl`
+    uniform vec2 resolution;
     uniform float delta;
     uniform float timeSinceStart;
-    uniform float translationFromParent;
-    uniform float rotationFromParent;
     uniform float warningTime;  
-    uniform vec2 resolution;
-    uniform vec3 parentPosition;
-    uniform mat4 parentRotation;
     uniform sampler2D positionSampler;
     uniform sampler2D velocitySampler;
     uniform sampler2D collisionSampler;
@@ -28,6 +24,19 @@ const constructPixelShader = (main: string, type: PixelShaderType) => {
     uniform sampler2D timingsSampler;
     uniform sampler2D endTimingsSampler;
 
+    uniform float bulletRadius;
+    uniform float bombPositions[${MAX_BOMBS * 3}];
+    uniform float bombRadii[${MAX_BOMBS}];
+    uniform vec3 bulletTypePack1;
+    uniform vec3 bulletTypePack2;
+    uniform vec3 playerPosition;
+    uniform vec3 arenaMin;
+    uniform vec3 arenaMax;
+`;
+
+export const constructPixelShader = (main: string, type: PixelShaderType) => {
+    return glsl`
+    ${uniforms}
     void main() {
         vec2 uv = gl_FragCoord.xy / resolution.xy;
         float id = (gl_FragCoord.x - 0.5) + ((gl_FragCoord.y - 0.5) * resolution.x);
@@ -91,6 +100,19 @@ const getLines = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
     }
     lines.push(currentLine);
     return lines;
+};
+
+const bufferMatricesPreCompute = new Float32Array(MAX_BULLETS_PER_GROUP * 16);
+
+export const makeInstances = (mesh: Mesh, num: number) => {
+    if (num > MAX_BULLETS_PER_GROUP)
+        throw new Error("MAX_BULLETS_PER_GROUP is " + MAX_BULLETS_PER_GROUP + " You have " + num);
+    mesh.thinInstanceSetBuffer("matrix", bufferMatricesPreCompute.slice(0, num * 16), 16, true);
+};
+
+export const findMeshChild = (node: TransformNode) => {
+    const meshes = node.getChildMeshes();
+    return meshes.length > 0 ? (meshes[0] as Mesh) : undefined;
 };
 
 export const textOnCtx = (

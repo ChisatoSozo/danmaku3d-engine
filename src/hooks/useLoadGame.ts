@@ -3,27 +3,30 @@ import { useEffect, useMemo, useState } from "react";
 import { glslLoaded, loadGLSL } from "../loaders/glslLoader";
 import { loadMesh, meshLoaded } from "../loaders/meshLoader";
 import { loadSound, soundLoaded } from "../loaders/soundLoader";
+import { loadTiming, timingLoaded } from "../loaders/timingsLoader";
+import { loadVector, vectorLoaded } from "../loaders/vectorLoader";
 import { Assets, makeDefaultAssets } from "../types/Assets";
 import { AnyAssetDefinition } from "../types/gameDefinition/AssetDefinition";
 import { GameDefinition } from "../types/gameDefinition/GameDefinition";
 import { traverseJsonAsync } from "../utils/ObjectUtils";
 
 export const useLoadGame = (
-    doLoadGame: boolean,
-    gameDefinition: GameDefinition,
-    gameDefinitionName: string,
-    scene: Scene | null
+    gameDefinition: GameDefinition | undefined,
+    gameDefinitionName: string | undefined,
+    scene: Scene | undefined
 ) => {
     const [status, setStatus] = useState("");
     const [loadedAssets, setLoadedAssets] = useState<Assets>();
-    const returnValue = useMemo(() => ({ status, loadedAssets }), [status, loadedAssets]);
+    const [loadingAssets, setLoadingAssets] = useState(false);
+    const returnValue = useMemo(() => ({ status, loadedAssets, loadingAssets }), [status, loadedAssets, loadingAssets]);
 
     useEffect(() => {
         if (!scene) return;
-        if (!doLoadGame) return;
+        if (!gameDefinition) return;
+        if (!gameDefinitionName) return;
         const loadGame = async () => {
             if (!scene) return;
-            const assets = makeDefaultAssets();
+            const assets = loadedAssets ? { ...loadedAssets } : makeDefaultAssets();
 
             await traverseJsonAsync(gameDefinition, async (element, key) => {
                 if (key === "asset") {
@@ -44,32 +47,32 @@ export const useLoadGame = (
                             setStatus(`loading glsl ${assetDefinition.url}`);
                             await loadGLSL(gameDefinitionName, assetDefinition, scene, assets);
                             break;
+                        case "vector":
+                            if (vectorLoaded(assetDefinition, assets)) break;
+                            setStatus(`loading vector ${assetDefinition.type}`);
+                            await loadVector(gameDefinitionName, assetDefinition, scene, assets);
+                            break;
+                        case "timing":
+                            if (timingLoaded(assetDefinition, assets)) break;
+                            setStatus(`loading timing ${assetDefinition.type}`);
+                            await loadTiming(gameDefinitionName, assetDefinition, scene, assets);
+                            break;
+                        default:
+                            break;
                     }
                 }
             });
             setLoadedAssets(assets);
+            setLoadingAssets(false);
         };
 
         loadGame();
 
         return () => {
-            setLoadedAssets((loadedAssets) => {
-                loadedAssets?.meshes &&
-                    Object.values(loadedAssets.meshes).forEach((mesh) => {
-                        mesh.container.dispose();
-                    });
-                loadedAssets?.textures &&
-                    Object.values(loadedAssets.textures).forEach((texture) => {
-                        texture.dispose();
-                    });
-                loadedAssets?.sounds &&
-                    Object.values(loadedAssets.sounds).forEach((sound) => {
-                        sound.dispose();
-                    });
-                return undefined;
-            });
+            setLoadingAssets(true);
         };
-    }, [doLoadGame, gameDefinition, gameDefinitionName, scene]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [gameDefinition, gameDefinitionName, scene]);
 
     return returnValue;
 };

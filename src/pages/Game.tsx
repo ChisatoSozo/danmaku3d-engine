@@ -1,17 +1,19 @@
-import { Vector3 } from "@babylonjs/core";
+import { Scene as BJSScene, Vector3 } from "@babylonjs/core";
 import "@babylonjs/loaders";
 import { useEffect, useMemo, useState } from "react";
 import { Scene } from "react-babylonjs";
 import { useLocation, useMatch } from "react-router-dom";
 import { BindControls } from "../bjs-components/BindControls";
-import { GameLoader, GameLoaderOutput } from "../bjs-components/GameLoader";
+import { SceneElevator } from "../bjs-components/SceneElevator";
 import { Stage } from "../bjs-components/Stage";
 import { GameDefinitionEditor } from "../components/GameDefinitionEditor";
 import { Overlay } from "../components/Overlay";
 import { GameContainer } from "../containers/GameContainer";
 import Engine from "../forks/Engine";
+import { useLoadGame } from "../hooks/useLoadGame";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { GameDefinition } from "../types/gameDefinition/GameDefinition";
+import { assetHost } from "../utils/Utils";
 
 function useQuery() {
     const { search } = useLocation();
@@ -23,16 +25,25 @@ export const Game = () => {
     const name = useMatch("/game/:name")?.params.name;
     const editing = useQuery().get("editing") === "true";
     const windowSize = useWindowSize();
-    const [gameLoaderOutput, setGameLoaderOutput] = useState<GameLoaderOutput>();
-    const [loadGame, setLoadGame] = useState(false);
     const [currentStage, setCurrentStage] = useState(0);
     const [currentPhase, setCurrentPhase] = useState(0);
     const [gameDefinition, setGameDefinition] = useState<GameDefinition>();
+    const [overrideGameDefinition, setOverrideGameDefinition] = useState<GameDefinition>();
+
+    const gameDefinitionToUse = useMemo(() => {
+        if (overrideGameDefinition) {
+            return overrideGameDefinition;
+        }
+
+        return gameDefinition;
+    }, [gameDefinition, overrideGameDefinition]);
+
+    const [scene, setScene] = useState<BJSScene>();
+    const gameLoaderOutput = useLoadGame(gameDefinitionToUse, name, scene);
+
     useEffect(() => {
         const fetchGameDefinition = async () => {
-            const response = await fetch(
-                `${window.location.protocol}//${window.location.hostname}:5000/${name}/definition.json`
-            );
+            const response = await fetch(`${assetHost}${name}/definition.json`);
             const gameDefinition = await response.json();
             setGameDefinition(gameDefinition);
         };
@@ -42,54 +53,41 @@ export const Game = () => {
     if (!name) return <>404 game not found</>;
     return (
         <>
-            {editing ? (
+            {editing && (
                 <Overlay>
                     <GameDefinitionEditor
                         gameDefinitionName={name}
                         gameDefinition={gameDefinition}
                         setGameDefinition={setGameDefinition}
+                        overrideGameDefinition={overrideGameDefinition}
+                        setOverrideGameDefinition={setOverrideGameDefinition}
                         currentStage={currentStage}
                         setCurrentStage={setCurrentStage}
                         currentPhase={currentPhase}
                         setCurrentPhase={setCurrentPhase}
                     />
                 </Overlay>
-            ) : (
-                <>
-                    {!loadGame && (
-                        <Overlay>
-                            <button onClick={() => setLoadGame(true)}>Load Game Definition</button>
-                        </Overlay>
-                    )}
-                    {gameLoaderOutput && !gameLoaderOutput.loadedAssets && (
-                        <Overlay>
-                            <span> {gameLoaderOutput.status}</span>
-                        </Overlay>
-                    )}
-                </>
+            )}
+            {gameLoaderOutput && !gameLoaderOutput.loadedAssets && (
+                <Overlay>
+                    <div
+                        style={{
+                            display: "flex",
+                            width: "100%",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <span> {gameLoaderOutput.status}</span>
+                    </div>
+                </Overlay>
             )}
             <Engine width={windowSize.width} height={windowSize.height} antialias canvasId="babylonJS">
                 <Scene>
-                    {gameDefinition && (
-                        <GameLoader
-                            loadGame={loadGame}
-                            gameDefinition={gameDefinition}
-                            gameDefinitionName={name}
-                            setGameLoaderOutput={setGameLoaderOutput}
-                        />
-                    )}
-                    {(!gameLoaderOutput || !gameLoaderOutput.loadedAssets || !gameDefinition) && (
-                        <>
-                            <arcRotateCamera
-                                name="camera1"
-                                target={Vector3.Zero()}
-                                alpha={Math.PI / 2}
-                                beta={Math.PI / 4}
-                                radius={8}
-                            />
-                        </>
-                    )}
-                    {gameLoaderOutput && gameLoaderOutput.loadedAssets && gameDefinition && (
+                    <SceneElevator setScene={setScene} />
+                    {gameLoaderOutput &&
+                    gameLoaderOutput.loadedAssets &&
+                    !gameLoaderOutput.loadingAssets &&
+                    gameDefinitionToUse ? (
                         <GameContainer assets={gameLoaderOutput.loadedAssets}>
                             <BindControls />
                             <Stage
@@ -97,9 +95,17 @@ export const Game = () => {
                                 setCurrentStage={setCurrentStage}
                                 currentPhase={currentPhase}
                                 setCurrentPhase={setCurrentPhase}
-                                gameDefinition={gameDefinition}
+                                gameDefinition={gameDefinitionToUse}
                             />
                         </GameContainer>
+                    ) : (
+                        <arcRotateCamera
+                            name="camera1"
+                            target={Vector3.Zero()}
+                            alpha={Math.PI / 2}
+                            beta={Math.PI / 4}
+                            radius={8}
+                        />
                     )}
                 </Scene>
             </Engine>

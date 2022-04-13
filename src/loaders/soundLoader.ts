@@ -2,15 +2,12 @@ import { Scene, Sound } from "@babylonjs/core";
 import { getAsset, useAssets } from "../hooks/useAsset";
 import { Assets } from "../types/Assets";
 import { SoundAssetDefinition } from "../types/gameDefinition/AssetDefinition";
+import { assetHost } from "../utils/Utils";
 
 export const hashSound = (soundAssetDefinition: SoundAssetDefinition) => {
     return soundAssetDefinition.url;
 };
 export const soundLoaded = (assetDefinition: SoundAssetDefinition, assets: Assets) => {
-    if (assetDefinition.hash) {
-        return true;
-    }
-
     const hash = hashSound(assetDefinition);
     if (assets.sounds[hash]) {
         assetDefinition.hash = hash;
@@ -27,7 +24,7 @@ export const loadSound = (
 ) => {
     return new Promise<boolean>((resolve) => {
         const hash = hashSound(assetDefinition);
-        const URI = `${window.location.protocol}//${window.location.hostname}:5000/${gameDefinitionName}/sounds/${assetDefinition.url}`;
+        const URI = `${assetHost}${gameDefinitionName}/sounds/${assetDefinition.url}`;
         const sound = new Sound(
             hash,
             URI,

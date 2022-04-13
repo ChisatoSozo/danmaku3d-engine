@@ -1,12 +1,16 @@
 import { Scene, Vector3 } from "@babylonjs/core";
 import { VectorGenerator } from "../../types/gameDefinition/BulletPatternDefinition";
+import { blankVectorGenerator } from "./blankVectorGenerator";
 import { burstVectorGenerator } from "./burstVectorGenerator";
+import { fillVectorGenerator } from "./fillVectorGenerator";
 import { makeTextureFromVectors } from "./vectorGeneratorUtils";
 
-export type VectorGeneratorFunction = (vectorGenerator: VectorGenerator) => Vector3[];
+export type VectorGeneratorFunction = (vectorGenerator: any) => Vector3[];
 
 const vectorGeneratorFunctions: { [key in VectorGenerator["type"]]: VectorGeneratorFunction } = {
     burst: burstVectorGenerator,
+    blank: blankVectorGenerator,
+    fill: fillVectorGenerator,
 };
 
 export const generateVectorTexture = (vectorGenerator: VectorGenerator, scene: Scene) => {

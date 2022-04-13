@@ -10,6 +10,7 @@ export const Overlay: React.FC = ({ children }) => {
                 width: "100vw",
                 height: "100vh",
                 zIndex: 100,
+                pointerEvents: "none",
             }}
         >
             {children}

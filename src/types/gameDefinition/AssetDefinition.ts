@@ -3,6 +3,10 @@ import { BulletPatternDefinition, TimingGenerator, VectorGenerator } from "./Bul
 export type AssetType = "mesh" | "sound" | "texture" | "bulletPattern" | "glsl" | "timing" | "vector";
 export type ShaderType = "vertex" | "fragment" | "pixel";
 
+export type AssetContainer<T> = {
+    asset: T;
+};
+
 export type BaseAssetDefinition<T extends AssetType> = {
     hash?: string;
     type: T;
@@ -13,10 +17,10 @@ export type GLSLAssetDefinition = BaseAssetDefinition<"glsl"> & {
     url: string;
 };
 
-export const makeGLSLAssetDefinition = (): GLSLAssetDefinition => ({
+export const makeGLSLAssetDefinition = (url: string, shaderType: ShaderType): GLSLAssetDefinition => ({
     type: "glsl",
-    shaderType: "vertex",
-    url: "",
+    shaderType,
+    url,
 });
 
 export type BulletPatternAssetDefinition = BaseAssetDefinition<"bulletPattern"> & {
@@ -26,6 +30,11 @@ export type BulletPatternAssetDefinition = BaseAssetDefinition<"bulletPattern"> 
 export type MeshAssetDefinition = BaseAssetDefinition<"mesh"> & {
     url: string;
 };
+
+export const makeMeshAssetDefinition = (): MeshAssetDefinition => ({
+    type: "mesh",
+    url: "sphere.glb",
+});
 
 export type SoundAssetDefinition = BaseAssetDefinition<"sound"> & {
     url: string;
@@ -39,12 +48,12 @@ export type TimingAssetDefinition = BaseAssetDefinition<"timing"> & {
     generator: TimingGenerator;
 };
 
-export const makeTimingAssetDefinition = (): TimingAssetDefinition => ({
+export const makeTimingAssetDefinition = (time: number): TimingAssetDefinition => ({
     type: "timing",
     generator: {
         type: "uniform",
         count: 100,
-        time: 0,
+        time,
     },
 });
 
@@ -62,6 +71,27 @@ export const makeVectorAssetDefinition = (): VectorAssetDefinition => ({
         thetaLength: 2 * Math.PI,
         startY: 1,
         yLength: 2,
+    },
+});
+
+export const makeBlankVectorAssetDefinition = (): VectorAssetDefinition => ({
+    type: "vector",
+    generator: {
+        type: "blank",
+        count: 100,
+    },
+});
+
+export const makeFillVectorAssetDefinition = (): VectorAssetDefinition => ({
+    type: "vector",
+    generator: {
+        type: "fill",
+        count: 100,
+        vector: {
+            x: 0,
+            y: 0,
+            z: 0,
+        },
     },
 });
 

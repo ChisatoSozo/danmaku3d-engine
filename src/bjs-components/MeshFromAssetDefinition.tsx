@@ -7,12 +7,13 @@ import { MeshAssetDefinition } from "../types/gameDefinition/AssetDefinition";
 type MeshFromAssetDefinitionProps = {
     assetDefinition: MeshAssetDefinition;
     activeAnimation?: string;
+    onMeshLoaded?: (rootNodes: TransformNode[]) => void;
 } & FiberTransformNodeProps &
     FiberTransformNodePropsCtor &
     BabylonNode<TransformNode>;
 
 export const MeshFromAssetDefinition = React.forwardRef<TransformNode, MeshFromAssetDefinitionProps>(
-    ({ assetDefinition, activeAnimation, ...transformNodeProps }, ref) => {
+    ({ assetDefinition, activeAnimation, onMeshLoaded, ...transformNodeProps }, ref) => {
         const { container, additionalData } = useMeshAsset(assetDefinition);
         const _transformNodeRef = useRef<TransformNode>(null);
         const transformNodeRef = (ref || _transformNodeRef) as MutableRefObject<TransformNode | null>;
@@ -26,6 +27,10 @@ export const MeshFromAssetDefinition = React.forwardRef<TransformNode, MeshFromA
             instantiated.rootNodes.forEach((node) => {
                 node.parent = transformNodeRef.current;
             });
+
+            if (onMeshLoaded) {
+                onMeshLoaded(instantiated.rootNodes);
+            }
 
             setAnimations(instantiated.animationGroups);
 

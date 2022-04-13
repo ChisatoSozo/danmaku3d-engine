@@ -1,7 +1,9 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { EditorContainer } from "../containers/EditorContainer";
 import { AssetType } from "../types/gameDefinition/AssetDefinition";
-import { GameDefinition } from "../types/gameDefinition/GameDefinition";
+import { BulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
+import { GameDefinition, makeGameDefinition } from "../types/gameDefinition/GameDefinition";
+import { assetHost } from "../utils/Utils";
 import { AssetBrowser } from "./AssetBrowser";
 import { AssetViewer } from "./AssetViewer";
 import { DetailsPane } from "./DetailsPane";
@@ -17,6 +19,8 @@ interface GameDefinitionEditorProps {
     gameDefinitionName: string;
     gameDefinition?: GameDefinition;
     setGameDefinition: Dispatch<SetStateAction<GameDefinition | undefined>>;
+    overrideGameDefinition?: GameDefinition;
+    setOverrideGameDefinition: Dispatch<SetStateAction<GameDefinition | undefined>>;
     currentStage: number;
     setCurrentStage: Dispatch<SetStateAction<number>>;
     currentPhase: number;
@@ -27,21 +31,70 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
     gameDefinitionName,
     gameDefinition,
     setGameDefinition,
+    overrideGameDefinition,
+    setOverrideGameDefinition,
     currentStage,
     setCurrentStage,
     currentPhase,
     setCurrentPhase,
 }) => {
-    const [localGameDefinition, setLocalGameDefinition] = useState(gameDefinition);
     const [currentAsset, setCurrentAsset] = useState<ViewableAsset>();
 
     useEffect(() => {
-        setLocalGameDefinition(gameDefinition);
-    }, [gameDefinition]);
+        const setOverride = async () => {
+            const tempGameDefinition = makeGameDefinition();
+            if (!currentAsset) {
+                setOverrideGameDefinition(undefined);
+                return;
+            }
+            if (currentAsset?.assetType === "mesh") {
+                tempGameDefinition.stages[0].phases[0].instructions.push({
+                    at: 0,
+                    type: "spawnEnemy",
+                    position: { x: 0, y: 0, z: 0 },
+                    asset: {
+                        type: "mesh",
+                        url: currentAsset.assetURL,
+                    },
+                    instructions: [],
+                });
+            }
 
-    if (!localGameDefinition) return null;
+            if (currentAsset?.assetType === "bulletPattern") {
+                const bulletPatternDefinitionJson = (await fetch(
+                    `${assetHost}${gameDefinitionName}/bulletPatterns/${currentAsset.assetURL}`
+                ).then((res) => res.json())) as BulletPatternDefinition;
+                tempGameDefinition.stages[0].phases[0].instructions.push({
+                    at: 0,
+                    type: "spawnEnemy",
+                    position: { x: 0, y: 0, z: 0 },
+                    asset: {
+                        type: "mesh",
+                        url: "sphere.glb",
+                    },
+                    instructions: [
+                        {
+                            at: 0,
+                            type: "attack",
+                            bulletPattern: bulletPatternDefinitionJson,
+                        },
+                    ],
+                });
+            }
+
+            setOverrideGameDefinition(tempGameDefinition);
+            return;
+        };
+        setOverride();
+    }, [currentAsset, gameDefinitionName, setOverrideGameDefinition]);
+
+    if (!gameDefinition) return null;
     return (
-        <EditorContainer gameDefinitionName={gameDefinitionName}>
+        <EditorContainer
+            gameDefinitionName={gameDefinitionName}
+            overrideGameDefinition={overrideGameDefinition}
+            setOverrideGameDefinition={setOverrideGameDefinition}
+        >
             <div
                 style={{
                     position: "relative",
@@ -66,17 +119,21 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
                     }}
                 >
                     <AssetBrowser
-                        gameDefinition={localGameDefinition}
+                        gameDefinition={gameDefinition}
                         gameDefinitionName={gameDefinitionName}
                         currentAsset={currentAsset}
                         setCurrentAsset={setCurrentAsset}
                     />
                     {currentAsset ? (
-                        <AssetViewer gameDefinitionName={gameDefinitionName} currentAsset={currentAsset} />
+                        <AssetViewer
+                            gameDefinitionName={gameDefinitionName}
+                            currentAsset={currentAsset}
+                            setCurrentAsset={setCurrentAsset}
+                        />
                     ) : (
                         <div style={{ flex: 1 }} />
                     )}
-                    <DetailsPane gameDefinition={localGameDefinition} setGameDefinition={setLocalGameDefinition} />
+                    <DetailsPane gameDefinition={gameDefinition} setGameDefinition={setGameDefinition} />
                 </div>
                 <div
                     style={{
@@ -87,15 +144,15 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
                     }}
                 >
                     <StagePhasePicker
-                        gameDefinition={localGameDefinition}
-                        setGameDefinition={setLocalGameDefinition}
+                        gameDefinition={gameDefinition}
+                        setGameDefinition={setGameDefinition}
                         currentStage={currentStage}
                         setCurrentStage={setCurrentStage}
                         currentPhase={currentPhase}
                         setCurrentPhase={setCurrentPhase}
                     />
                     <GameDefinitionTimeline
-                        gameDefinition={localGameDefinition}
+                        gameDefinition={gameDefinition}
                         currentStage={currentStage}
                         currentPhase={currentPhase}
                     />

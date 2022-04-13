@@ -54,10 +54,15 @@ export const makeStageDefinition = (): StageDefinition => ({
         max: { x: -10, y: 0, z: -10 },
     },
     stageMeshes: [],
-    phases: [],
+    phases: [makePhaseDefinition()],
 });
 
 export type GameDefinition = {
     playableCharacters: PlayableCharacterDefinition[];
     stages: StageDefinition[];
 };
+
+export const makeGameDefinition = (): GameDefinition => ({
+    playableCharacters: [],
+    stages: [makeStageDefinition()],
+});

@@ -7,10 +7,6 @@ export const hashMesh = (meshAssetDefinition: MeshAssetDefinition) => {
     return meshAssetDefinition.url;
 };
 export const meshLoaded = (assetDefinition: MeshAssetDefinition, assets: Assets) => {
-    if (assetDefinition.hash) {
-        return true;
-    }
-
     const hash = hashMesh(assetDefinition);
     if (assets.meshes[hash]) {
         assetDefinition.hash = hash;

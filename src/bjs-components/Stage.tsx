@@ -2,6 +2,7 @@ import { Vector3 } from "@babylonjs/core";
 import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { useExecutor } from "../hooks/useExecutor";
 import { GameDefinition, PlayMusicInstruction, SpawnEnemyInstruction } from "../types/gameDefinition/GameDefinition";
+import { KeyedInstruction } from "../types/utilTypes/InstructionTypes";
 import { Camera } from "./Camera";
 import { ControlsToState } from "./ControlsToState";
 import { Enemy } from "./Enemy";
@@ -31,8 +32,8 @@ export const Stage: React.FC<StageProps> = ({
 }) => {
     const stageDefinition = useMemo(() => gameDefinition.stages[currentStage], [gameDefinition, currentStage]);
     const phaseDefinition = useMemo(() => stageDefinition.phases[currentPhase], [stageDefinition, currentPhase]);
-    const [musics, setMusics] = useState<{ musicInstruction: PlayMusicInstruction; key: number }[]>([]);
-    const [enemies, setEnemies] = useState<{ enemyInstruction: SpawnEnemyInstruction; key: number }[]>([]);
+    const [musics, setMusics] = useState<KeyedInstruction<PlayMusicInstruction>[]>([]);
+    const [enemies, setEnemies] = useState<KeyedInstruction<SpawnEnemyInstruction>[]>([]);
 
     useEffect(() => {
         return () => {
@@ -44,10 +45,10 @@ export const Stage: React.FC<StageProps> = ({
     useExecutor((instruction, index) => {
         switch (instruction.type) {
             case "playMusic":
-                setMusics((musics) => [...musics, { musicInstruction: instruction, key: index }]);
+                setMusics((musics) => [...musics, { instruction, key: index }]);
                 break;
             case "spawnEnemy":
-                setEnemies((enemies) => [...enemies, { enemyInstruction: instruction, key: index }]);
+                setEnemies((enemies) => [...enemies, { instruction, key: index }]);
                 break;
         }
     }, phaseDefinition.instructions);
@@ -62,18 +63,22 @@ export const Stage: React.FC<StageProps> = ({
             <FadeText text={stageDefinition.subtitle} position={SUBTITLE_POSITION} size={8} fontSize={0.08} />
             <StageMesh stageDefinition={stageDefinition} />
             {musics.map((music) => (
-                <Music key={music.key} musicInstruction={music.musicInstruction} />
+                <Music key={music.key} musicInstruction={music.instruction} />
             ))}
             {enemies.map((enemy) => (
-                <Enemy key={enemy.key} enemyInstruction={enemy.enemyInstruction} />
+                <Enemy key={enemy.key} enemyInstruction={enemy.instruction} />
             ))}
-            <PlayerMovement
-                stageDefinition={stageDefinition}
-                playableCharacterDefinition={gameDefinition.playableCharacters[0]}
-            >
-                <Player focused={focused} playableCharacterDefinition={gameDefinition.playableCharacters[0]} />
-                <Camera mode="player" />
-            </PlayerMovement>
+            {gameDefinition.playableCharacters.length > 0 ? (
+                <PlayerMovement
+                    stageDefinition={stageDefinition}
+                    playableCharacterDefinition={gameDefinition.playableCharacters[0]}
+                >
+                    <Player focused={focused} playableCharacterDefinition={gameDefinition.playableCharacters[0]} />
+                    <Camera mode="player" />
+                </PlayerMovement>
+            ) : (
+                <Camera mode="free" />
+            )}
         </>
     );
 };

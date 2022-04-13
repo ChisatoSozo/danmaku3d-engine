@@ -9,10 +9,6 @@ export const hashVector = (vectorAssetDefinition: VectorAssetDefinition) => {
     return hash(vectorAssetDefinition);
 };
 export const vectorLoaded = (assetDefinition: VectorAssetDefinition, assets: Assets) => {
-    if (assetDefinition.hash) {
-        return true;
-    }
-
     const hash = hashVector(assetDefinition);
     if (assets.textures[hash]) {
         assetDefinition.hash = hash;

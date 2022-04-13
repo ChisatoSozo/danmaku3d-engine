@@ -17,6 +17,7 @@ export const StageMesh: React.FC<StageMeshProps> = ({ stageDefinition }) => {
     }, [stageDefinition]);
 
     const positions = useMemo(() => {
+        if (stageDefinition.stageMeshes.length === 0) return [];
         let curLen = -1 * stageDefinition.stageMeshes[0].length;
         const _positions: Vector3[] = [];
         for (let i = 0; i < numMeshes; i++) {
@@ -36,6 +37,7 @@ export const StageMesh: React.FC<StageMeshProps> = ({ stageDefinition }) => {
         if (!transformNodeRef.current) return;
 
         transformNodeRef.current.position.addInPlace(velocity.scale(-deltaS));
+        if (positions.length === 0) return;
 
         if (transformNodeRef.current.position.z < -(positions[positions.length - 1].z - maxFogDistance)) {
             transformNodeRef.current.position.z += positions[positions.length - 1].z;

@@ -75,8 +75,8 @@ export const Camera: React.FC<CameraProps> = ({ mode }) => {
                 <arcRotateCamera
                     name="freeCamera"
                     target={Vector3.Zero()}
-                    alpha={Math.PI / 2}
-                    beta={-Math.PI / 4}
+                    alpha={-Math.PI / 2}
+                    beta={Math.PI / 2}
                     radius={20}
                 />
             )}

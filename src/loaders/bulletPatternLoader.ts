@@ -11,10 +11,6 @@ export const hashBulletPattern = (bulletPatternAssetDefinition: BulletPatternAss
     return hash(bulletPatternAssetDefinition);
 };
 export const bulletPatternLoaded = (assetDefinition: BulletPatternAssetDefinition, assets: Assets) => {
-    if (assetDefinition.hash) {
-        return true;
-    }
-
     const hash = hashBulletPattern(assetDefinition);
     if (assets.bulletPatterns[hash]) {
         assetDefinition.hash = hash;
@@ -34,12 +30,15 @@ export const loadBulletPattern = async (
 
     const patternDefinition = assetDefinition.pattern;
     const bulletPattern: BulletPatternAsset = {
-        initialPositionsHash: hashVector(patternDefinition.initialPositions),
-        initialVelocitiesHash: hashVector(patternDefinition.initialVelocities),
-        timingsHash: hashTiming(patternDefinition.timings),
-        positionFunctionGLSLHash: hashGLSL(patternDefinition.positionFunctionGLSL),
-        velocityFunctionGLSLHash: hashGLSL(patternDefinition.velocityFunctionGLSL),
-        collisionFunctionGLSLHash: hashGLSL(patternDefinition.collisionFunctionGLSL),
+        startPositionsStateHash: hashVector(patternDefinition._startPositionsState.asset),
+        startVelocitiesStateHash: hashVector(patternDefinition._startVelocitiesState.asset),
+        initialPositionsHash: hashVector(patternDefinition.initialPositions.asset),
+        initialVelocitiesHash: hashVector(patternDefinition.initialVelocities.asset),
+        initialCollisionsHash: hashVector(patternDefinition._initialCollisions.asset),
+        timingsHash: hashTiming(patternDefinition.timings.asset),
+        positionFunctionGLSLHash: hashGLSL(patternDefinition.positionFunctionGLSL.asset),
+        velocityFunctionGLSLHash: hashGLSL(patternDefinition.velocityFunctionGLSL.asset),
+        collisionFunctionGLSLHash: hashGLSL(patternDefinition.collisionFunctionGLSL.asset),
     };
 
     assets.bulletPatterns[hash] = bulletPattern;

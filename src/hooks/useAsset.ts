@@ -18,6 +18,10 @@ export const getAsset = (assets: Assets, assetDefinition: AnyAssetDefinition) =>
         return assets.glsl[hash];
     } else if (assetDefinition.type === "texture") {
         return assets.textures[hash];
+    } else if (assetDefinition.type === "vector") {
+        return assets.textures[hash];
+    } else if (assetDefinition.type === "timing") {
+        return assets.textures[hash];
     }
-    throw new Error(`Asset ${hash} is not an Asset Type`);
+    throw new Error(`Asset ${assetDefinition.type} is not an Asset Type`);
 };

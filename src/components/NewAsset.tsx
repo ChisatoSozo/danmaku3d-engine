@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { assetTypeToAssetFileMap, useEditor } from "../containers/EditorContainer";
 import { AssetType } from "../types/gameDefinition/AssetDefinition";
 import { makeBulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
+import { assetHost } from "../utils/Utils";
 
 interface NewAssetProps {
     gameDefinitionName: string;
@@ -44,7 +45,7 @@ export const NewAsset: React.FC<NewAssetProps> = ({ gameDefinitionName, assetTyp
         formData.append("type", assetType);
         formData.append("gameDefinitionName", gameDefinitionName);
         setUploading(true);
-        await fetch(`${window.location.protocol}//${window.location.hostname}:5000/upload-asset`, {
+        await fetch(`${assetHost}upload-asset`, {
             method: "POST",
             body: formData,
         });

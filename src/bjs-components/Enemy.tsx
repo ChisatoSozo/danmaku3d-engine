@@ -2,8 +2,15 @@ import { TransformNode, Vector3 } from "@babylonjs/core";
 import React, { useRef, useState } from "react";
 import { useDeltaBeforeRender } from "../hooks/useDeltaBeforeRender";
 import { useExecutor } from "../hooks/useExecutor";
-import { EnemyInstruction } from "../types/gameDefinition/EnemyDefinition";
+import { useVectorMemo } from "../hooks/useVectorMemo";
+import {
+    EnemyAttackInstruction,
+    EnemyInstruction,
+    EnemyMoveToInstruction,
+} from "../types/gameDefinition/EnemyDefinition";
 import { SpawnEnemyInstruction } from "../types/gameDefinition/GameDefinition";
+import { KeyedInstruction } from "../types/utilTypes/InstructionTypes";
+import { BulletPattern } from "./BulletPattern";
 import { MeshFromAssetDefinition } from "./MeshFromAssetDefinition";
 
 interface EnemyProps {
@@ -11,7 +18,7 @@ interface EnemyProps {
 }
 
 const useMovement = (
-    movementInstruction: EnemyInstruction | undefined,
+    movementInstruction: EnemyMoveToInstruction | undefined,
     transformNodeRef: React.RefObject<TransformNode>
 ) => {
     useDeltaBeforeRender((scene, deltaS) => {
@@ -40,21 +47,29 @@ const useMovement = (
 export const Enemy: React.FC<EnemyProps> = ({ enemyInstruction }) => {
     const transformNodeRef = useRef<TransformNode>(null);
 
-    const [movementInstruction, setMovementInstruction] = useState<EnemyInstruction>();
+    const [movementInstruction, setMovementInstruction] = useState<EnemyMoveToInstruction>();
+    const [bulletPatterns, setBulletPatterns] = useState<KeyedInstruction<EnemyAttackInstruction>[]>([]);
+    const position = useVectorMemo(enemyInstruction.position);
 
-    useExecutor((instruction: EnemyInstruction) => {
+    useExecutor((instruction: EnemyInstruction, index) => {
         if (instruction.type === "moveTo") {
             setMovementInstruction(instruction);
+        }
+        if (instruction.type === "attack") {
+            setBulletPatterns((patterns) => [...patterns, { instruction, key: index }]);
         }
     }, enemyInstruction.instructions);
 
     useMovement(movementInstruction, transformNodeRef);
 
     return (
-        <transformNode name="" ref={transformNodeRef}>
+        <transformNode name="" ref={transformNodeRef} position={position}>
             <transformNode name="" rotation-y={Math.PI}>
                 <MeshFromAssetDefinition name="" assetDefinition={enemyInstruction.asset} />
             </transformNode>
+            {bulletPatterns.map((pattern) => (
+                <BulletPattern key={pattern.key} bulletPatternDefinition={pattern.instruction.bulletPattern} />
+            ))}
         </transformNode>
     );
 };

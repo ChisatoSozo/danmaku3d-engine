@@ -12,8 +12,11 @@ export interface MeshAsset {
 }
 
 export interface BulletPatternAsset {
+    startPositionsStateHash: string;
+    startVelocitiesStateHash: string;
     initialPositionsHash: string;
     initialVelocitiesHash: string;
+    initialCollisionsHash: string;
     timingsHash: string;
     positionFunctionGLSLHash: string;
     velocityFunctionGLSLHash: string;
