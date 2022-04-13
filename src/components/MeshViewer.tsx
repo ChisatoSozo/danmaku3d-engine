@@ -2,6 +2,7 @@ import { Vector3 } from "@babylonjs/core";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { ILoadedModel, Model, Scene } from "react-babylonjs";
 import Engine from "../forks/Engine";
+import { assetHost } from "../utils/Utils";
 
 interface MeshViewerProps {
     gameDefinitionName: string;
@@ -59,7 +60,7 @@ export const MeshViewer: React.FC<MeshViewerProps> = ({ gameDefinitionName, url 
                         <Model
                             onModelLoaded={setModel}
                             name="viewedModel"
-                            rootUrl={`${window.location.protocol}//${window.location.hostname}:5000/${gameDefinitionName}/meshes/`}
+                            rootUrl={`${assetHost}${gameDefinitionName}/meshes/`}
                             sceneFilename={url}
                             position={new Vector3(0, 0, 0)}
                         />

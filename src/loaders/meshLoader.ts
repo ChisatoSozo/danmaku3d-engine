@@ -2,6 +2,7 @@ import { Scene, SceneLoader } from "@babylonjs/core";
 import { getAsset, useAssets } from "../hooks/useAsset";
 import { Assets, MeshAdditionalData, MeshAsset } from "../types/Assets";
 import { MeshAssetDefinition } from "../types/gameDefinition/AssetDefinition";
+import { assetHost } from "../utils/Utils";
 
 export const hashMesh = (meshAssetDefinition: MeshAssetDefinition) => {
     return meshAssetDefinition.url;
@@ -23,7 +24,7 @@ export const loadMesh = (
 ) => {
     return new Promise<boolean>((resolve) => {
         const hash = hashMesh(assetDefinition);
-        const root = `${window.location.protocol}//${window.location.hostname}:5000/${gameDefinitionName}/meshes/`;
+        const root = `${assetHost}${gameDefinitionName}/meshes/`;
         const URI = assetDefinition.url;
         SceneLoader.LoadAssetContainer(root, URI, scene, async (container) => {
             assetDefinition.hash = hash;
