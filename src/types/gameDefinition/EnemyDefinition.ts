@@ -1,4 +1,4 @@
-import { BulletPatternDefinition } from "./BulletPatternDefinition";
+import { BulletPatternAssetDefinition } from "./AssetDefinition";
 import { Instruction } from "./CommonDefinition";
 import { IVector3 } from "./UtilTypes";
 
@@ -10,7 +10,7 @@ export type EnemyMoveToInstruction = {
 
 export type EnemyAttackInstruction = {
     type: "attack";
-    bulletPattern: BulletPatternDefinition;
+    bulletPattern: BulletPatternAssetDefinition;
 };
 
 type BaseEnemyInstruction = EnemyMoveToInstruction | EnemyAttackInstruction;

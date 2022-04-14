@@ -107,9 +107,9 @@ export default class DifferentialPositionVelocityCollisionSystem {
     public collisionResult: CustomFloatProceduralTexture;
     private reducerLayers: CustomFloatProceduralTexture[];
 
-    private frame: number;
-    private ready: boolean;
-    private justStarted: boolean;
+    private frame = 0;
+    private disposed = false;
+    private justStarted = true;
 
     constructor({
         num,
@@ -128,16 +128,16 @@ export default class DifferentialPositionVelocityCollisionSystem {
     }: DifferentialPositionVelocityCollisionSystemArgs) {
         const WIDTH = Math.max(nextPowerOfTwo(Math.ceil(Math.sqrt(num))), 2);
         this.positionTextures = [
-            makeProceduralTexture("position", positionShader, WIDTH, scene),
-            makeProceduralTexture("position", positionShader, WIDTH, scene),
+            makeProceduralTexture("", positionShader, WIDTH, scene),
+            makeProceduralTexture("", positionShader, WIDTH, scene),
         ];
         this.velocityTextures = [
-            makeProceduralTexture("velocity", velocityShader, WIDTH, scene),
-            makeProceduralTexture("velocity", velocityShader, WIDTH, scene),
+            makeProceduralTexture("", velocityShader, WIDTH, scene),
+            makeProceduralTexture("", velocityShader, WIDTH, scene),
         ];
         this.collisionTextures = [
-            makeProceduralTexture("collision", collisionShader, WIDTH, scene),
-            makeProceduralTexture("collision", collisionShader, WIDTH, scene),
+            makeProceduralTexture("", collisionShader, WIDTH, scene),
+            makeProceduralTexture("", collisionShader, WIDTH, scene),
         ];
 
         this.allTextures = [...this.positionTextures, ...this.velocityTextures, ...this.collisionTextures];
@@ -170,10 +170,6 @@ export default class DifferentialPositionVelocityCollisionSystem {
             this.collisionResult = this.collisionTextures[0];
             this.reducerLayers = [];
         }
-
-        this.frame = 0;
-        this.ready = true;
-        this.justStarted = true;
     }
 
     dispose() {
@@ -189,11 +185,12 @@ export default class DifferentialPositionVelocityCollisionSystem {
             });
         }
 
-        this.ready = false;
+        this.disposed = true;
     }
 
     update(deltaS: number, bindOtherUniforms: (texture: CustomFloatProceduralTexture) => void) {
-        if (!this.ready) {
+        if (this.disposed) {
+            console.warn("DifferentialPositionVelocityCollisionSystem.update() called after dispose()");
             return;
         }
 

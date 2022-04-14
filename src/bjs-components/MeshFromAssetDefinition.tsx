@@ -45,7 +45,7 @@ export const MeshFromAssetDefinition = React.forwardRef<TransformNode, MeshFromA
                     node.dispose();
                 });
             };
-        }, [container, transformNodeRef]);
+        }, [container, onMeshLoaded, transformNodeRef]);
 
         useEffect(() => {
             if (!activeAnimation) return;

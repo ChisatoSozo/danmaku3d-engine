@@ -6,7 +6,7 @@ export const blankVectorGenerator: VectorGeneratorFunction = ({ count }: BlankVe
     const points = [];
 
     for (let i = 0; i < count; i++) {
-        points.push(new Vector3(0, 0, 0));
+        points.push(new Vector3(0.0001, 0.0001, 0.0001));
     }
 
     return points;

@@ -64,9 +64,11 @@ export const Enemy: React.FC<EnemyProps> = ({ enemyInstruction }) => {
 
     return (
         <transformNode name="" ref={transformNodeRef} position={position}>
-            <transformNode name="" rotation-y={Math.PI}>
-                <MeshFromAssetDefinition name="" assetDefinition={enemyInstruction.asset} />
-            </transformNode>
+            {!enemyInstruction.hidden && (
+                <transformNode name="" rotation-y={Math.PI}>
+                    <MeshFromAssetDefinition name="" assetDefinition={enemyInstruction.asset} />
+                </transformNode>
+            )}
             {bulletPatterns.map((pattern) => (
                 <BulletPattern key={pattern.key} bulletPatternDefinition={pattern.instruction.bulletPattern} />
             ))}

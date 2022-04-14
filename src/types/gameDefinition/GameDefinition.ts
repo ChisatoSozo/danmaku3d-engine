@@ -13,6 +13,7 @@ export type SpawnEnemyInstruction = {
     type: "spawnEnemy";
     asset: MeshAssetDefinition;
     position: IVector3;
+    hidden: boolean;
     instructions: EnemyInstruction[];
 };
 

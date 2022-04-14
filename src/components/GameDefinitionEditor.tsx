@@ -52,7 +52,9 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
                     at: 0,
                     type: "spawnEnemy",
                     position: { x: 0, y: 0, z: 0 },
+                    hidden: false,
                     asset: {
+                        isAsset: true,
                         type: "mesh",
                         url: currentAsset.assetURL,
                     },
@@ -68,7 +70,9 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
                     at: 0,
                     type: "spawnEnemy",
                     position: { x: 0, y: 0, z: 0 },
+                    hidden: true,
                     asset: {
+                        isAsset: true,
                         type: "mesh",
                         url: "sphere.glb",
                     },
@@ -76,7 +80,11 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
                         {
                             at: 0,
                             type: "attack",
-                            bulletPattern: bulletPatternDefinitionJson,
+                            bulletPattern: {
+                                isAsset: true,
+                                type: "bulletPattern",
+                                pattern: bulletPatternDefinitionJson,
+                            },
                         },
                     ],
                 });

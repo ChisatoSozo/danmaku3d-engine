@@ -1,5 +1,6 @@
 import { Scene } from "@babylonjs/core";
 import { useEffect, useMemo, useState } from "react";
+import { bulletPatternLoaded, loadBulletPattern } from "../loaders/bulletPatternLoader";
 import { glslLoaded, loadGLSL } from "../loaders/glslLoader";
 import { loadMesh, meshLoaded } from "../loaders/meshLoader";
 import { loadSound, soundLoaded } from "../loaders/soundLoader";
@@ -29,7 +30,7 @@ export const useLoadGame = (
             const assets = loadedAssets ? { ...loadedAssets } : makeDefaultAssets();
 
             await traverseJsonAsync(gameDefinition, async (element, key) => {
-                if (key === "asset") {
+                if (element.isAsset) {
                     const assetDefinition = element as AnyAssetDefinition;
                     switch (assetDefinition.type) {
                         case "sound":
@@ -62,6 +63,21 @@ export const useLoadGame = (
                     }
                 }
             });
+            await traverseJsonAsync(gameDefinition, async (element, key) => {
+                if (element.isAsset) {
+                    const assetDefinition = element as AnyAssetDefinition;
+                    switch (assetDefinition.type) {
+                        case "bulletPattern":
+                            if (bulletPatternLoaded(assetDefinition, assets)) break;
+                            setStatus(`loading bullet pattern`);
+                            await loadBulletPattern(gameDefinitionName, assetDefinition, scene, assets);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+
             setLoadedAssets(assets);
             setLoadingAssets(false);
         };

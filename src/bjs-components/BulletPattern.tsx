@@ -2,10 +2,11 @@ import { Effect, Mesh, ShaderMaterial, TransformNode } from "@babylonjs/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useScene } from "react-babylonjs";
 import { useDeltaBeforeRender } from "../hooks/useDeltaBeforeRender";
+import { useBulletPatternAsset } from "../loaders/bulletPatternLoader";
 import { useGLSLAsset } from "../loaders/glslLoader";
 import { useTimingAsset } from "../loaders/timingsLoader";
 import { useVectorAsset } from "../loaders/vectorLoader";
-import { BulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
+import { BulletPatternAssetDefinition } from "../types/gameDefinition/AssetDefinition";
 import { findMeshChild, glsl, makeInstances } from "../utils/BabylonUtils";
 import DifferentialPositionVelocityCollisionSystem from "../utils/DifferentialPositionVelocityCollisionSystem";
 import { MeshFromAssetDefinition } from "./MeshFromAssetDefinition";
@@ -22,15 +23,6 @@ varying vec2 vUV;
 
 uniform sampler2D positionSampler;
 uniform sampler2D velocitySampler;
-uniform sampler2D timingsSampler;
-uniform sampler2D endTimingsSampler;
-
-uniform float timeSinceStart;
-uniform float disableWarning;
-uniform float radius;
-uniform float warning;
-
-varying float dTiming;
 
 #include<helperFunctions>
 
@@ -52,27 +44,14 @@ void main() {
     int y = instance / width;                            // integer division
     float u = (float(x) + 0.5) / float(width);           // map into 0-1 range
     float v = (float(y) + 0.5) / float(width);
-    vec4 instPos = texture(positionSampler, vec2(u, v));
-    vec4 instVel = texture(velocitySampler, vec2(u, v));
-    vec4 timingPosition = texture2D( timingsSampler, vec2(u, v));
-    vec4 endTimingPosition = texture2D( endTimingsSampler, vec2(u, v) );
-    float timing = timingPosition.w;
+    vec3 instPos = texture(positionSampler, vec2(u, v)).xyz;
+    vec3 instVel = texture(velocitySampler, vec2(u, v)).xyz;
 
     mat3 rotation;
-    makeRotation(normalize(vec3(instVel)), rotation);
+    makeRotation(normalize(instVel), rotation);
     vec4 rotatedVert = vec4(rotation * position, 1.0 );
 
-    dTiming = timeSinceStart - timing;
-
-    float size = (warning - clamp(dTiming, 0.0, warning)) / warning;
-    size *= (1. - disableWarning);
-    float hasEnded = float(dTiming > endTimingPosition.w);
-
-    rotatedVert *= size * 3. + 1.;
-    rotatedVert *= (1. - hasEnded);
-    rotatedVert *= radius;
-
-    vec4 totalPosition = vec4(rotatedVert.xyz + instPos.xyz, 1.0);
+    vec4 totalPosition = vec4(rotatedVert.xyz + instPos, 1.0);
 
     vPositionW = totalPosition.xyz;
     vNormalW = rotation * normal;
@@ -82,36 +61,38 @@ void main() {
 `;
 
 interface BulletPatternProps {
-    bulletPatternDefinition: BulletPatternDefinition;
+    bulletPatternDefinition: BulletPatternAssetDefinition;
 }
 
 export const BulletPattern: React.FC<BulletPatternProps> = ({ bulletPatternDefinition }) => {
     const scene = useScene();
-    const bulletMaterialAsset = useGLSLAsset(bulletPatternDefinition.material.asset);
+    const bulletPatternAsset = useBulletPatternAsset(bulletPatternDefinition);
 
-    const positionShader = useGLSLAsset(bulletPatternDefinition.positionFunctionGLSL.asset);
-    const velocityShader = useGLSLAsset(bulletPatternDefinition.velocityFunctionGLSL.asset);
-    const collisionShader = useGLSLAsset(bulletPatternDefinition.collisionFunctionGLSL.asset);
+    const bulletMaterialAsset = useGLSLAsset(bulletPatternAsset.material);
 
-    const startPositionsState = useVectorAsset(bulletPatternDefinition._startPositionsState.asset);
-    const startVelocitiesState = useVectorAsset(bulletPatternDefinition._startVelocitiesState.asset);
+    const positionShader = useGLSLAsset(bulletPatternAsset.positionFunctionGLSL);
+    const velocityShader = useGLSLAsset(bulletPatternAsset.velocityFunctionGLSL);
+    const collisionShader = useGLSLAsset(bulletPatternAsset.collisionFunctionGLSL);
 
-    const initialPositionSampler = useVectorAsset(bulletPatternDefinition.initialPositions.asset);
-    const initialVelocitiesSampler = useVectorAsset(bulletPatternDefinition.initialVelocities.asset);
-    const startCollisionsState = useVectorAsset(bulletPatternDefinition._initialCollisions.asset);
-    const timingsAsset = useTimingAsset(bulletPatternDefinition.timings.asset);
-    const endTimingsAsset = useTimingAsset(bulletPatternDefinition.endTimings.asset);
+    const _startPositionsState = useVectorAsset(bulletPatternAsset._startPositionsState);
+    const _startVelocitiesState = useVectorAsset(bulletPatternAsset._startVelocitiesState);
+    const _startCollisionsState = useVectorAsset(bulletPatternAsset._startCollisionsState);
+
+    const initialPositionSampler = useVectorAsset(bulletPatternAsset.initialPositions);
+    const initialVelocitiesSampler = useVectorAsset(bulletPatternAsset.initialVelocities);
+
+    const timingsAsset = useTimingAsset(bulletPatternAsset.timings);
 
     const [mesh, setMesh] = useState<Mesh>();
     const [material, setMaterial] = useState<ShaderMaterial>();
 
     const count = useMemo(
-        () => bulletPatternDefinition.initialPositions.asset.generator.count,
-        [bulletPatternDefinition.initialPositions.asset.generator.count]
+        () => bulletPatternAsset.initialPositions.generator.count,
+        [bulletPatternAsset.initialPositions.generator.count]
     );
     const downsampleCollisions = useMemo(
-        () => bulletPatternDefinition.downsampleCollisions,
-        [bulletPatternDefinition.downsampleCollisions]
+        () => bulletPatternAsset.downsampleCollisions,
+        [bulletPatternAsset.downsampleCollisions]
     );
 
     const setRootNodes = useCallback((rootNodes: TransformNode[]) => {
@@ -131,9 +112,9 @@ export const BulletPattern: React.FC<BulletPatternProps> = ({ bulletPatternDefin
         if (!scene) return;
         return new DifferentialPositionVelocityCollisionSystem({
             num: count,
-            startPositionsState,
-            startVelocitiesState,
-            startCollisionsState,
+            startPositionsState: _startPositionsState,
+            startVelocitiesState: _startVelocitiesState,
+            startCollisionsState: _startCollisionsState,
             positionShader,
             velocityShader,
             collisionShader,
@@ -143,7 +124,6 @@ export const BulletPattern: React.FC<BulletPatternProps> = ({ bulletPatternDefin
                 texture.setTexture("initialPositionSampler", initialPositionSampler);
                 texture.setTexture("initialVelocitySampler", initialVelocitiesSampler);
                 texture.setTexture("timingsSampler", timingsAsset);
-                texture.setTexture("endTimingsSampler", endTimingsAsset);
                 texture.setFloat("timeSinceStart", timeSinceStart.current);
             },
         });
@@ -151,14 +131,13 @@ export const BulletPattern: React.FC<BulletPatternProps> = ({ bulletPatternDefin
         collisionShader,
         count,
         downsampleCollisions,
-        endTimingsAsset,
         initialPositionSampler,
         initialVelocitiesSampler,
         positionShader,
         scene,
-        startCollisionsState,
-        startPositionsState,
-        startVelocitiesState,
+        _startCollisionsState,
+        _startPositionsState,
+        _startVelocitiesState,
         timingsAsset,
         velocityShader,
     ]);
@@ -167,9 +146,6 @@ export const BulletPattern: React.FC<BulletPatternProps> = ({ bulletPatternDefin
         if (!scene) return;
         if (!bulletMaterialAsset) return;
         if (!mesh) return;
-
-        console.log(bulletMaterialAsset);
-        console.log(Effect.ShadersStore[bulletMaterialAsset]);
 
         const material = new ShaderMaterial(
             "",
@@ -183,17 +159,30 @@ export const BulletPattern: React.FC<BulletPatternProps> = ({ bulletPatternDefin
                 uniforms: ["worldView", "worldViewProjection", "view", "projection", "direction", "cameraPosition"],
             }
         );
+        material.setTexture("positionSampler", _startPositionsState);
+        material.setTexture("velocitySampler", _startVelocitiesState);
+        material.setTexture("collisionSampler", _startCollisionsState);
+        material.setFloat("timeSinceStart", timeSinceStart.current);
 
-        makeInstances(mesh, bulletPatternDefinition.initialPositions.asset.generator.count);
+        makeInstances(mesh, bulletPatternAsset.initialPositions.generator.count);
 
         mesh.material = material;
 
         setMaterial(material);
-    }, [bulletMaterialAsset, bulletPatternDefinition.initialPositions.asset.generator.count, mesh, scene]);
+    }, [
+        _startCollisionsState,
+        _startPositionsState,
+        _startVelocitiesState,
+        bulletMaterialAsset,
+        bulletPatternAsset.initialPositions.generator.count,
+        mesh,
+        scene,
+    ]);
 
     useDeltaBeforeRender((scene, deltaS) => {
         if (!differentialPositionVelocityCollisionSystem) return;
         if (!material) return;
+        timeSinceStart.current += deltaS;
         const updateResult = differentialPositionVelocityCollisionSystem.update(deltaS, (texture) => {
             texture.setFloat("timeSinceStart", timeSinceStart.current);
         });
@@ -209,17 +198,18 @@ export const BulletPattern: React.FC<BulletPatternProps> = ({ bulletPatternDefin
     });
 
     useEffect(() => {
+        const oldDiffSystem = differentialPositionVelocityCollisionSystem;
         return () => {
-            if (differentialPositionVelocityCollisionSystem) differentialPositionVelocityCollisionSystem.dispose();
-            if (material) material.dispose();
+            if (oldDiffSystem) oldDiffSystem.dispose();
         };
-    }, [differentialPositionVelocityCollisionSystem, material]);
+    }, [differentialPositionVelocityCollisionSystem]);
 
-    return (
-        <MeshFromAssetDefinition
-            onMeshLoaded={setRootNodes}
-            name=""
-            assetDefinition={bulletPatternDefinition.mesh.asset}
-        />
-    );
+    useEffect(() => {
+        const oldMaterial = material;
+        return () => {
+            if (oldMaterial) oldMaterial.dispose();
+        };
+    }, [material]);
+
+    return <MeshFromAssetDefinition onMeshLoaded={setRootNodes} name="" assetDefinition={bulletPatternAsset.mesh} />;
 };

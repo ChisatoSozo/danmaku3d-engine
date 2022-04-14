@@ -1,5 +1,5 @@
 import { Matrix, Mesh, Quaternion, TransformNode, Vector3 } from "@babylonjs/core";
-import { MAX_BOMBS, MAX_BULLETS_PER_GROUP } from "./EngineConstants";
+import { MAX_BULLETS_PER_GROUP } from "./EngineConstants";
 
 export const glsl = (template: TemplateStringsArray, ...args: (string | number)[]) => {
     let str = "";
@@ -14,71 +14,73 @@ type PixelShaderType = "position" | "velocity";
 const uniforms = glsl`
     uniform vec2 resolution;
     uniform float delta;
-    uniform float timeSinceStart;
-    uniform float warningTime;  
+    uniform float timeSinceStart; 
     uniform sampler2D positionSampler;
     uniform sampler2D velocitySampler;
     uniform sampler2D collisionSampler;
     uniform sampler2D initialPositionSampler;
     uniform sampler2D initialVelocitySampler;
     uniform sampler2D timingsSampler;
-    uniform sampler2D endTimingsSampler;
-
-    uniform float bulletRadius;
-    uniform float bombPositions[${MAX_BOMBS * 3}];
-    uniform float bombRadii[${MAX_BOMBS}];
-    uniform vec3 bulletTypePack1;
-    uniform vec3 bulletTypePack2;
-    uniform vec3 playerPosition;
-    uniform vec3 arenaMin;
-    uniform vec3 arenaMax;
 `;
 
-export const constructPixelShader = (main: string, type: PixelShaderType) => {
+export type BulletPhase = {
+    at: number;
+    initializationFunction: string;
+    updateFunction: string;
+};
+
+export const constructPixelShader = (phases: BulletPhase[], type: PixelShaderType) => {
     return glsl`
     ${uniforms}
     void main() {
         vec2 uv = gl_FragCoord.xy / resolution.xy;
         float id = (gl_FragCoord.x - 0.5) + ((gl_FragCoord.y - 0.5) * resolution.x);
-        vec4 timingPosition = texture2D( timingsSampler, uv );
-        
-        vec3 initialPosition = texture2D( initialPositionSampler, uv ).xyz;
-        vec3 position = texture2D( positionSampler, uv ).xyz;
-        vec4 initialVelocity = texture2D( initialVelocitySampler, uv );
-        vec4 currentVelocity = texture2D( velocitySampler, uv );
-        
-        vec4 collision = texture2D( collisionSampler, uv );
-        float timing = timingPosition.w;
-        mat4 parentRotationMatrix = (mat4(1.0) * (1.0 - rotationFromParent)) + (parentRotation * rotationFromParent);
-        initialPosition = initialPosition * mat3(parentRotationMatrix) + translationFromParent * parentPosition;
-        initialVelocity = initialVelocity * parentRotationMatrix;
-        float dTiming = timeSinceStart - timing;
-        float shouldAssignInitialStates = float(dTiming > 0.) * (1. - currentVelocity.w);
-        float shouldPositionReset = float(dTiming > 0. && dTiming < warningTime) * float(parentPosition != vec3(0.,0.,0.));
-        position = mix(position, initialPosition, shouldPositionReset);
-        currentVelocity = mix(currentVelocity, initialVelocity, shouldAssignInitialStates);
-        vec3 velocity = currentVelocity.xyz;
-        float velocityW = currentVelocity.w;
-        vec3 startPosition = position;
-        vec3 startVelocity = velocity;
-        vec3 updatedValue = vec3(1.0, 1.0, 1.0);
 
-        ${main}
+        vec4 positionWithW = texture2D(positionSampler, uv);
+        vec4 velocityWithW = texture2D(velocitySampler, uv);
+        vec4 collisionWithW = texture2D(collisionSampler, uv);
+        vec4 initialPositionWithW = texture2D(initialPositionSampler, uv);
+        vec4 initialVelocityWithW = texture2D(initialVelocitySampler, uv);
+        float startTime = texture2D(timingsSampler, uv).x;
 
-        ${
-            type === "position"
-                ? glsl`
-            float collidedWithAnything = clamp(collision.w, 0.0, 1.0);
-            float noCollision = 1. - collidedWithAnything;
-            updatedValue = (collidedWithAnything * vec3(-510., -510., -510.)) + (noCollision * updatedValue);
+        vec3 position = positionWithW.xyz;
+        vec3 velocity = velocityWithW.xyz;
+        float collision = collisionWithW.w;
+        vec3 initialPosition = initialPositionWithW.xyz;
+        vec3 initialVelocity = initialVelocityWithW.xyz;
 
-            gl_FragColor = vec4(updatedValue, 1.0);
-        `
-                : glsl`
-            gl_FragColor = vec4(updatedValue, velocityW);
-        `
+        vec3 updatedValue = vec3(0.);
+
+        ${type === "position" ? glsl`float phaseState = positionWithW.w;` : glsl`float phaseState = velocityWithW.w;`}
+
+        if(phaseState == 0. && ${phases[0].at / 1000}. > timeSinceStart + startTime) {
+            gl_FragColor = vec4(0.0001, 0.0001, 0.0001, 0.0001);
         }
-        
+        else{
+            ${phases
+                .map((phase, i) => {
+                    return glsl`
+                    if(phaseState == ${i * 2 + 1}.) {
+                        ${phase.updateFunction}
+                        ${
+                            phases[i + 1]
+                                ? glsl`if(timeSinceStart + startTime > ${phases[i + 1].at / 1000}.) {
+                            phaseState = ${i * 2 + 2}.;
+                        }`
+                                : glsl``
+                        }
+                        
+                    }
+                    if(phaseState == ${i * 2}.) {
+                        ${phase.initializationFunction}
+                        phaseState = ${i * 2 + 1}.;
+                    }
+                `;
+                })
+                .join("\n")}
+    
+            gl_FragColor = vec4(updatedValue, phaseState);
+        }
     }
 `;
 };

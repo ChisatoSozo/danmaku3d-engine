@@ -1,0 +1,120 @@
+{
+    "parented": false,
+    "downsampleCollisions": true,
+    "material": { "isAsset": true, "type": "glsl", "shaderType": "fragment", "url": "fresnel.fs" },
+    "mesh": { "isAsset": true, "type": "mesh", "url": "sphere.glb" },
+    "_startPositionsState": { "isAsset": true, "type": "vector", "generator": { "type": "blank", "count": 100 } },
+    "_startVelocitiesState": { "isAsset": true, "type": "vector", "generator": { "type": "blank", "count": 100 } },
+    "_startCollisionsState": { "isAsset": true, "type": "vector", "generator": { "type": "blank", "count": 100 } },
+    "initialPositions": {
+        "isAsset": true,
+        "type": "vector",
+        "generator": {
+            "type": "burst",
+            "count": 100,
+            "radius": 1,
+            "startTheta": 0,
+            "thetaLength": 6.283185307179586,
+            "startY": 1,
+            "yLength": 2
+        }
+    },
+    "initialVelocities": {
+        "isAsset": true,
+        "type": "vector",
+        "generator": {
+            "type": "burst",
+            "count": 100,
+            "radius": 5,
+            "startTheta": 0,
+            "thetaLength": 6.283185307179586,
+            "startY": 1,
+            "yLength": 2
+        }
+    },
+    "timings": { "isAsset": true, "type": "timing", "generator": { "type": "uniform", "count": 100, "time": 0 } },
+    "phases": [
+        {
+            "at": 0,
+            "positionInitializationGLSL": {
+                "isAsset": true,
+                "type": "glsl",
+                "shaderType": "pixel",
+                "url": "initializePosition.glsl"
+            },
+            "velocityInitializationGLSL": {
+                "isAsset": true,
+                "type": "glsl",
+                "shaderType": "pixel",
+                "url": "initializeVelocity.glsl"
+            },
+            "positionUpdateGLSL": {
+                "isAsset": true,
+                "type": "glsl",
+                "shaderType": "pixel",
+                "url": "linearPosition.glsl"
+            },
+            "velocityUpdateGLSL": {
+                "isAsset": true,
+                "type": "glsl",
+                "shaderType": "pixel",
+                "url": "linearVelocity.glsl"
+            }
+        },
+        {
+            "at": 2000,
+            "positionInitializationGLSL": {
+                "isAsset": true,
+                "type": "glsl",
+                "shaderType": "pixel",
+                "url": "identityPosition.glsl"
+            },
+            "velocityInitializationGLSL": {
+                "isAsset": true,
+                "type": "glsl",
+                "shaderType": "pixel",
+                "url": "identityVelocity.glsl"
+            },
+            "positionUpdateGLSL": {
+                "isAsset": true,
+                "type": "glsl",
+                "shaderType": "pixel",
+                "url": "linearPosition.glsl"
+            },
+            "velocityUpdateGLSL": {
+                "isAsset": true,
+                "type": "glsl",
+                "shaderType": "pixel",
+                "url": "noVelocity.glsl"
+            }
+        },
+        {
+            "at": 4000,
+            "positionInitializationGLSL": {
+                "isAsset": true,
+                "type": "glsl",
+                "shaderType": "pixel",
+                "url": "identityPosition.glsl"
+            },
+            "velocityInitializationGLSL": {
+                "isAsset": true,
+                "type": "glsl",
+                "shaderType": "pixel",
+                "url": "identityVelocity.glsl"
+            },
+            "positionUpdateGLSL": {
+                "isAsset": true,
+                "type": "glsl",
+                "shaderType": "pixel",
+                "url": "linearPosition.glsl"
+            },
+            "velocityUpdateGLSL": {
+                "isAsset": true,
+                "type": "glsl",
+                "shaderType": "pixel",
+                "url": "acceleratingWithRespectToInitialVelocity.glsl"
+            }
+        }
+    ],
+    "collisionFunctionGLSL": { "isAsset": true, "type": "glsl", "shaderType": "pixel", "url": "collision.glsl" }
+}

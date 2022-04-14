@@ -7,6 +7,9 @@ import { assetHost } from "../utils/Utils";
 export const hashGLSL = (glslAssetDefinition: GLSLAssetDefinition) => {
     return glslAssetDefinition.url + glslAssetDefinition.shaderType;
 };
+export const manualHashGLSL = (name: string, shaderType: ShaderType) => {
+    return name + shaderType;
+};
 export const glslLoaded = (assetDefinition: GLSLAssetDefinition, assets: Assets) => {
     const hash = hashGLSL(assetDefinition);
     if (assets.glsl[hash]) {
@@ -34,10 +37,19 @@ export const loadGLSL = async (
     const response = await fetch(URI);
     if (!response.ok) throw new Error(`Failed to load ${URI}: ${response.statusText}`);
     const glsl = await response.text();
-    const shaderName = assetDefinition.url.replaceAll(".", "") + shaderTypeToSuffixMap[assetDefinition.shaderType];
-    assets.glsl[hash] = shaderName;
+    const shaderName = hash + shaderTypeToSuffixMap[assetDefinition.shaderType];
+    assets.glsl[hash] = hash;
     Effect.ShadersStore[shaderName] = glsl;
     assetDefinition.hash = hash;
+};
+
+export const manualLoadGLSL = (glslName: string, glslContent: string, shaderType: ShaderType, assets: Assets) => {
+    const hash = manualHashGLSL(glslName, shaderType);
+    const glsl = glslContent;
+    const shaderName = hash + shaderTypeToSuffixMap[shaderType];
+    assets.glsl[hash] = hash;
+    Effect.ShadersStore[shaderName] = glsl;
+    return hash;
 };
 
 export const useGLSLAsset = (assetDefinition: GLSLAssetDefinition) => {

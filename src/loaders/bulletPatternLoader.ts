@@ -1,11 +1,10 @@
-import { Scene } from "@babylonjs/core";
+import { Effect, Scene } from "@babylonjs/core";
 import hash from "object-hash";
 import { getAsset, useAssets } from "../hooks/useAsset";
 import { Assets, BulletPatternAsset } from "../types/Assets";
-import { BulletPatternAssetDefinition } from "../types/gameDefinition/AssetDefinition";
-import { hashGLSL } from "./glslLoader";
-import { hashTiming } from "./timingsLoader";
-import { hashVector } from "./vectorLoader";
+import { BulletPatternAssetDefinition, GLSLAssetDefinition } from "../types/gameDefinition/AssetDefinition";
+import { BulletPhase, constructPixelShader } from "../utils/BabylonUtils";
+import { manualLoadGLSL } from "./glslLoader";
 
 export const hashBulletPattern = (bulletPatternAssetDefinition: BulletPatternAssetDefinition) => {
     return hash(bulletPatternAssetDefinition);
@@ -20,6 +19,18 @@ export const bulletPatternLoaded = (assetDefinition: BulletPatternAssetDefinitio
     return false;
 };
 
+const glslAssetDefinitionToContent = (glslAssetDefinition: GLSLAssetDefinition, assets: Assets) => {
+    const hash = glslAssetDefinition.hash;
+    if (!hash) throw new Error("glslAssetDefinitionToContent: hash is undefined");
+
+    const glslAsset = assets.glsl[hash];
+    if (!glslAsset) throw new Error("glslAssetDefinitionToContent: glslAsset is undefined");
+
+    const shaderContent = Effect.ShadersStore[glslAsset + "PixelShader"];
+    if (!shaderContent) throw new Error("glslAssetDefinitionToContent: shaderContent is undefined");
+    return shaderContent;
+};
+
 export const loadBulletPattern = async (
     gameDefinitionName: string,
     assetDefinition: BulletPatternAssetDefinition,
@@ -29,16 +40,58 @@ export const loadBulletPattern = async (
     const hash = hashBulletPattern(assetDefinition);
 
     const patternDefinition = assetDefinition.pattern;
+
+    const positionPhases = patternDefinition.phases.map((phase): BulletPhase => {
+        const at = phase.at;
+        const positionInitializationGLSL = glslAssetDefinitionToContent(phase.positionInitializationGLSL, assets);
+        const positionUpdateGLSL = glslAssetDefinitionToContent(phase.positionUpdateGLSL, assets);
+
+        return {
+            at,
+            initializationFunction: positionInitializationGLSL,
+            updateFunction: positionUpdateGLSL,
+        };
+    });
+
+    const velocityPhases = patternDefinition.phases.map((phase): BulletPhase => {
+        const at = phase.at;
+        const velocityInitializationGLSL = glslAssetDefinitionToContent(phase.velocityInitializationGLSL, assets);
+        const velocityUpdateGLSL = glslAssetDefinitionToContent(phase.velocityUpdateGLSL, assets);
+
+        return {
+            at,
+            initializationFunction: velocityInitializationGLSL,
+            updateFunction: velocityUpdateGLSL,
+        };
+    });
+
+    const positionFunctionGLSL = constructPixelShader(positionPhases, "position");
+    const velocityFunctionGLSL = constructPixelShader(velocityPhases, "velocity");
+
+    console.log(positionFunctionGLSL, velocityFunctionGLSL);
+
+    const positionFunctionGLSLName = hash + "PositionFunction";
+    const velocityFunctionGLSLName = hash + "VelocityFunction";
+
+    const positionFunctionGLSLHash = manualLoadGLSL(positionFunctionGLSLName, positionFunctionGLSL, "pixel", assets);
+    const velocityFunctionGLSLHash = manualLoadGLSL(velocityFunctionGLSLName, velocityFunctionGLSL, "pixel", assets);
+
     const bulletPattern: BulletPatternAsset = {
-        startPositionsStateHash: hashVector(patternDefinition._startPositionsState.asset),
-        startVelocitiesStateHash: hashVector(patternDefinition._startVelocitiesState.asset),
-        initialPositionsHash: hashVector(patternDefinition.initialPositions.asset),
-        initialVelocitiesHash: hashVector(patternDefinition.initialVelocities.asset),
-        initialCollisionsHash: hashVector(patternDefinition._initialCollisions.asset),
-        timingsHash: hashTiming(patternDefinition.timings.asset),
-        positionFunctionGLSLHash: hashGLSL(patternDefinition.positionFunctionGLSL.asset),
-        velocityFunctionGLSLHash: hashGLSL(patternDefinition.velocityFunctionGLSL.asset),
-        collisionFunctionGLSLHash: hashGLSL(patternDefinition.collisionFunctionGLSL.asset),
+        ...patternDefinition,
+        positionFunctionGLSL: {
+            isAsset: true,
+            hash: positionFunctionGLSLHash,
+            type: "glsl",
+            shaderType: "pixel",
+            url: "",
+        },
+        velocityFunctionGLSL: {
+            isAsset: true,
+            hash: velocityFunctionGLSLHash,
+            type: "glsl",
+            shaderType: "pixel",
+            url: "",
+        },
     };
 
     assets.bulletPatterns[hash] = bulletPattern;
@@ -47,10 +100,10 @@ export const loadBulletPattern = async (
 
 export const useBulletPatternAsset = (assetDefinition: BulletPatternAssetDefinition) => {
     const assets = useAssets();
-    return getAsset(assets, assetDefinition) as string;
+    return getAsset(assets, assetDefinition) as BulletPatternAsset;
 };
 
 export const useBulletPatternAssetArray = (assetDefinitions: BulletPatternAssetDefinition[]) => {
     const assets = useAssets();
-    return assetDefinitions.map((assetDefinition) => getAsset(assets, assetDefinition)) as string[];
+    return assetDefinitions.map((assetDefinition) => getAsset(assets, assetDefinition)) as BulletPatternAsset[];
 };

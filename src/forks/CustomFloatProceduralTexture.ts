@@ -1,6 +1,7 @@
 import {
     Color3,
     Color4,
+    Effect,
     Logger,
     Nullable,
     ProceduralTexture,
@@ -62,6 +63,9 @@ export class CustomFloatProceduralTexture extends ProceduralTexture {
         textureType?: number
     ) {
         super(name, size, null, scene, fallbackTexture, generateMipMaps, isCube, textureType);
+        if (!Effect.ShadersStore[texturePath + "PixelShader"]) {
+            throw new Error("No shader loaded under " + texturePath + "PixelShader");
+        }
         this._texturePath = texturePath;
         this.sleep = false;
 
@@ -199,7 +203,7 @@ export class CustomFloatProceduralTexture extends ProceduralTexture {
     }
 
     public readPixels(): Nullable<ArrayBufferView> {
-        throw new Error("Not implemented");
+        return super.readPixels();
     }
 
     //@ts-ignore

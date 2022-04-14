@@ -1,5 +1,4 @@
 import {
-    AssetContainer,
     GLSLAssetDefinition,
     makeBlankVectorAssetDefinition,
     makeGLSLAssetDefinition,
@@ -45,59 +44,47 @@ export type UniformTimingGenerator = {
 export type TimingGenerator = UniformTimingGenerator;
 
 export type BulletPatternDefinition = {
+    _startPositionsState: VectorAssetDefinition;
+    _startVelocitiesState: VectorAssetDefinition;
+    _startCollisionsState: VectorAssetDefinition;
+
     parented: boolean;
     downsampleCollisions: boolean;
-    material: AssetContainer<GLSLAssetDefinition>;
-    mesh: AssetContainer<MeshAssetDefinition>;
-    _startPositionsState: AssetContainer<VectorAssetDefinition>;
-    _startVelocitiesState: AssetContainer<VectorAssetDefinition>;
-    initialPositions: AssetContainer<VectorAssetDefinition>;
-    initialVelocities: AssetContainer<VectorAssetDefinition>;
-    _initialCollisions: AssetContainer<VectorAssetDefinition>;
-    timings: AssetContainer<TimingAssetDefinition>;
-    endTimings: AssetContainer<TimingAssetDefinition>;
-    positionFunctionGLSL: AssetContainer<GLSLAssetDefinition>;
-    velocityFunctionGLSL: AssetContainer<GLSLAssetDefinition>;
-    collisionFunctionGLSL: AssetContainer<GLSLAssetDefinition>;
+    material: GLSLAssetDefinition;
+    mesh: MeshAssetDefinition;
+    initialPositions: VectorAssetDefinition;
+    initialVelocities: VectorAssetDefinition;
+    timings: TimingAssetDefinition;
+
+    phases: {
+        at: number;
+        positionInitializationGLSL: GLSLAssetDefinition;
+        velocityInitializationGLSL: GLSLAssetDefinition;
+        positionUpdateGLSL: GLSLAssetDefinition;
+        velocityUpdateGLSL: GLSLAssetDefinition;
+    }[];
+    collisionFunctionGLSL: GLSLAssetDefinition;
 };
 
 export const makeBulletPatternDefinition = (): BulletPatternDefinition => ({
     parented: false,
     downsampleCollisions: true,
-    material: {
-        asset: makeGLSLAssetDefinition("fresnel.fs", "fragment"),
-    },
-    mesh: {
-        asset: makeMeshAssetDefinition(),
-    },
-    _startPositionsState: {
-        asset: makeBlankVectorAssetDefinition(),
-    },
-    _startVelocitiesState: {
-        asset: makeBlankVectorAssetDefinition(),
-    },
-    initialPositions: {
-        asset: makeVectorAssetDefinition(),
-    },
-    initialVelocities: {
-        asset: makeVectorAssetDefinition(),
-    },
-    _initialCollisions: {
-        asset: makeBlankVectorAssetDefinition(),
-    },
-    timings: {
-        asset: makeTimingAssetDefinition(0),
-    },
-    endTimings: {
-        asset: makeTimingAssetDefinition(10000),
-    },
-    positionFunctionGLSL: {
-        asset: makeGLSLAssetDefinition("linearPosition.glsl", "pixel"),
-    },
-    velocityFunctionGLSL: {
-        asset: makeGLSLAssetDefinition("linearVelocity.glsl", "pixel"),
-    },
-    collisionFunctionGLSL: {
-        asset: makeGLSLAssetDefinition("collision.glsl", "pixel"),
-    },
+    material: makeGLSLAssetDefinition("fresnel.fs", "fragment"),
+    mesh: makeMeshAssetDefinition(),
+    _startPositionsState: makeBlankVectorAssetDefinition(),
+    _startVelocitiesState: makeBlankVectorAssetDefinition(),
+    _startCollisionsState: makeBlankVectorAssetDefinition(),
+    initialPositions: makeVectorAssetDefinition(),
+    initialVelocities: makeVectorAssetDefinition(),
+    timings: makeTimingAssetDefinition(0),
+    phases: [
+        {
+            at: 0,
+            positionInitializationGLSL: makeGLSLAssetDefinition("initializePosition.glsl", "pixel"),
+            velocityInitializationGLSL: makeGLSLAssetDefinition("initializeVelocity.glsl", "pixel"),
+            positionUpdateGLSL: makeGLSLAssetDefinition("linearPosition.glsl", "pixel"),
+            velocityUpdateGLSL: makeGLSLAssetDefinition("linearVelocity.glsl", "pixel"),
+        },
+    ],
+    collisionFunctionGLSL: makeGLSLAssetDefinition("collision.glsl", "pixel"),
 });
