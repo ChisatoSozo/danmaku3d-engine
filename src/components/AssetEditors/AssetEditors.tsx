@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
 import { useEditor } from "../../containers/EditorContainer";
 import { AssetType } from "../../types/gameDefinition/AssetDefinition";
 import { BulletPatternDefinition } from "../../types/gameDefinition/BulletPatternDefinition";
@@ -20,7 +20,27 @@ interface AssetEditorsProps {
 
 export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setGameDefinition }) => {
     const { setSelectedDetails, setOverrideGameDefinition, gameDefinitionName } = useEditor();
-    const [currentAsset, setCurrentAsset] = useState<ViewableAsset>();
+    const [currentAssets, setCurrentAssets] = useState<ViewableAsset[]>([]);
+
+    const currentAsset = useMemo(
+        () => (currentAssets.length ? currentAssets[currentAssets.length - 1] : undefined),
+        [currentAssets]
+    );
+    const setCurrentAsset = useCallback((asset: ViewableAsset | undefined) => {
+        if (!asset) {
+            setCurrentAssets((currentAssets) => {
+                if (!currentAssets.length) return currentAssets;
+                const newAssets = [...currentAssets];
+                newAssets.pop();
+                return newAssets;
+            });
+        } else {
+            setCurrentAssets((currentAssets) => {
+                const newAssets = [...currentAssets].filter((a) => a.assetType !== asset.assetType);
+                return [...newAssets, asset];
+            });
+        }
+    }, []);
 
     useEffect(() => {
         if (!setOverrideGameDefinition) return;

@@ -5,7 +5,7 @@ import { useInterval } from "../../hooks/useInterval";
 import { BulletPatternDefinition } from "../../types/gameDefinition/BulletPatternDefinition";
 import gameDefinitionSchema from "../../types/gameDefinition/GameDefinition.json";
 import { MAX_BULLETS_PER_GROUP } from "../../utils/EngineConstants";
-import { uploadFile } from "../../utils/Utils";
+import { uploadJSON } from "../../utils/Utils";
 import { Category } from "../Category";
 import { FormFromType } from "../FormFromType/FormFromType";
 import { LabeledField } from "../FormFromType/LabeledField";
@@ -61,7 +61,7 @@ export const BulletPatternDetails: React.FC<BulletPatternDetailsProps> = ({
 
     const tryUploadBulletPattern = useCallback(() => {
         if (!updatedBulletPattern) return;
-        uploadFile(fileName, "bulletPattern", gameDefinitionName, updatedBulletPattern).then(() => {
+        uploadJSON(fileName, "bulletPattern", gameDefinitionName, updatedBulletPattern).then(() => {
             reloadAsset(fileName);
         });
         setUpdatedBulletPattern(undefined);

@@ -21,12 +21,13 @@ export const findAndLoadAssetDefinitions = async (
     setStatus: (status: string) => void,
     debug = false
 ) => {
+    let anyUpdated = false;
     await traverseJsonAsync(parentDefinition, async (element, key) => {
         if (element.isAsset) {
             const assetDefinition = element as AnyAssetDefinition;
             switch (assetDefinition.type) {
                 case "sound":
-                    if (soundLoaded(assetDefinition, assets) || assetDefinition.url === assetToReload) {
+                    if (soundLoaded(assetDefinition, assets) && assetDefinition.url !== assetToReload) {
                         if (debug) console.log(`sound ${assetDefinition.url} already loaded`);
                         break;
                     }
@@ -35,58 +36,71 @@ export const findAndLoadAssetDefinitions = async (
                         console.log(`loading sound ${assetDefinition.url}`);
                     }
                     await loadSound(gameDefinitionName, assetDefinition, scene, assets);
+                    anyUpdated = true;
                     break;
                 case "mesh":
-                    if (meshLoaded(assetDefinition, assets) || assetDefinition.url === assetToReload) {
+                    if (meshLoaded(assetDefinition, assets) && assetDefinition.url !== assetToReload) {
                         if (debug) console.log(`mesh ${assetDefinition.url} already loaded`);
                         break;
                     }
-                    if (meshLoaded(assetDefinition, assets) || assetDefinition.url === assetToReload) break;
                     setStatus(`loading mesh ${assetDefinition.url}`);
                     if (debug) {
                         console.log(`loading mesh ${assetDefinition.url}`);
                     }
                     await loadMesh(gameDefinitionName, assetDefinition, scene, assets);
+                    anyUpdated = true;
                     break;
                 case "glsl":
-                    if (glslLoaded(assetDefinition, assets) || assetDefinition.url === assetToReload) {
+                    if (glslLoaded(assetDefinition, assets) && assetDefinition.url !== assetToReload) {
                         if (debug) console.log(`glsl ${assetDefinition.url} already loaded`);
                         break;
                     }
-                    if (glslLoaded(assetDefinition, assets) || assetDefinition.url === assetToReload) break;
                     setStatus(`loading glsl ${assetDefinition.url}`);
                     if (debug) {
                         console.log(`loading glsl ${assetDefinition.url}`);
                     }
                     await loadGLSL(gameDefinitionName, assetDefinition, scene, assets);
+                    anyUpdated = true;
                     break;
                 case "vector":
                     if (vectorLoaded(assetDefinition, assets)) {
                         if (debug) console.log(`vector ${JSON.stringify(assetDefinition.generator)} already loaded`);
                         break;
                     }
-                    if (vectorLoaded(assetDefinition, assets)) break;
                     setStatus(`loading vector ${assetDefinition.type}`);
                     if (debug) {
                         console.log(`loading vector ${assetDefinition.type}`);
                     }
                     await loadVector(gameDefinitionName, assetDefinition, scene, assets);
+                    anyUpdated = true;
                     break;
                 case "timing":
                     if (timingLoaded(assetDefinition, assets)) {
                         if (debug) console.log(`timing ${JSON.stringify(assetDefinition.generator)} already loaded`);
                         break;
                     }
-                    if (timingLoaded(assetDefinition, assets)) break;
                     setStatus(`loading timing ${assetDefinition.type}`);
                     if (debug) {
                         console.log(`loading timing ${assetDefinition.type}`);
                     }
                     await loadTiming(gameDefinitionName, assetDefinition, scene, assets);
+                    anyUpdated = true;
                     break;
                 case "bulletPattern":
-                    if (bulletPatternLoaded(assetDefinition, assets) || assetDefinition.url === assetToReload) {
-                        if (debug) console.log(`bulletPattern ${assetDefinition.url} already loaded`);
+                    if (
+                        (await bulletPatternLoaded(
+                            gameDefinitionName,
+                            assetDefinition,
+                            scene,
+                            assets,
+                            assetToReload,
+                            setStatus
+                        )) &&
+                        assetDefinition.url !== assetToReload
+                    ) {
+                        if (debug) {
+                            console.log(`bulletPattern ${assetDefinition.url} already loaded`);
+                        }
                         break;
                     }
                     setStatus(`loading bullet pattern ${assetDefinition.url}`);
@@ -94,12 +108,14 @@ export const findAndLoadAssetDefinitions = async (
                         console.log(`loading bullet pattern ${assetDefinition.url}`);
                     }
                     await loadBulletPattern(gameDefinitionName, assetDefinition, scene, assets, setStatus);
+                    anyUpdated = true;
                     break;
                 default:
                     break;
             }
         }
     });
+    return anyUpdated;
 };
 
 export const useLoadGame = (

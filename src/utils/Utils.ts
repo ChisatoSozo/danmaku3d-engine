@@ -7,10 +7,26 @@ export const assertNever = (shouldBeNever: never) => {
     throw new Error("Was not never: " + JSON.stringify(shouldBeNever));
 };
 
-export const uploadFile = async (fileName: string, fileType: AssetType, gameDefinitionName: string, object: {}) => {
+export const uploadJSON = async (fileName: string, fileType: AssetType, gameDefinitionName: string, object: {}) => {
     const formData = new FormData();
     const json = JSON.stringify(object);
     const blob = new Blob([json], { type: "text/json" });
+
+    const assetFileIndex = assetTypeToAssetFileMap[fileType];
+    if (!assetFileIndex) throw new Error("No asset file map for asset type: " + fileType);
+
+    formData.append("file", blob, fileName);
+    formData.append("type", fileType);
+    formData.append("gameDefinitionName", gameDefinitionName);
+    await fetch(`${assetHost}upload-asset`, {
+        method: "POST",
+        body: formData,
+    });
+};
+
+export const uploadText = async (fileName: string, fileType: AssetType, gameDefinitionName: string, text: string) => {
+    const formData = new FormData();
+    const blob = new Blob([text], { type: "text/plain" });
 
     const assetFileIndex = assetTypeToAssetFileMap[fileType];
     if (!assetFileIndex) throw new Error("No asset file map for asset type: " + fileType);

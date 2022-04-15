@@ -1,11 +1,11 @@
-import { Dispatch, SetStateAction, useCallback } from "react";
+import { useCallback } from "react";
 import { AssetType } from "../../types/gameDefinition/AssetDefinition";
 import { ViewableAsset } from "./AssetEditors";
 
 interface AssetElementProps {
     assetURL: string;
     assetType: AssetType;
-    setCurrentAsset: Dispatch<SetStateAction<ViewableAsset | undefined>>;
+    setCurrentAsset: (asset: ViewableAsset | undefined) => void;
 }
 
 export const AssetElement: React.FC<AssetElementProps> = ({ assetURL, assetType, setCurrentAsset }) => {

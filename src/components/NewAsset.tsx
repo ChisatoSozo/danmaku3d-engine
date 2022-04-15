@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { assetTypeToAssetFileMap, useEditor } from "../containers/EditorContainer";
 import { AssetType } from "../types/gameDefinition/AssetDefinition";
 import { makeBulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
-import { uploadFile } from "../utils/Utils";
+import { uploadJSON } from "../utils/Utils";
 
 interface NewAssetProps {
     gameDefinitionName: string;
@@ -37,7 +37,7 @@ export const NewAsset: React.FC<NewAssetProps> = ({ gameDefinitionName, assetTyp
         const newFileName = findNewFileName(assetFiles[assetFileIndex], "newBulletPattern.json");
         const newAsset = newAssetGenerators[assetType](newFileName);
         setUploading(true);
-        await uploadFile(newFileName, assetType, gameDefinitionName, newAsset);
+        await uploadJSON(newFileName, assetType, gameDefinitionName, newAsset);
         refreshAssetFiles();
         setUploading(false);
     }, [assetFiles, assetType, gameDefinitionName, refreshAssetFiles]);

@@ -111,7 +111,7 @@ export const Game = () => {
                             target={Vector3.Zero()}
                             alpha={Math.PI / 2}
                             beta={Math.PI / 4}
-                            radius={500}
+                            radius={50}
                         />
                     )}
                 </Scene>

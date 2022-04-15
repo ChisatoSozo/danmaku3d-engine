@@ -9,14 +9,52 @@ import { BulletPhase, constructPixelShader } from "../utils/BabylonUtils";
 import { assetHost } from "../utils/Utils";
 import { manualLoadGLSL } from "./glslLoader";
 
-export const hashBulletPattern = (bulletPatternAssetDefinition: BulletPatternAssetDefinition) => {
-    return hash(bulletPatternAssetDefinition);
+const deepExcludeKeyFromObject = (obj: any, key: string) => {
+    const newObj = { ...obj };
+    delete newObj[key];
+
+    for (const k in newObj) {
+        if (newObj.hasOwnProperty(k)) {
+            if (typeof newObj[k] === "object") {
+                newObj[k] = deepExcludeKeyFromObject(newObj[k], key);
+            }
+        }
+    }
+
+    return newObj;
 };
-export const bulletPatternLoaded = (assetDefinition: BulletPatternAssetDefinition, assets: Assets) => {
+
+export const hashBulletPattern = (bulletPatternAssetDefinition: BulletPatternAssetDefinition) => {
+    const newBulletPatternAssetDefinition = deepExcludeKeyFromObject(bulletPatternAssetDefinition, "hash");
+    return hash(newBulletPatternAssetDefinition);
+};
+
+export const hashString = (str: string) => {
+    return hash({ str });
+};
+
+export const bulletPatternLoaded = async (
+    gameDefinitionName: string,
+    assetDefinition: BulletPatternAssetDefinition,
+    scene: Scene,
+    assets: Assets,
+    assetToReload: string | undefined,
+    setStatus: (status: string) => void
+) => {
     const hash = hashBulletPattern(assetDefinition);
     if (assets.bulletPatterns[hash]) {
         assetDefinition.hash = hash;
-        return true;
+        const URI = `${assetHost}${gameDefinitionName}/bulletPatterns/${assetDefinition.url}`;
+        const patternDefinition = (await fetch(URI).then((response) => response.json())) as BulletPatternDefinition;
+        const anyUpdated = await findAndLoadAssetDefinitions(
+            gameDefinitionName,
+            patternDefinition,
+            scene,
+            assets,
+            assetToReload,
+            setStatus
+        );
+        return !anyUpdated;
     }
 
     return false;
@@ -29,7 +67,7 @@ const glslAssetDefinitionToContent = (glslAssetDefinition: GLSLAssetDefinition, 
     const glslAsset = assets.glsl[hash];
     if (!glslAsset) throw new Error("glslAssetDefinitionToContent: glslAsset is undefined");
 
-    const shaderContent = Effect.ShadersStore[glslAsset + "PixelShader"];
+    const shaderContent = Effect.ShadersStore[glslAsset.shader + "PixelShader"];
     if (!shaderContent) throw new Error("glslAssetDefinitionToContent: shaderContent is undefined");
     return shaderContent;
 };
@@ -41,11 +79,11 @@ export const loadBulletPattern = async (
     assets: Assets,
     setStatus: (status: string) => void
 ) => {
-    const hash = hashBulletPattern(assetDefinition);
-
     const URI = `${assetHost}${gameDefinitionName}/bulletPatterns/${assetDefinition.url}`;
     const patternDefinition = (await fetch(URI).then((response) => response.json())) as BulletPatternDefinition;
     await findAndLoadAssetDefinitions(gameDefinitionName, patternDefinition, scene, assets, undefined, setStatus);
+
+    const hash = hashBulletPattern(assetDefinition);
 
     const positionPhases = patternDefinition.phases.map((phase): BulletPhase => {
         const at = phase.at;
@@ -74,8 +112,8 @@ export const loadBulletPattern = async (
     const positionFunctionGLSL = constructPixelShader(positionPhases, "position");
     const velocityFunctionGLSL = constructPixelShader(velocityPhases, "velocity");
 
-    const positionFunctionGLSLName = hash + "PositionFunction";
-    const velocityFunctionGLSLName = hash + "VelocityFunction";
+    const positionFunctionGLSLName = hashString(positionFunctionGLSL) + "PositionFunction";
+    const velocityFunctionGLSLName = hashString(velocityFunctionGLSL) + "VelocityFunction";
 
     const positionFunctionGLSLHash = manualLoadGLSL(positionFunctionGLSLName, positionFunctionGLSL, "pixel", assets);
     const velocityFunctionGLSLHash = manualLoadGLSL(velocityFunctionGLSLName, velocityFunctionGLSL, "pixel", assets);

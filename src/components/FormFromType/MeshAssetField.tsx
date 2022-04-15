@@ -15,11 +15,13 @@ export const MeshAssetField: React.FC<MeshAssetFieldProps> = ({ value, setValue 
 
     return (
         <select value={value.url} onChange={(e) => setMeshAssetUrl(e.target.value)}>
-            {meshAssets.map((url) => (
-                <option key={url} value={url}>
-                    {url}
-                </option>
-            ))}
+            {meshAssets.map((url) =>
+                url.endsWith(".json") ? null : (
+                    <option key={url} value={url}>
+                        {url}
+                    </option>
+                )
+            )}
         </select>
     );
 };

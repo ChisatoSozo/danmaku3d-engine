@@ -1,13 +1,13 @@
-import { Dispatch, SetStateAction } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import { ViewableAsset } from "./AssetEditors";
+import { GLSLViewer } from "./GLSLViewer";
 import { SoundViewer } from "./SoundViewer";
 import { TextureViewer } from "./TextureViewer";
 
 interface AssetViewerProps {
     gameDefinitionName: string;
     currentAsset: ViewableAsset;
-    setCurrentAsset: Dispatch<SetStateAction<ViewableAsset | undefined>>;
+    setCurrentAsset: (asset: ViewableAsset | undefined) => void;
 }
 
 export const AssetViewer: React.FC<AssetViewerProps> = ({ gameDefinitionName, currentAsset, setCurrentAsset }) => {
@@ -27,10 +27,33 @@ export const AssetViewer: React.FC<AssetViewerProps> = ({ gameDefinitionName, cu
             <div
                 style={{
                     position: "absolute",
+                    top: 1,
+                    right: 0,
+                    cursor: "pointer",
+                    zIndex: 999,
+                }}
+            >
+                <AiOutlineClose color="white" />
+            </div>
+            <div
+                style={{
+                    position: "absolute",
+                    top: -1,
+                    right: 0,
+                    cursor: "pointer",
+                    zIndex: 999,
+                }}
+            >
+                <AiOutlineClose color="white" />
+            </div>
+            <div
+                style={{
+                    position: "absolute",
                     top: 0,
                     right: 0,
                     cursor: "pointer",
                     pointerEvents: "all",
+                    zIndex: 1000,
                 }}
                 onClick={() => setCurrentAsset(undefined)}
             >
@@ -41,6 +64,9 @@ export const AssetViewer: React.FC<AssetViewerProps> = ({ gameDefinitionName, cu
             )}
             {currentAsset.assetType === "texture" && (
                 <TextureViewer gameDefinitionName={gameDefinitionName} url={currentAsset?.assetURL} />
+            )}
+            {currentAsset.assetType === "glsl" && (
+                <GLSLViewer gameDefinitionName={gameDefinitionName} url={currentAsset?.assetURL} />
             )}
         </div>
     );

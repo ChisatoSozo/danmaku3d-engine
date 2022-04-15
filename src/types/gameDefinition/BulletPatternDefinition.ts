@@ -51,6 +51,7 @@ export type BulletPatternDefinition = {
 
     parented: boolean;
     downsampleCollisions: boolean;
+    vertex: GLSLAssetDefinition;
     material: GLSLAssetDefinition;
     mesh: MeshAssetDefinition;
     initialPositions: VectorAssetDefinition;
@@ -71,6 +72,7 @@ export const makeBulletPatternDefinition = (refURL: string): BulletPatternDefini
     _url: refURL,
     parented: false,
     downsampleCollisions: true,
+    vertex: makeGLSLAssetDefinition("standardVertex.vs", "vertex"),
     material: makeGLSLAssetDefinition("fresnel.fs", "fragment"),
     mesh: makeMeshAssetDefinition(),
     _startPositionsState: makeBlankVectorAssetDefinition(),

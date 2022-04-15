@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from "react";
 import { useEditor } from "../../containers/EditorContainer";
 import { GameDefinition } from "../../types/gameDefinition/GameDefinition";
 import { Category } from "../Category";
@@ -11,7 +10,7 @@ interface AssetBrowserProps {
     gameDefinition: GameDefinition;
     gameDefinitionName: string;
     currentAsset: ViewableAsset | undefined;
-    setCurrentAsset: Dispatch<SetStateAction<ViewableAsset | undefined>>;
+    setCurrentAsset: (asset: ViewableAsset | undefined) => void;
 }
 
 export const AssetBrowser: React.FC<AssetBrowserProps> = ({

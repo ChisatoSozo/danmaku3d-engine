@@ -11,7 +11,7 @@ export const glsl = (template: TemplateStringsArray, ...args: (string | number)[
 
 type PixelShaderType = "position" | "velocity";
 
-const uniforms = glsl`
+export const uniforms = glsl`
     uniform vec2 resolution;
     uniform float delta;
     uniform float timeSinceStart; 
@@ -23,33 +23,56 @@ const uniforms = glsl`
     uniform sampler2D timingsSampler;
 `;
 
+export const processUniforms = glsl`
+    vec2 uv = gl_FragCoord.xy / resolution.xy;
+    float id = (gl_FragCoord.x - 0.5) + ((gl_FragCoord.y - 0.5) * resolution.x);
+
+    vec4 positionWithW = texture2D(positionSampler, uv);
+    vec4 velocityWithW = texture2D(velocitySampler, uv);
+    vec4 collisionWithW = texture2D(collisionSampler, uv);
+    vec4 initialPositionWithW = texture2D(initialPositionSampler, uv);
+    vec4 initialVelocityWithW = texture2D(initialVelocitySampler, uv);
+    float startTime = texture2D(timingsSampler, uv).x;
+
+    vec3 position = positionWithW.xyz;
+    vec3 velocity = velocityWithW.xyz;
+    float collision = collisionWithW.w;
+    vec3 initialPosition = initialPositionWithW.xyz;
+    vec3 initialVelocity = initialVelocityWithW.xyz;
+
+    vec3 updatedValue = vec3(0.);
+`;
+
+export const otherUniforms = glsl`
+    float startTime
+    vec3 position
+    vec3 velocity
+    float collision
+    vec3 initialPosition
+    vec3 initialVelocity
+`;
+
 export type BulletPhase = {
     at: number;
     initializationFunction: string;
     updateFunction: string;
 };
 
+export const lintConstructPixelShader = (body: string) => {
+    return glsl`
+    ${uniforms}
+    void main() {
+        ${processUniforms}
+        ${body}
+        gl_FragColor = vec4(updatedValue, 1.0);
+    }`;
+};
+
 export const constructPixelShader = (phases: BulletPhase[], type: PixelShaderType) => {
     return glsl`
     ${uniforms}
     void main() {
-        vec2 uv = gl_FragCoord.xy / resolution.xy;
-        float id = (gl_FragCoord.x - 0.5) + ((gl_FragCoord.y - 0.5) * resolution.x);
-
-        vec4 positionWithW = texture2D(positionSampler, uv);
-        vec4 velocityWithW = texture2D(velocitySampler, uv);
-        vec4 collisionWithW = texture2D(collisionSampler, uv);
-        vec4 initialPositionWithW = texture2D(initialPositionSampler, uv);
-        vec4 initialVelocityWithW = texture2D(initialVelocitySampler, uv);
-        float startTime = texture2D(timingsSampler, uv).x;
-
-        vec3 position = positionWithW.xyz;
-        vec3 velocity = velocityWithW.xyz;
-        float collision = collisionWithW.w;
-        vec3 initialPosition = initialPositionWithW.xyz;
-        vec3 initialVelocity = initialVelocityWithW.xyz;
-
-        vec3 updatedValue = vec3(0.);
+        ${processUniforms}
 
         ${type === "position" ? glsl`float phaseState = positionWithW.w;` : glsl`float phaseState = velocityWithW.w;`}
 

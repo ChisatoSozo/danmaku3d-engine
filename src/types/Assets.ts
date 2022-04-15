@@ -18,6 +18,10 @@ export type BulletPatternAsset = {
     velocityFunctionGLSL: GLSLAssetDefinition;
 } & BulletPatternDefinition;
 
+export type GLSLAsset = {
+    shader: string;
+};
+
 export interface Assets {
     sounds: { [key: string]: Sound };
     meshes: {
@@ -25,7 +29,7 @@ export interface Assets {
     };
     bulletPatterns: { [key: string]: BulletPatternAsset };
     textures: { [key: string]: Texture };
-    glsl: { [key: string]: string };
+    glsl: { [key: string]: GLSLAsset };
 }
 
 export const makeDefaultAssets = (): Assets => ({
