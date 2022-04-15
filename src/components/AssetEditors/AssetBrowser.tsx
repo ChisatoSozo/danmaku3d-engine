@@ -1,5 +1,6 @@
 import { useEditor } from "../../containers/EditorContainer";
 import { GameDefinition } from "../../types/gameDefinition/GameDefinition";
+import { theme } from "../../utils/theme";
 import { Category } from "../Category";
 import { NewAsset } from "../NewAsset";
 import { ViewableAsset } from "./AssetEditors";
@@ -26,7 +27,7 @@ export const AssetBrowser: React.FC<AssetBrowserProps> = ({
             style={{
                 width: "250px",
                 height: "100%",
-                backgroundColor: "rgba(0, 0, 255, 0.1)",
+                backgroundColor: theme.colors.background,
                 pointerEvents: "all",
                 paddingLeft: "10px",
             }}

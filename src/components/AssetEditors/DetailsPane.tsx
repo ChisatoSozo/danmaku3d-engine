@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 import { useEditor } from "../../containers/EditorContainer";
 import { GameDefinition } from "../../types/gameDefinition/GameDefinition";
+import { theme } from "../../utils/theme";
 import { GameDetails } from "../GameDetails";
 import { BulletPatternDetails } from "./BulletPatternDetails";
 import { PhaseDetails } from "./PhaseDetails";
@@ -19,7 +20,7 @@ export const DetailsPane: React.FC<DetailsPaneProps> = ({ gameDefinition, setGam
                 pointerEvents: "all",
                 width: "250px",
                 height: "100%",
-                backgroundColor: "rgba(0, 255, 255, 0.5)",
+                backgroundColor: theme.colors.background,
                 overflowY: "auto",
             }}
         >

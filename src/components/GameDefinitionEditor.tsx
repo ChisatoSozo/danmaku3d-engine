@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 import { EditorContainer } from "../containers/EditorContainer";
 import { GameDefinition } from "../types/gameDefinition/GameDefinition";
+import { theme } from "../utils/theme";
 import { AssetEditors } from "./AssetEditors/AssetEditors";
 import { GameDefinitionTimeline } from "./GameDefinitionTimeline";
 import { StagePhasePicker } from "./StagePhasePicker";
@@ -42,6 +43,7 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
         >
             <div
                 style={{
+                    color: theme.colors.text,
                     position: "relative",
                     width: "100vw",
                     height: "100vh",

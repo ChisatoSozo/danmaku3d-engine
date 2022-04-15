@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useEditor } from "../../containers/EditorContainer";
 import { useSave } from "../../hooks/useSave";
 import { lintConstructPixelShader, otherUniforms, uniforms } from "../../utils/BabylonUtils";
+import { theme } from "../../utils/theme";
 import { assetHost, uploadText } from "../../utils/Utils";
 
 interface GLSLViewerProps {
@@ -115,8 +116,7 @@ export const GLSLViewer: React.FC<GLSLViewerProps> = ({ gameDefinitionName, url 
                         height: "100%",
                         paddingLeft: 10,
                         marginTop: 0,
-                        color: "#aaaaaa",
-                        backgroundColor: "rgba(0, 0, 0, 0.95)",
+                        backgroundColor: theme.colors.codeBackground,
                     }}
                 >
                     {"\n"}
@@ -149,7 +149,7 @@ export const GLSLViewer: React.FC<GLSLViewerProps> = ({ gameDefinitionName, url 
                         placeholder="Please enter GLSL code."
                         onChange={(evn) => setGlsl(evn.target.value)}
                         style={{
-                            backgroundColor: "rgba(22, 27, 34, 0.95)",
+                            backgroundColor: theme.colors.codeBackground,
                             fontSize: 12,
                             fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
                             width: "100%",
@@ -162,7 +162,7 @@ export const GLSLViewer: React.FC<GLSLViewerProps> = ({ gameDefinitionName, url 
                     <div
                         style={{
                             width: "100%",
-                            backgroundColor: "#f44336d0",
+                            backgroundColor: theme.colors.errorBackground,
                             cursor: "pointer",
                             pointerEvents: "all",
                             fontSize: 12,
@@ -176,7 +176,7 @@ export const GLSLViewer: React.FC<GLSLViewerProps> = ({ gameDefinitionName, url 
                     <div
                         style={{
                             width: "100%",
-                            backgroundColor: "#ffa726d0",
+                            backgroundColor: theme.colors.noticeBackground,
                             cursor: "pointer",
                             pointerEvents: "all",
                         }}

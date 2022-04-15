@@ -3,6 +3,7 @@ import { BsGearFill } from "react-icons/bs";
 import { MdDelete } from "react-icons/md";
 import { useEditor } from "../containers/EditorContainer";
 import { GameDefinition, makePhaseDefinition, makeStageDefinition } from "../types/gameDefinition/GameDefinition";
+import { theme } from "../utils/theme";
 import { Category } from "./Category";
 
 export interface StagePhasePickerProps {
@@ -25,7 +26,7 @@ export const StagePhasePicker: React.FC<StagePhasePickerProps> = ({
     const { selectedDetails, setSelectedDetails } = useEditor();
 
     return (
-        <div style={{ pointerEvents: "all", padding: "10px" }}>
+        <div style={{ pointerEvents: "all", padding: "10px", backgroundColor: theme.colors.background }}>
             <button
                 style={{
                     cursor: "pointer",

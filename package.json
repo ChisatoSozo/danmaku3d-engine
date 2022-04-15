@@ -15,15 +15,20 @@
         "@types/react": "^17.0.41",
         "@types/react-dom": "^17.0.14",
         "@uiw/react-textarea-code-editor": "^2.0.1",
+        "chart.js": "^3.7.1",
+        "chartjs-plugin-dragdata": "^2.2.4",
+        "chartjs-plugin-zoom": "^1.2.1",
         "deep-object-diff": "^1.1.7",
         "glslx": "^0.2.13",
         "object-hash": "^3.0.0",
         "re-resizable": "^6.9.5",
         "react": "^17.0.2",
         "react-babylonjs": "^3.0.31",
+        "react-chartjs-2": "^3.0.3",
         "react-collapsible": "^2.8.4",
         "react-dom": "^17.0.2",
         "react-icons": "^4.3.1",
+        "react-resize-detector": "^7.0.0",
         "react-router-dom": "^6.2.2",
         "react-scripts": "5.0.0",
         "ts-json-schema-generator": "^1.0.0",
@@ -55,5 +60,8 @@
             "last 1 firefox version",
             "last 1 safari version"
         ]
+    },
+    "devDependencies": {
+        "@types/hammerjs": "^2.0.41"
     }
 }

@@ -1,6 +1,7 @@
 import { ReactElement, useState } from "react";
 import Collapsible from "react-collapsible";
 import { BsChevronDown, BsChevronRight } from "react-icons/bs";
+import { theme } from "../utils/theme";
 
 type CategoryProps = {
     name: string | ReactElement<any>;
@@ -52,7 +53,7 @@ export const Category: React.FC<CategoryProps> = ({ name, additionalElement, def
                         style={{
                             minWidth: 2,
                             height: "100%",
-                            backgroundColor: lineHovered ? "#aaaaaa" : "#ffffff",
+                            backgroundColor: lineHovered ? theme.colors.collapseLine : theme.colors.collapseLineHover,
                             borderRadius: 2,
                         }}
                     />
