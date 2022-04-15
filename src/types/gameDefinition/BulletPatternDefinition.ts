@@ -12,7 +12,7 @@ import {
 import { IVector3 } from "./UtilTypes";
 
 export type BaseVectorGenerator = {
-    count: number;
+    _count: number;
 };
 
 export type BurstVectorGenerator = {
@@ -37,13 +37,14 @@ export type VectorGenerator = BurstVectorGenerator | BlankVectorGenerator | Fill
 
 export type UniformTimingGenerator = {
     type: "uniform";
-    count: number;
+    _count: number;
     time: number;
 };
 
 export type TimingGenerator = UniformTimingGenerator;
 
 export type BulletPatternDefinition = {
+    _url: string;
     _startPositionsState: VectorAssetDefinition;
     _startVelocitiesState: VectorAssetDefinition;
     _startCollisionsState: VectorAssetDefinition;
@@ -66,7 +67,8 @@ export type BulletPatternDefinition = {
     collisionFunctionGLSL: GLSLAssetDefinition;
 };
 
-export const makeBulletPatternDefinition = (): BulletPatternDefinition => ({
+export const makeBulletPatternDefinition = (refURL: string): BulletPatternDefinition => ({
+    _url: refURL,
     parented: false,
     downsampleCollisions: true,
     material: makeGLSLAssetDefinition("fresnel.fs", "fragment"),

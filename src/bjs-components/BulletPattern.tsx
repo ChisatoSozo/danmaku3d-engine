@@ -60,11 +60,11 @@ void main() {
 }
 `;
 
-interface BulletPatternProps {
+interface BulletPatternComponentProps {
     bulletPatternDefinition: BulletPatternAssetDefinition;
 }
 
-export const BulletPattern: React.FC<BulletPatternProps> = ({ bulletPatternDefinition }) => {
+export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ bulletPatternDefinition }) => {
     const scene = useScene();
     const bulletPatternAsset = useBulletPatternAsset(bulletPatternDefinition);
 
@@ -87,8 +87,8 @@ export const BulletPattern: React.FC<BulletPatternProps> = ({ bulletPatternDefin
     const [material, setMaterial] = useState<ShaderMaterial>();
 
     const count = useMemo(
-        () => bulletPatternAsset.initialPositions.generator.count,
-        [bulletPatternAsset.initialPositions.generator.count]
+        () => bulletPatternAsset.initialPositions.generator._count,
+        [bulletPatternAsset.initialPositions.generator._count]
     );
     const downsampleCollisions = useMemo(
         () => bulletPatternAsset.downsampleCollisions,
@@ -164,7 +164,7 @@ export const BulletPattern: React.FC<BulletPatternProps> = ({ bulletPatternDefin
         material.setTexture("collisionSampler", _startCollisionsState);
         material.setFloat("timeSinceStart", timeSinceStart.current);
 
-        makeInstances(mesh, bulletPatternAsset.initialPositions.generator.count);
+        makeInstances(mesh, bulletPatternAsset.initialPositions.generator._count);
 
         mesh.material = material;
 
@@ -174,7 +174,7 @@ export const BulletPattern: React.FC<BulletPatternProps> = ({ bulletPatternDefin
         _startPositionsState,
         _startVelocitiesState,
         bulletMaterialAsset,
-        bulletPatternAsset.initialPositions.generator.count,
+        bulletPatternAsset.initialPositions.generator._count,
         mesh,
         scene,
     ]);

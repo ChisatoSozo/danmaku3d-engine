@@ -1,19 +1,9 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { EditorContainer } from "../containers/EditorContainer";
-import { AssetType } from "../types/gameDefinition/AssetDefinition";
-import { BulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
-import { GameDefinition, makeGameDefinition } from "../types/gameDefinition/GameDefinition";
-import { assetHost } from "../utils/Utils";
-import { AssetBrowser } from "./AssetBrowser";
-import { AssetViewer } from "./AssetViewer";
-import { DetailsPane } from "./DetailsPane";
+import { GameDefinition } from "../types/gameDefinition/GameDefinition";
+import { AssetEditors } from "./AssetEditors/AssetEditors";
 import { GameDefinitionTimeline } from "./GameDefinitionTimeline";
 import { StagePhasePicker } from "./StagePhasePicker";
-
-export interface ViewableAsset {
-    assetURL: string;
-    assetType: AssetType;
-}
 
 interface GameDefinitionEditorProps {
     gameDefinitionName: string;
@@ -25,6 +15,7 @@ interface GameDefinitionEditorProps {
     setCurrentStage: Dispatch<SetStateAction<number>>;
     currentPhase: number;
     setCurrentPhase: Dispatch<SetStateAction<number>>;
+    setAssetToReload: Dispatch<SetStateAction<string | undefined>>;
 }
 
 export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
@@ -37,71 +28,17 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
     setCurrentStage,
     currentPhase,
     setCurrentPhase,
+    setAssetToReload,
 }) => {
-    const [currentAsset, setCurrentAsset] = useState<ViewableAsset>();
-
-    useEffect(() => {
-        const setOverride = async () => {
-            const tempGameDefinition = makeGameDefinition();
-            if (!currentAsset) {
-                setOverrideGameDefinition(undefined);
-                return;
-            }
-            if (currentAsset?.assetType === "mesh") {
-                tempGameDefinition.stages[0].phases[0].instructions.push({
-                    at: 0,
-                    type: "spawnEnemy",
-                    position: { x: 0, y: 0, z: 0 },
-                    hidden: false,
-                    asset: {
-                        isAsset: true,
-                        type: "mesh",
-                        url: currentAsset.assetURL,
-                    },
-                    instructions: [],
-                });
-            }
-
-            if (currentAsset?.assetType === "bulletPattern") {
-                const bulletPatternDefinitionJson = (await fetch(
-                    `${assetHost}${gameDefinitionName}/bulletPatterns/${currentAsset.assetURL}`
-                ).then((res) => res.json())) as BulletPatternDefinition;
-                tempGameDefinition.stages[0].phases[0].instructions.push({
-                    at: 0,
-                    type: "spawnEnemy",
-                    position: { x: 0, y: 0, z: 0 },
-                    hidden: true,
-                    asset: {
-                        isAsset: true,
-                        type: "mesh",
-                        url: "sphere.glb",
-                    },
-                    instructions: [
-                        {
-                            at: 0,
-                            type: "attack",
-                            bulletPattern: {
-                                isAsset: true,
-                                type: "bulletPattern",
-                                pattern: bulletPatternDefinitionJson,
-                            },
-                        },
-                    ],
-                });
-            }
-
-            setOverrideGameDefinition(tempGameDefinition);
-            return;
-        };
-        setOverride();
-    }, [currentAsset, gameDefinitionName, setOverrideGameDefinition]);
-
     if (!gameDefinition) return null;
     return (
         <EditorContainer
             gameDefinitionName={gameDefinitionName}
             overrideGameDefinition={overrideGameDefinition}
             setOverrideGameDefinition={setOverrideGameDefinition}
+            gameDefinition={gameDefinition}
+            setGameDefinition={setGameDefinition}
+            reloadAsset={setAssetToReload}
         >
             <div
                 style={{
@@ -126,22 +63,7 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
                         maxHeight: "calc(100vh - 250px)",
                     }}
                 >
-                    <AssetBrowser
-                        gameDefinition={gameDefinition}
-                        gameDefinitionName={gameDefinitionName}
-                        currentAsset={currentAsset}
-                        setCurrentAsset={setCurrentAsset}
-                    />
-                    {currentAsset ? (
-                        <AssetViewer
-                            gameDefinitionName={gameDefinitionName}
-                            currentAsset={currentAsset}
-                            setCurrentAsset={setCurrentAsset}
-                        />
-                    ) : (
-                        <div style={{ flex: 1 }} />
-                    )}
-                    <DetailsPane gameDefinition={gameDefinition} setGameDefinition={setGameDefinition} />
+                    <AssetEditors gameDefinition={gameDefinition} setGameDefinition={setGameDefinition} />
                 </div>
                 <div
                     style={{

@@ -10,7 +10,7 @@ import {
 } from "../types/gameDefinition/EnemyDefinition";
 import { SpawnEnemyInstruction } from "../types/gameDefinition/GameDefinition";
 import { KeyedInstruction } from "../types/utilTypes/InstructionTypes";
-import { BulletPattern } from "./BulletPattern";
+import { BulletPatternComponent } from "./BulletPattern";
 import { MeshFromAssetDefinition } from "./MeshFromAssetDefinition";
 
 interface EnemyProps {
@@ -70,7 +70,7 @@ export const Enemy: React.FC<EnemyProps> = ({ enemyInstruction }) => {
                 </transformNode>
             )}
             {bulletPatterns.map((pattern) => (
-                <BulletPattern key={pattern.key} bulletPatternDefinition={pattern.instruction.bulletPattern} />
+                <BulletPatternComponent key={pattern.key} bulletPatternDefinition={pattern.instruction.bulletPattern} />
             ))}
         </transformNode>
     );

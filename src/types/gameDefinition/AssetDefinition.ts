@@ -1,4 +1,4 @@
-import { BulletPatternDefinition, TimingGenerator, VectorGenerator } from "./BulletPatternDefinition";
+import { TimingGenerator, VectorGenerator } from "./BulletPatternDefinition";
 
 export type AssetType = "mesh" | "sound" | "texture" | "bulletPattern" | "glsl" | "timing" | "vector";
 export type ShaderType = "vertex" | "fragment" | "pixel";
@@ -22,7 +22,8 @@ export const makeGLSLAssetDefinition = (url: string, shaderType: ShaderType): GL
 });
 
 export type BulletPatternAssetDefinition = BaseAssetDefinition<"bulletPattern"> & {
-    pattern: BulletPatternDefinition;
+    isAsset: true;
+    url: string;
 };
 
 export type MeshAssetDefinition = BaseAssetDefinition<"mesh"> & {
@@ -52,7 +53,7 @@ export const makeTimingAssetDefinition = (time: number): TimingAssetDefinition =
     type: "timing",
     generator: {
         type: "uniform",
-        count: 100,
+        _count: 100,
         time,
     },
 });
@@ -66,7 +67,7 @@ export const makeVectorAssetDefinition = (): VectorAssetDefinition => ({
     type: "vector",
     generator: {
         type: "burst",
-        count: 100,
+        _count: 100,
         radius: 1,
         startTheta: 0,
         thetaLength: 2 * Math.PI,
@@ -80,7 +81,7 @@ export const makeBlankVectorAssetDefinition = (): VectorAssetDefinition => ({
     type: "vector",
     generator: {
         type: "blank",
-        count: 100,
+        _count: 100,
     },
 });
 
@@ -89,7 +90,7 @@ export const makeFillVectorAssetDefinition = (): VectorAssetDefinition => ({
     type: "vector",
     generator: {
         type: "fill",
-        count: 100,
+        _count: 100,
         vector: {
             x: 0,
             y: 0,

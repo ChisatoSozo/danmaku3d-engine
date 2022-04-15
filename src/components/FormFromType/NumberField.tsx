@@ -3,19 +3,31 @@ import { useEffect, useState } from "react";
 type NumberFieldProps = {
     value: number;
     setValue: (value: number) => void;
+    min?: number;
+    max?: number;
 } & React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
 
-export const NumberField: React.FC<NumberFieldProps> = ({ value, setValue, ...props }) => {
+export const NumberField: React.FC<NumberFieldProps> = ({ value, setValue, min, max, ...props }) => {
     const [numberString, setNumberString] = useState(value.toString());
 
     useEffect(() => {
-        //is the number string valid?
-        const isValid = !isNaN(parseFloat(numberString));
+        setNumberString(value.toString());
+    }, [value]);
+
+    useEffect(() => {
+        const floatValue = parseFloat(numberString);
+        const isValid = !isNaN(floatValue);
         if (isValid) {
-            setValue(parseFloat(numberString));
+            if (min !== undefined && floatValue < min) {
+                setNumberString(min.toString());
+            } else if (max !== undefined && floatValue > max) {
+                setNumberString(max.toString());
+            } else {
+                setValue(floatValue);
+            }
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [numberString]);
+    }, [min, max, numberString]);
 
     return <input {...props} type="number" value={numberString} onChange={(e) => setNumberString(e.target.value)} />;
 };

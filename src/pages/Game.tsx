@@ -29,6 +29,7 @@ export const Game = () => {
     const [currentPhase, setCurrentPhase] = useState(0);
     const [gameDefinition, setGameDefinition] = useState<GameDefinition>();
     const [overrideGameDefinition, setOverrideGameDefinition] = useState<GameDefinition>();
+    const [assetToReload, setAssetToReload] = useState<string>();
 
     const gameDefinitionToUse = useMemo(() => {
         if (overrideGameDefinition) {
@@ -39,7 +40,12 @@ export const Game = () => {
     }, [gameDefinition, overrideGameDefinition]);
 
     const [scene, setScene] = useState<BJSScene>();
-    const gameLoaderOutput = useLoadGame(gameDefinitionToUse, name, scene);
+
+    const gameLoaderOutput = useLoadGame(gameDefinitionToUse, name, assetToReload, scene);
+
+    useEffect(() => {
+        setAssetToReload(undefined);
+    }, [gameLoaderOutput]);
 
     useEffect(() => {
         const fetchGameDefinition = async () => {
@@ -65,6 +71,7 @@ export const Game = () => {
                         setCurrentStage={setCurrentStage}
                         currentPhase={currentPhase}
                         setCurrentPhase={setCurrentPhase}
+                        setAssetToReload={setAssetToReload}
                     />
                 </Overlay>
             )}
@@ -104,7 +111,7 @@ export const Game = () => {
                             target={Vector3.Zero()}
                             alpha={Math.PI / 2}
                             beta={Math.PI / 4}
-                            radius={8}
+                            radius={500}
                         />
                     )}
                 </Scene>

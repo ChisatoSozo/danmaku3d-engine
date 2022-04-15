@@ -1,5 +1,6 @@
 import { AssetContainer, Sound, Texture } from "@babylonjs/core";
-import { BulletPatternAssetDefinition, GLSLAssetDefinition } from "./gameDefinition/AssetDefinition";
+import { GLSLAssetDefinition } from "./gameDefinition/AssetDefinition";
+import { BulletPatternDefinition } from "./gameDefinition/BulletPatternDefinition";
 
 export interface MeshAdditionalData {
     animations?: {
@@ -15,7 +16,7 @@ export interface MeshAsset {
 export type BulletPatternAsset = {
     positionFunctionGLSL: GLSLAssetDefinition;
     velocityFunctionGLSL: GLSLAssetDefinition;
-} & BulletPatternAssetDefinition["pattern"];
+} & BulletPatternDefinition;
 
 export interface Assets {
     sounds: { [key: string]: Sound };

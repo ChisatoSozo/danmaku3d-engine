@@ -77,7 +77,7 @@ export const Camera: React.FC<CameraProps> = ({ mode }) => {
                     target={Vector3.Zero()}
                     alpha={-Math.PI / 2}
                     beta={Math.PI / 2}
-                    radius={20}
+                    radius={500}
                 />
             )}
         </transformNode>

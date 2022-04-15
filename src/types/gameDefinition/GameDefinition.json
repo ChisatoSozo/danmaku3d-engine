@@ -44,12 +44,17 @@
         "hash": {
           "type": "string"
         },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
+        },
         "type": {
           "const": "bulletPattern",
           "type": "string"
         }
       },
       "required": [
+        "isAsset",
         "type"
       ],
       "type": "object"
@@ -60,12 +65,17 @@
         "hash": {
           "type": "string"
         },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
+        },
         "type": {
           "const": "glsl",
           "type": "string"
         }
       },
       "required": [
+        "isAsset",
         "type"
       ],
       "type": "object"
@@ -76,12 +86,17 @@
         "hash": {
           "type": "string"
         },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
+        },
         "type": {
           "const": "mesh",
           "type": "string"
         }
       },
       "required": [
+        "isAsset",
         "type"
       ],
       "type": "object"
@@ -92,12 +107,17 @@
         "hash": {
           "type": "string"
         },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
+        },
         "type": {
           "const": "sound",
           "type": "string"
         }
       },
       "required": [
+        "isAsset",
         "type"
       ],
       "type": "object"
@@ -108,12 +128,17 @@
         "hash": {
           "type": "string"
         },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
+        },
         "type": {
           "const": "texture",
           "type": "string"
         }
       },
       "required": [
+        "isAsset",
         "type"
       ],
       "type": "object"
@@ -124,12 +149,17 @@
         "hash": {
           "type": "string"
         },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
+        },
         "type": {
           "const": "timing",
           "type": "string"
         }
       },
       "required": [
+        "isAsset",
         "type"
       ],
       "type": "object"
@@ -140,12 +170,17 @@
         "hash": {
           "type": "string"
         },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
+        },
         "type": {
           "const": "vector",
           "type": "string"
         }
       },
       "required": [
+        "isAsset",
         "type"
       ],
       "type": "object"
@@ -160,31 +195,80 @@
         }
       ]
     },
+    "BaseVectorGenerator": {
+      "additionalProperties": false,
+      "properties": {
+        "_count": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "_count"
+      ],
+      "type": "object"
+    },
+    "BlankVectorGenerator": {
+      "additionalProperties": false,
+      "properties": {
+        "_count": {
+          "type": "number"
+        },
+        "type": {
+          "const": "blank",
+          "type": "string"
+        }
+      },
+      "required": [
+        "_count",
+        "type"
+      ],
+      "type": "object"
+    },
     "BulletPatternAssetDefinition": {
       "additionalProperties": false,
       "properties": {
         "hash": {
           "type": "string"
         },
-        "pattern": {
-          "$ref": "#/definitions/BulletPatternDefinition"
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
         },
         "type": {
           "const": "bulletPattern",
           "type": "string"
+        },
+        "url": {
+          "type": "string"
         }
       },
       "required": [
-        "pattern",
-        "type"
+        "isAsset",
+        "type",
+        "url"
       ],
       "type": "object"
     },
     "BulletPatternDefinition": {
       "additionalProperties": false,
       "properties": {
+        "_startCollisionsState": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "_startPositionsState": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "_startVelocitiesState": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "_url": {
+          "type": "string"
+        },
         "collisionFunctionGLSL": {
           "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        "downsampleCollisions": {
+          "type": "boolean"
         },
         "initialPositions": {
           "$ref": "#/definitions/VectorAssetDefinition"
@@ -192,22 +276,63 @@
         "initialVelocities": {
           "$ref": "#/definitions/VectorAssetDefinition"
         },
-        "positionFunctionGLSL": {
+        "material": {
           "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        "mesh": {
+          "$ref": "#/definitions/MeshAssetDefinition"
+        },
+        "parented": {
+          "type": "boolean"
+        },
+        "phases": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "at": {
+                "type": "number"
+              },
+              "positionInitializationGLSL": {
+                "$ref": "#/definitions/GLSLAssetDefinition"
+              },
+              "positionUpdateGLSL": {
+                "$ref": "#/definitions/GLSLAssetDefinition"
+              },
+              "velocityInitializationGLSL": {
+                "$ref": "#/definitions/GLSLAssetDefinition"
+              },
+              "velocityUpdateGLSL": {
+                "$ref": "#/definitions/GLSLAssetDefinition"
+              }
+            },
+            "required": [
+              "at",
+              "positionInitializationGLSL",
+              "velocityInitializationGLSL",
+              "positionUpdateGLSL",
+              "velocityUpdateGLSL"
+            ],
+            "type": "object"
+          },
+          "type": "array"
         },
         "timings": {
           "$ref": "#/definitions/TimingAssetDefinition"
-        },
-        "velocityFunctionGLSL": {
-          "$ref": "#/definitions/GLSLAssetDefinition"
         }
       },
       "required": [
+        "_url",
+        "_startPositionsState",
+        "_startVelocitiesState",
+        "_startCollisionsState",
+        "parented",
+        "downsampleCollisions",
+        "material",
+        "mesh",
         "initialPositions",
         "initialVelocities",
         "timings",
-        "positionFunctionGLSL",
-        "velocityFunctionGLSL",
+        "phases",
         "collisionFunctionGLSL"
       ],
       "type": "object"
@@ -215,7 +340,7 @@
     "BurstVectorGenerator": {
       "additionalProperties": false,
       "properties": {
-        "count": {
+        "_count": {
           "type": "number"
         },
         "radius": {
@@ -239,12 +364,12 @@
         }
       },
       "required": [
-        "type",
-        "count",
+        "_count",
         "radius",
         "startTheta",
-        "thetaLength",
         "startY",
+        "thetaLength",
+        "type",
         "yLength"
       ],
       "type": "object"
@@ -314,12 +439,76 @@
       ],
       "type": "object"
     },
-    "EnemyInstruction": {
+    "EnemyAttackInstruction": {
       "additionalProperties": false,
       "properties": {
-        "at": {
-          "type": "number"
+        "bulletPattern": {
+          "$ref": "#/definitions/BulletPatternAssetDefinition"
         },
+        "type": {
+          "const": "attack",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "bulletPattern"
+      ],
+      "type": "object"
+    },
+    "EnemyInstruction": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "at": {
+              "type": "number"
+            },
+            "position": {
+              "$ref": "#/definitions/IVector3"
+            },
+            "speed": {
+              "type": "number"
+            },
+            "type": {
+              "const": "moveTo",
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "position",
+            "speed",
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "at": {
+              "type": "number"
+            },
+            "bulletPattern": {
+              "$ref": "#/definitions/BulletPatternAssetDefinition"
+            },
+            "type": {
+              "const": "attack",
+              "type": "string"
+            }
+          },
+          "required": [
+            "at",
+            "bulletPattern",
+            "type"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "EnemyMoveToInstruction": {
+      "additionalProperties": false,
+      "properties": {
         "position": {
           "$ref": "#/definitions/IVector3"
         },
@@ -332,10 +521,30 @@
         }
       },
       "required": [
-        "at",
+        "type",
         "position",
-        "speed",
-        "type"
+        "speed"
+      ],
+      "type": "object"
+    },
+    "FillVectorGenerator": {
+      "additionalProperties": false,
+      "properties": {
+        "_count": {
+          "type": "number"
+        },
+        "type": {
+          "const": "fill",
+          "type": "string"
+        },
+        "vector": {
+          "$ref": "#/definitions/IVector3"
+        }
+      },
+      "required": [
+        "_count",
+        "type",
+        "vector"
       ],
       "type": "object"
     },
@@ -344,6 +553,10 @@
       "properties": {
         "hash": {
           "type": "string"
+        },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
         },
         "shaderType": {
           "$ref": "#/definitions/ShaderType"
@@ -357,6 +570,7 @@
         }
       },
       "required": [
+        "isAsset",
         "shaderType",
         "type",
         "url"
@@ -423,6 +637,10 @@
         "hash": {
           "type": "string"
         },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
+        },
         "type": {
           "const": "mesh",
           "type": "string"
@@ -432,9 +650,78 @@
         }
       },
       "required": [
+        "isAsset",
         "type",
         "url"
       ],
+      "type": "object"
+    },
+    "NamedParameters<typeof makeBlankVectorAssetDefinition>": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "NamedParameters<typeof makeBulletPatternDefinition>": {
+      "additionalProperties": false,
+      "properties": {
+        "refURL": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "refURL"
+      ],
+      "type": "object"
+    },
+    "NamedParameters<typeof makeFillVectorAssetDefinition>": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "NamedParameters<typeof makeGLSLAssetDefinition>": {
+      "additionalProperties": false,
+      "properties": {
+        "shaderType": {
+          "$ref": "#/definitions/ShaderType"
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "shaderType"
+      ],
+      "type": "object"
+    },
+    "NamedParameters<typeof makeGameDefinition>": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "NamedParameters<typeof makeMeshAssetDefinition>": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "NamedParameters<typeof makePhaseDefinition>": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "NamedParameters<typeof makeStageDefinition>": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "NamedParameters<typeof makeTimingAssetDefinition>": {
+      "additionalProperties": false,
+      "properties": {
+        "time": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "time"
+      ],
+      "type": "object"
+    },
+    "NamedParameters<typeof makeVectorAssetDefinition>": {
+      "additionalProperties": false,
       "type": "object"
     },
     "PhaseDefinition": {
@@ -514,6 +801,10 @@
         "hash": {
           "type": "string"
         },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
+        },
         "type": {
           "const": "sound",
           "type": "string"
@@ -523,6 +814,7 @@
         }
       },
       "required": [
+        "isAsset",
         "type",
         "url"
       ],
@@ -533,6 +825,9 @@
       "properties": {
         "asset": {
           "$ref": "#/definitions/MeshAssetDefinition"
+        },
+        "hidden": {
+          "type": "boolean"
         },
         "instructions": {
           "items": {
@@ -552,6 +847,7 @@
         "type",
         "asset",
         "position",
+        "hidden",
         "instructions"
       ],
       "type": "object"
@@ -635,6 +931,9 @@
             "at": {
               "type": "number"
             },
+            "hidden": {
+              "type": "boolean"
+            },
             "instructions": {
               "items": {
                 "$ref": "#/definitions/EnemyInstruction"
@@ -652,6 +951,7 @@
           "required": [
             "asset",
             "at",
+            "hidden",
             "instructions",
             "position",
             "type"
@@ -682,6 +982,10 @@
         "hash": {
           "type": "string"
         },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
+        },
         "type": {
           "const": "texture",
           "type": "string"
@@ -691,6 +995,7 @@
         }
       },
       "required": [
+        "isAsset",
         "type",
         "url"
       ],
@@ -705,6 +1010,10 @@
         "hash": {
           "type": "string"
         },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
+        },
         "type": {
           "const": "timing",
           "type": "string"
@@ -712,6 +1021,7 @@
       },
       "required": [
         "generator",
+        "isAsset",
         "type"
       ],
       "type": "object"
@@ -722,7 +1032,7 @@
     "UniformTimingGenerator": {
       "additionalProperties": false,
       "properties": {
-        "count": {
+        "_count": {
           "type": "number"
         },
         "time": {
@@ -735,7 +1045,7 @@
       },
       "required": [
         "type",
-        "count",
+        "_count",
         "time"
       ],
       "type": "object"
@@ -749,6 +1059,10 @@
         "hash": {
           "type": "string"
         },
+        "isAsset": {
+          "const": true,
+          "type": "boolean"
+        },
         "type": {
           "const": "vector",
           "type": "string"
@@ -756,12 +1070,23 @@
       },
       "required": [
         "generator",
+        "isAsset",
         "type"
       ],
       "type": "object"
     },
     "VectorGenerator": {
-      "$ref": "#/definitions/BurstVectorGenerator"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/BurstVectorGenerator"
+        },
+        {
+          "$ref": "#/definitions/BlankVectorGenerator"
+        },
+        {
+          "$ref": "#/definitions/FillVectorGenerator"
+        }
+      ]
     }
   }
 }

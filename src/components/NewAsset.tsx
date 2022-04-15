@@ -2,14 +2,14 @@ import { useCallback, useState } from "react";
 import { assetTypeToAssetFileMap, useEditor } from "../containers/EditorContainer";
 import { AssetType } from "../types/gameDefinition/AssetDefinition";
 import { makeBulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
-import { assetHost } from "../utils/Utils";
+import { uploadFile } from "../utils/Utils";
 
 interface NewAssetProps {
     gameDefinitionName: string;
     assetType: AssetType;
 }
 
-const newAssetGenerators: { [key: string]: any } = {
+const newAssetGenerators: { [key: string]: (url: string) => any } = {
     bulletPattern: makeBulletPatternDefinition,
 };
 
@@ -32,23 +32,12 @@ export const NewAsset: React.FC<NewAssetProps> = ({ gameDefinitionName, assetTyp
 
     const uploadNewFile = useCallback(async () => {
         if (!assetFiles) return;
-        //upload file to /upload-asset
-        const formData = new FormData();
-        const object = newAssetGenerators[assetType]();
-        const json = JSON.stringify(object);
-        const blob = new Blob([json], { type: "text/json" });
-
         const assetFileIndex = assetTypeToAssetFileMap[assetType];
         if (!assetFileIndex) throw new Error("No asset file map for asset type: " + assetType);
-
-        formData.append("file", blob, findNewFileName(assetFiles[assetFileIndex], "newBulletPattern.json"));
-        formData.append("type", assetType);
-        formData.append("gameDefinitionName", gameDefinitionName);
+        const newFileName = findNewFileName(assetFiles[assetFileIndex], "newBulletPattern.json");
+        const newAsset = newAssetGenerators[assetType](newFileName);
         setUploading(true);
-        await fetch(`${assetHost}upload-asset`, {
-            method: "POST",
-            body: formData,
-        });
+        await uploadFile(newFileName, assetType, gameDefinitionName, newAsset);
         refreshAssetFiles();
         setUploading(false);
     }, [assetFiles, assetType, gameDefinitionName, refreshAssetFiles]);

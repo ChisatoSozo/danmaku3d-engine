@@ -3,7 +3,7 @@ import { VectorGeneratorFunction } from ".";
 import { BurstVectorGenerator } from "../../types/gameDefinition/BulletPatternDefinition";
 
 export const burstVectorGenerator: VectorGeneratorFunction = ({
-    count,
+    _count,
     radius,
     startTheta,
     thetaLength,
@@ -13,8 +13,8 @@ export const burstVectorGenerator: VectorGeneratorFunction = ({
     const points = [];
     const phi = Math.PI * (3 - Math.sqrt(5)); //golden angle in radians
 
-    for (let i = 0; i < count; i++) {
-        const y = startY - (i / (count - 1)) * yLength; //y goes from 1 to -1
+    for (let i = 0; i < _count; i++) {
+        const y = startY - (i / (_count - 1)) * yLength; //y goes from 1 to -1
         const curRadius = Math.sqrt(1 - y * y); //radius at y
 
         const theta = ((phi * i) % thetaLength) + startTheta; //golden angle increment

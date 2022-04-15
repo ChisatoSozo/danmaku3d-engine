@@ -1,9 +1,12 @@
 import { Effect, Scene } from "@babylonjs/core";
 import hash from "object-hash";
 import { getAsset, useAssets } from "../hooks/useAsset";
+import { findAndLoadAssetDefinitions } from "../hooks/useLoadGame";
 import { Assets, BulletPatternAsset } from "../types/Assets";
 import { BulletPatternAssetDefinition, GLSLAssetDefinition } from "../types/gameDefinition/AssetDefinition";
+import { BulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
 import { BulletPhase, constructPixelShader } from "../utils/BabylonUtils";
+import { assetHost } from "../utils/Utils";
 import { manualLoadGLSL } from "./glslLoader";
 
 export const hashBulletPattern = (bulletPatternAssetDefinition: BulletPatternAssetDefinition) => {
@@ -35,11 +38,14 @@ export const loadBulletPattern = async (
     gameDefinitionName: string,
     assetDefinition: BulletPatternAssetDefinition,
     scene: Scene,
-    assets: Assets
+    assets: Assets,
+    setStatus: (status: string) => void
 ) => {
     const hash = hashBulletPattern(assetDefinition);
 
-    const patternDefinition = assetDefinition.pattern;
+    const URI = `${assetHost}${gameDefinitionName}/bulletPatterns/${assetDefinition.url}`;
+    const patternDefinition = (await fetch(URI).then((response) => response.json())) as BulletPatternDefinition;
+    await findAndLoadAssetDefinitions(gameDefinitionName, patternDefinition, scene, assets, undefined, setStatus);
 
     const positionPhases = patternDefinition.phases.map((phase): BulletPhase => {
         const at = phase.at;
@@ -67,8 +73,6 @@ export const loadBulletPattern = async (
 
     const positionFunctionGLSL = constructPixelShader(positionPhases, "position");
     const velocityFunctionGLSL = constructPixelShader(velocityPhases, "velocity");
-
-    console.log(positionFunctionGLSL, velocityFunctionGLSL);
 
     const positionFunctionGLSLName = hash + "PositionFunction";
     const velocityFunctionGLSLName = hash + "VelocityFunction";

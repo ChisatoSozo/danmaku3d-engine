@@ -1,11 +1,15 @@
 import { useMemo } from "react";
 import { Schema } from "ts-json-schema-generator";
 import { Category } from "../Category";
+import { BooleanField } from "./BooleanField";
+import { GLSLAssetField } from "./GLSLAssetField";
 import { LabeledField } from "./LabeledField";
 import { MeshAssetField } from "./MeshAssetField";
 import { NumberField } from "./NumberField";
 import { StringField } from "./StringField";
 import { TextureAssetField } from "./TextureAssetField";
+import { TimingAssetField } from "./TimingAssetField";
+import { VectorAssetField } from "./VectorAssetField";
 import { VectorField } from "./VectorField";
 
 interface FormFromTypeProps {
@@ -27,9 +31,26 @@ type JSONSchema7TypeName =
     | "array"
     | "null";
 
-const ExtendedSchemaTypes = ["IVector3", "MeshAssetDefinition", "TextureAssetDefinition"];
-type ExtendedSchemaTypeTypes = "IVector3" | "MeshAssetDefinition" | "TextureAssetDefinition";
+const ExtendedSchemaTypes = [
+    "IVector3",
+    "MeshAssetDefinition",
+    "TextureAssetDefinition",
+    "GLSLAssetDefinition",
+    "VectorAssetDefinition",
+    "TimingAssetDefinition",
+];
+type ExtendedSchemaTypeTypes =
+    | "IVector3"
+    | "MeshAssetDefinition"
+    | "TextureAssetDefinition"
+    | "GLSLAssetDefinition"
+    | "VectorAssetDefinition"
+    | "TimingAssetDefinition";
 
+// converts camel case strings to title case strings
+// e.g. "thisIsATest" -> "This Is A Test"
+// e.g. "thisIsANOTHER" -> "This Is ANOTHER"
+// preserves all caps words
 const camelCaseToSpaces = (str: string) => {
     return str.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
 };
@@ -45,7 +66,12 @@ const resolveSchema = (schema: Schema, localSchema: Schema, value: any): Schema 
     if (!localSchema) throw new Error("localSchema is undefined: " + JSON.stringify(schema));
     if (localSchema.anyOf) {
         const newLocalSchema = localSchema.anyOf.find((schemaInst: any) => {
-            return schemaInst.properties.type.const === value.type;
+            const resolvedShcemaInst = resolveSchema(schema, schemaInst, value) as any;
+            if (!resolvedShcemaInst) throw new Error("Could not resolve schema: " + JSON.stringify(schemaInst));
+            if (!resolvedShcemaInst?.properties?.type?.const)
+                throw new Error("Could not resolve schema, no const: " + JSON.stringify(resolvedShcemaInst));
+
+            return resolvedShcemaInst.properties.type.const === value.type;
         }) as Schema;
         if (!newLocalSchema) throw new Error(`Could not find schema for type ${value.type}`);
         return resolveSchema(schema, newLocalSchema, value);
@@ -109,13 +135,16 @@ export const FormFromType: React.FC<FormFromTypeProps> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [resolvedLocalSchema.properties, setValue, type, value]);
 
+    const readableLabel = useMemo(() => humanReadableLabel(label), [label]);
+    const propName = useMemo(() => label.split(".").pop() || "", [label]);
+
     let formElement: JSX.Element | JSX.Element[] = <></>;
     switch (type as JSONSchema7TypeName & ExtendedSchemaTypeTypes) {
         case "array":
             const newLocalSchema = resolvedLocalSchema.items;
             if (!newLocalSchema) throw new Error("Array schema must have an items property");
             formElement = (
-                <Category defaultOpen={topLevel} name={humanReadableLabel(label)}>
+                <Category defaultOpen={topLevel} name={readableLabel}>
                     {value.map((valueInst: any, i: number) => {
                         if (!valueInst) return <></>;
                         return (
@@ -139,9 +168,10 @@ export const FormFromType: React.FC<FormFromTypeProps> = ({
             const objectValue = value as any;
             const required = properties.required as string[];
             formElement = (
-                <Category defaultOpen={topLevel} name={humanReadableLabel(label)}>
+                <Category defaultOpen={topLevel} name={readableLabel}>
                     {Object.keys(properties).map((key: string, i) => {
-                        if (required && !required.includes(key)) return <></>;
+                        if (required && !required.includes(key)) return null;
+                        if (key.startsWith("_")) return null;
                         const property = properties[key];
                         return (
                             <FormFromType
@@ -160,38 +190,58 @@ export const FormFromType: React.FC<FormFromTypeProps> = ({
             break;
         case "string":
             formElement = (
-                <LabeledField label={humanReadableLabel(label)}>
+                <LabeledField label={readableLabel}>
                     <StringField value={value} setValue={setValue} />
                 </LabeledField>
             );
             break;
         case "number":
             formElement = (
-                <LabeledField label={humanReadableLabel(label)}>
+                <LabeledField label={readableLabel}>
                     <NumberField value={value} setValue={setValue} />
+                </LabeledField>
+            );
+            break;
+        case "boolean":
+            formElement = (
+                <LabeledField label={readableLabel} direction="row">
+                    <BooleanField value={value} setValue={setValue} />
                 </LabeledField>
             );
             break;
         case "IVector3":
             formElement = (
-                <LabeledField label={humanReadableLabel(label)}>
+                <LabeledField label={readableLabel}>
                     <VectorField value={value} setValue={setValue} />
                 </LabeledField>
             );
             break;
         case "MeshAssetDefinition":
             formElement = (
-                <LabeledField label={humanReadableLabel(label)}>
+                <LabeledField label={readableLabel}>
                     <MeshAssetField value={value} setValue={setValue} />
                 </LabeledField>
             );
             break;
         case "TextureAssetDefinition":
             formElement = (
-                <LabeledField label={humanReadableLabel(label)}>
+                <LabeledField label={readableLabel}>
                     <TextureAssetField value={value} setValue={setValue} />
                 </LabeledField>
             );
+            break;
+        case "GLSLAssetDefinition":
+            formElement = (
+                <LabeledField label={readableLabel}>
+                    <GLSLAssetField value={value} setValue={setValue} />
+                </LabeledField>
+            );
+            break;
+        case "VectorAssetDefinition":
+            formElement = <VectorAssetField value={value} setValue={setValue} schema={schema} label={label} />;
+            break;
+        case "TimingAssetDefinition":
+            formElement = <TimingAssetField value={value} setValue={setValue} schema={schema} label={label} />;
             break;
         default:
             console.log("unknown type", type);

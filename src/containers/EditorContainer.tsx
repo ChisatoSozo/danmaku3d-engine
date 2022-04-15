@@ -1,5 +1,6 @@
 import { createContext, Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { AssetType } from "../types/gameDefinition/AssetDefinition";
+import { BulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
 import { GameDefinition } from "../types/gameDefinition/GameDefinition";
 import { assetHost } from "../utils/Utils";
 
@@ -18,7 +19,13 @@ interface PhaseDetails {
     phase: number;
 }
 
-type SelectedDetails = GameDetails | StageDetails | PhaseDetails;
+interface BulletPatternDetails {
+    type: "bulletPattern";
+    fileName: string;
+    bulletPattern: BulletPatternDefinition;
+}
+
+type SelectedDetails = GameDetails | StageDetails | PhaseDetails | BulletPatternDetails;
 interface AssetFiles {
     meshes: string[];
     sounds: string[];
@@ -36,17 +43,27 @@ export const assetTypeToAssetFileMap: { [key in AssetType]?: keyof AssetFiles } 
 };
 
 interface IEditorContext {
+    gameDefinitionName: string;
+    gameDefinition: GameDefinition | undefined;
+    setGameDefinition: Dispatch<SetStateAction<GameDefinition | undefined>>;
     selectedDetails?: SelectedDetails;
     setSelectedDetails: Dispatch<SetStateAction<SelectedDetails | undefined>>;
     assetFiles?: AssetFiles;
     refreshAssetFiles: () => void;
-    overrideGameDefinition?: GameDefinition | undefined;
-    setOverrideGameDefinition?: Dispatch<SetStateAction<GameDefinition | undefined>>;
+    reloadAsset: (url: string) => void;
+    overrideGameDefinition: GameDefinition | undefined;
+    setOverrideGameDefinition: Dispatch<SetStateAction<GameDefinition | undefined>>;
 }
 
 const makeDefaultIEditor = (): IEditorContext => ({
+    gameDefinitionName: "",
+    overrideGameDefinition: undefined,
+    gameDefinition: undefined,
+    setGameDefinition: () => {},
+    setOverrideGameDefinition: () => {},
     setSelectedDetails: () => {},
     refreshAssetFiles: () => {},
+    reloadAsset: () => {},
 });
 
 const EditorContext = createContext<IEditorContext>(makeDefaultIEditor());
@@ -57,8 +74,11 @@ export const useEditor = () => {
 
 interface EditorContainerProps {
     gameDefinitionName: string;
-    overrideGameDefinition?: GameDefinition | undefined;
-    setOverrideGameDefinition?: Dispatch<SetStateAction<GameDefinition | undefined>>;
+    overrideGameDefinition: GameDefinition | undefined;
+    setOverrideGameDefinition: Dispatch<SetStateAction<GameDefinition | undefined>>;
+    gameDefinition: GameDefinition | undefined;
+    setGameDefinition: Dispatch<SetStateAction<GameDefinition | undefined>>;
+    reloadAsset: (url: string) => void;
 }
 
 export const EditorContainer: React.FC<EditorContainerProps> = ({
@@ -66,6 +86,9 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
     gameDefinitionName,
     overrideGameDefinition,
     setOverrideGameDefinition,
+    gameDefinition,
+    setGameDefinition,
+    reloadAsset,
 }) => {
     const [selectedDetails, setSelectedDetails] = useState<SelectedDetails>();
     const [assetFiles, setAssetFiles] = useState<AssetFiles>();
@@ -89,20 +112,27 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
 
     const editorContextValue = useMemo(
         () => ({
+            gameDefinitionName,
             selectedDetails,
             setSelectedDetails,
             assetFiles,
             refreshAssetFiles,
             overrideGameDefinition,
             setOverrideGameDefinition,
+            gameDefinition,
+            setGameDefinition,
+            reloadAsset,
         }),
         [
+            gameDefinitionName,
             selectedDetails,
-            setSelectedDetails,
             assetFiles,
             refreshAssetFiles,
             overrideGameDefinition,
             setOverrideGameDefinition,
+            gameDefinition,
+            setGameDefinition,
+            reloadAsset,
         ]
     );
 
