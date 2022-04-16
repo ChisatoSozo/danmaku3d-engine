@@ -1,5 +1,6 @@
 import { Vector3 } from "@babylonjs/core";
-import React, { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import React, { Dispatch, MutableRefObject, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
+import { useDeltaBeforeRender } from "../hooks/useDeltaBeforeRender";
 import { useExecutor } from "../hooks/useExecutor";
 import { GameDefinition, PlayMusicInstruction, SpawnEnemyInstruction } from "../types/gameDefinition/GameDefinition";
 import { KeyedInstruction } from "../types/utilTypes/InstructionTypes";
@@ -13,6 +14,7 @@ import { PlayerMovement } from "./PlayerMovement";
 import { StageMesh } from "./StageMesh";
 
 interface StageProps {
+    time?: MutableRefObject<number>;
     currentStage: number;
     setCurrentStage: Dispatch<SetStateAction<number>>;
     currentPhase: number;
@@ -24,6 +26,7 @@ const TITLE_POSITION = new Vector3(0, 4, 0.5);
 const SUBTITLE_POSITION = new Vector3(0, 2, 0.5);
 
 export const Stage: React.FC<StageProps> = ({
+    time,
     currentStage,
     setCurrentStage,
     currentPhase,
@@ -34,6 +37,16 @@ export const Stage: React.FC<StageProps> = ({
     const phaseDefinition = useMemo(() => stageDefinition.phases[currentPhase], [stageDefinition, currentPhase]);
     const [musics, setMusics] = useState<KeyedInstruction<PlayMusicInstruction>[]>([]);
     const [enemies, setEnemies] = useState<KeyedInstruction<SpawnEnemyInstruction>[]>([]);
+    const lastTime = useRef(0);
+
+    useDeltaBeforeRender(() => {
+        if (!time) return;
+        if (time.current < lastTime.current) {
+            setMusics([]);
+            setEnemies([]);
+        }
+        lastTime.current = time.current;
+    });
 
     useEffect(() => {
         return () => {
@@ -42,16 +55,20 @@ export const Stage: React.FC<StageProps> = ({
         };
     }, [stageDefinition]);
 
-    useExecutor((instruction, index) => {
-        switch (instruction.type) {
-            case "playMusic":
-                setMusics((musics) => [...musics, { instruction, key: index }]);
-                break;
-            case "spawnEnemy":
-                setEnemies((enemies) => [...enemies, { instruction, key: index }]);
-                break;
-        }
-    }, phaseDefinition.instructions);
+    useExecutor(
+        (instruction, index) => {
+            switch (instruction.type) {
+                case "playMusic":
+                    setMusics((musics) => [...musics, { instruction, key: index }]);
+                    break;
+                case "spawnEnemy":
+                    setEnemies((enemies) => [...enemies, { instruction, key: index }]);
+                    break;
+            }
+        },
+        phaseDefinition.instructions,
+        time
+    );
 
     const [focused, setFocused] = useState(false);
 

@@ -1,13 +1,26 @@
+import { defaultAssets } from "../../utils/DefaultAssets";
 import { MeshAssetDefinition, SoundAssetDefinition } from "./AssetDefinition";
 import { EditorInstruction } from "./CommonDefinition";
 import { EnemyInstruction } from "./EnemyDefinition";
 import { PlayableCharacterDefinition } from "./PlayableCharacterDefinition";
 import { IVector3 } from "./UtilTypes";
 
+export type StageInstructionType = "playMusic" | "spawnEnemy";
+export const stageInstructionTypes = ["playMusic", "spawnEnemy"];
+
 export type PlayMusicInstruction = {
     type: "playMusic";
     asset: SoundAssetDefinition;
 };
+
+export const makePlayMusicInstruction = (): PlayMusicInstruction => ({
+    type: "playMusic",
+    asset: {
+        isAsset: true,
+        type: "sound",
+        url: defaultAssets.music,
+    },
+});
 
 export type SpawnEnemyInstruction = {
     type: "spawnEnemy";
@@ -16,6 +29,18 @@ export type SpawnEnemyInstruction = {
     hidden: boolean;
     instructions: EnemyInstruction[];
 };
+
+export const makeSpawnEnemyInstruction = (): SpawnEnemyInstruction => ({
+    type: "spawnEnemy",
+    asset: {
+        isAsset: true,
+        type: "mesh",
+        url: defaultAssets.mesh,
+    },
+    position: { x: 0, y: 5, z: 0 },
+    hidden: false,
+    instructions: [],
+});
 
 export type BaseStageInstruction = PlayMusicInstruction | SpawnEnemyInstruction;
 

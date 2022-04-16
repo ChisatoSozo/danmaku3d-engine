@@ -1,17 +1,16 @@
 import { Animatable } from "@babylonjs/core";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useCallback, useContext, useEffect, useState } from "react";
 import { useScene } from "react-babylonjs";
 import { PausableScene } from "../hooks/useDeltaBeforeRender";
 
-export const PauseContext = React.createContext<ReturnType<typeof usePause>>({
+export const AnimationsContext = React.createContext<ReturnType<typeof useAnimations>>({
     paused: false,
     setPaused: () => {},
     registerAnimation: () => {},
     unregisterAnimation: () => {},
 });
 
-export const usePause = () => {
-    const [paused, setPaused] = useState(false);
+export const useAnimations = (paused: boolean, setPaused: Dispatch<SetStateAction<boolean>>) => {
     const [, setAnimations] = useState<Animatable[]>([]);
     const scene = useScene();
 
@@ -56,6 +55,6 @@ export const usePause = () => {
 };
 
 export const useRegisterAnimation = () => {
-    const { registerAnimation } = useContext(PauseContext);
+    const { registerAnimation } = useContext(AnimationsContext);
     return registerAnimation;
 };

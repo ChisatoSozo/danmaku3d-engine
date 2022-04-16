@@ -1,4 +1,4 @@
-import { theme } from "../utils/theme";
+import { theme } from "../../utils/theme";
 import { GameDefinitionTimeline } from "./GameDefinitionTimeline";
 
 interface TimelineSectionProps {

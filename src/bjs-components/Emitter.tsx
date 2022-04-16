@@ -1,6 +1,6 @@
 import { Animation, TransformNode, Vector3 } from "@babylonjs/core";
 import { useEffect, useMemo, useRef } from "react";
-import { useRegisterAnimation } from "../containers/PauseContext";
+import { useRegisterAnimation } from "../containers/AnimationsContext";
 import { useVectorMemo } from "../hooks/useVectorMemo";
 import { EmitterDefinition } from "../types/gameDefinition/PlayableCharacterDefinition";
 import { MeshFromAssetDefinition } from "./MeshFromAssetDefinition";

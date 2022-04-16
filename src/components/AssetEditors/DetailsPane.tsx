@@ -5,6 +5,7 @@ import { theme } from "../../utils/theme";
 import { GameDetails } from "../GameDetails";
 import { BulletPatternDetails } from "./BulletPatternDetails";
 import { PhaseDetails } from "./PhaseDetails";
+import { SpawnEnemyInstructionDetails } from "./SpawnEnemyInstructionDetails";
 import { StageDetails } from "./StageDetails";
 
 interface DetailsPaneProps {
@@ -47,6 +48,13 @@ export const DetailsPane: React.FC<DetailsPaneProps> = ({ gameDefinition, setGam
                     gameDefinitionName={gameDefinitionName}
                     bulletPattern={selectedDetails.bulletPattern}
                     fileName={selectedDetails.fileName}
+                />
+            )}
+            {selectedDetails?.type === "spawnEnemyInstruction" && (
+                <SpawnEnemyInstructionDetails
+                    stageIndex={selectedDetails.stage}
+                    phaseIndex={selectedDetails.phase}
+                    instructionIndex={selectedDetails.instructionIndex}
                 />
             )}
         </div>

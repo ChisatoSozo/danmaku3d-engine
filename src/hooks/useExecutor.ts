@@ -1,43 +1,35 @@
-import { useEffect, useRef, useState } from "react";
+import { MutableRefObject, useRef } from "react";
 import { Instruction } from "../types/gameDefinition/CommonDefinition";
 import { useDeltaBeforeRender } from "./useDeltaBeforeRender";
 
 type ExecutorFunction<T extends Instruction> = (instruction: T, index: number) => void;
 
-export const useExecutor = <T extends Instruction>(executorFunction: ExecutorFunction<T>, instructions: T[]) => {
+export const useExecutor = <T extends Instruction>(
+    executorFunction: ExecutorFunction<T>,
+    instructions: T[],
+    timeRef?: MutableRefObject<number>
+) => {
     const time = useRef(0);
+    const usedTimeRef = timeRef || time;
 
-    const lock = useRef(false);
-    const index = useRef(0);
-    const [remainingInstructions, setRemainingInstructions] = useState(instructions);
-
-    useEffect(() => {
-        lock.current = false;
-    }, [remainingInstructions]);
-
-    useEffect(() => {
-        index.current = 0;
-        setRemainingInstructions(instructions);
-    }, [instructions]);
+    const lastTime = useRef(0);
 
     useDeltaBeforeRender((scene, deltaS) => {
-        time.current += deltaS * 1000;
+        usedTimeRef.current += deltaS * 1000;
 
-        if (lock.current) return;
+        if (lastTime.current > usedTimeRef.current) {
+            lastTime.current = usedTimeRef.current - 1;
+        }
+
+        if (scene.paused) return;
         const instructionsToRemove: T[] = [];
-        remainingInstructions.forEach((instruction) => {
-            if (instruction.at <= time.current) {
-                executorFunction(instruction, index.current);
-                index.current++;
+        instructions.forEach((instruction, index) => {
+            if (instruction.at <= usedTimeRef.current && instruction.at > lastTime.current) {
+                executorFunction(instruction, index);
                 instructionsToRemove.push(instruction);
             }
         });
 
-        if (!instructionsToRemove.length) return;
-
-        lock.current = true;
-        setRemainingInstructions((remainingInstructions) =>
-            remainingInstructions.filter((instruction) => !instructionsToRemove.includes(instruction))
-        );
+        lastTime.current = usedTimeRef.current;
     });
 };

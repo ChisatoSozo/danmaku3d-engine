@@ -31,17 +31,14 @@ export const loadMesh = (
 
             let additionalData: MeshAdditionalData | undefined;
 
-            const URINoExtension = URI.substring(0, URI.lastIndexOf("."));
-            const JSONURI = `${root}${URINoExtension}.json`;
-            const response = await fetch(JSONURI);
-
-            if (response.ok) {
-                try {
-                    const json = await response.json();
-                    additionalData = json;
-                } catch (e) {
-                    //nothing
-                }
+            try {
+                const URINoExtension = URI.substring(0, URI.lastIndexOf("."));
+                const JSONURI = `${root}${URINoExtension}.json`;
+                const response = await fetch(JSONURI);
+                const json = await response.json();
+                additionalData = json;
+            } catch (e) {
+                //nothing
             }
 
             assets.meshes[hash] = {

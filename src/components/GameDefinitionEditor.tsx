@@ -1,12 +1,17 @@
-import { Dispatch, SetStateAction } from "react";
+import { Scene } from "@babylonjs/core";
+import { Dispatch, MutableRefObject, SetStateAction } from "react";
 import { EditorContainer } from "../containers/EditorContainer";
 import { GameDefinition } from "../types/gameDefinition/GameDefinition";
 import { theme } from "../utils/theme";
 import { AssetEditors } from "./AssetEditors/AssetEditors";
 import { StagePhasePicker } from "./StagePhasePicker";
-import { TimelineSection } from "./TimelineSection";
+import { TimelineSection } from "./Timelines/TimelineSection";
 
 interface GameDefinitionEditorProps {
+    paused: boolean;
+    setPaused: Dispatch<SetStateAction<boolean>>;
+    time: MutableRefObject<number>;
+    scene?: Scene;
     gameDefinitionName: string;
     gameDefinition?: GameDefinition;
     setGameDefinition: Dispatch<SetStateAction<GameDefinition | undefined>>;
@@ -20,6 +25,10 @@ interface GameDefinitionEditorProps {
 }
 
 export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
+    paused,
+    setPaused,
+    time,
+    scene,
     gameDefinitionName,
     gameDefinition,
     setGameDefinition,
@@ -34,6 +43,10 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
     if (!gameDefinition) return null;
     return (
         <EditorContainer
+            paused={paused}
+            setPaused={setPaused}
+            time={time}
+            scene={scene}
             gameDefinitionName={gameDefinitionName}
             overrideGameDefinition={overrideGameDefinition}
             setOverrideGameDefinition={setOverrideGameDefinition}

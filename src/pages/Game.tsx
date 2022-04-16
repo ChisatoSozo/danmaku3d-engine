@@ -1,6 +1,6 @@
 import { Scene as BJSScene, Vector3 } from "@babylonjs/core";
 import "@babylonjs/loaders";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Scene } from "react-babylonjs";
 import { useLocation, useMatch } from "react-router-dom";
 import { BindControls } from "../bjs-components/BindControls";
@@ -10,6 +10,7 @@ import { GameDefinitionEditor } from "../components/GameDefinitionEditor";
 import { Overlay } from "../components/Overlay";
 import { GameContainer } from "../containers/GameContainer";
 import Engine from "../forks/Engine";
+import { PausableScene } from "../hooks/useDeltaBeforeRender";
 import { useLoadGame } from "../hooks/useLoadGame";
 import { useWindowSize } from "../hooks/useWindowSize";
 import { GameDefinition } from "../types/gameDefinition/GameDefinition";
@@ -30,6 +31,8 @@ export const Game = () => {
     const [gameDefinition, setGameDefinition] = useState<GameDefinition>();
     const [overrideGameDefinition, setOverrideGameDefinition] = useState<GameDefinition>();
     const [assetToReload, setAssetToReload] = useState<string>();
+    const [paused, setPaused] = useState(false);
+    const time = useRef(0);
 
     const gameDefinitionToUse = useMemo(() => {
         if (overrideGameDefinition) {
@@ -40,6 +43,11 @@ export const Game = () => {
     }, [gameDefinition, overrideGameDefinition]);
 
     const [scene, setScene] = useState<BJSScene>();
+
+    useEffect(() => {
+        if (!scene) return;
+        (scene as PausableScene).paused = paused;
+    }, [scene, paused]);
 
     const gameLoaderOutput = useLoadGame(gameDefinitionToUse, name, assetToReload, scene);
 
@@ -62,6 +70,10 @@ export const Game = () => {
             {editing && (
                 <Overlay>
                     <GameDefinitionEditor
+                        paused={paused}
+                        setPaused={setPaused}
+                        time={time}
+                        scene={scene}
                         gameDefinitionName={name}
                         gameDefinition={gameDefinition}
                         setGameDefinition={setGameDefinition}
@@ -95,9 +107,10 @@ export const Game = () => {
                     gameLoaderOutput.loadedAssets &&
                     !gameLoaderOutput.loadingAssets &&
                     gameDefinitionToUse ? (
-                        <GameContainer assets={gameLoaderOutput.loadedAssets}>
+                        <GameContainer assets={gameLoaderOutput.loadedAssets} paused={paused} setPaused={setPaused}>
                             <BindControls />
                             <Stage
+                                time={time}
                                 currentStage={currentStage}
                                 setCurrentStage={setCurrentStage}
                                 currentPhase={currentPhase}

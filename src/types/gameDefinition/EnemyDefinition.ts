@@ -1,5 +1,5 @@
 import { BulletPatternAssetDefinition } from "./AssetDefinition";
-import { Instruction } from "./CommonDefinition";
+import { EditorInstruction } from "./CommonDefinition";
 import { IVector3 } from "./UtilTypes";
 
 export type EnemyMoveToInstruction = {
@@ -8,11 +8,17 @@ export type EnemyMoveToInstruction = {
     speed: number;
 };
 
+export const makeMoveToInstruction = (): EnemyMoveToInstruction => ({
+    type: "moveTo",
+    position: { x: 5, y: 5, z: 0 },
+    speed: 1,
+});
+
 export type EnemyAttackInstruction = {
     type: "attack";
     bulletPattern: BulletPatternAssetDefinition;
 };
 
-type BaseEnemyInstruction = EnemyMoveToInstruction | EnemyAttackInstruction;
+export type BaseEnemyInstruction = EnemyMoveToInstruction | EnemyAttackInstruction;
 
-export type EnemyInstruction = BaseEnemyInstruction & Instruction;
+export type EnemyInstruction = BaseEnemyInstruction & EditorInstruction;

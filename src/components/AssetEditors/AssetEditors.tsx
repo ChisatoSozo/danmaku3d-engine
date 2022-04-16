@@ -2,16 +2,26 @@ import { Dispatch, SetStateAction, useEffect } from "react";
 import { useEditor } from "../../containers/EditorContainer";
 import { AssetType } from "../../types/gameDefinition/AssetDefinition";
 import { BulletPatternDefinition } from "../../types/gameDefinition/BulletPatternDefinition";
-import { GameDefinition, makeGameDefinition } from "../../types/gameDefinition/GameDefinition";
+import { GameDefinition, makeGameDefinition, SpawnEnemyInstruction } from "../../types/gameDefinition/GameDefinition";
 import { assetHost } from "../../utils/Utils";
 import { AssetBrowser } from "./AssetBrowser";
 import { AssetViewer } from "./AssetViewer";
 import { DetailsPane } from "./DetailsPane";
 
-export interface ViewableAsset {
-    assetURL: string;
-    assetType: AssetType;
-}
+export type SpawnEnemyInstructionViewable = {
+    spawnEnemyInstruction: SpawnEnemyInstruction;
+    instructionIndex: number;
+    phase: number;
+    stage: number;
+    assetType: "spawnEnemyInstruction";
+};
+
+export type ViewableAsset =
+    | {
+          assetURL: string;
+          assetType: AssetType;
+      }
+    | SpawnEnemyInstructionViewable;
 
 interface AssetEditorsProps {
     gameDefinition: GameDefinition;
@@ -67,6 +77,7 @@ export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setG
                     instructions: [
                         {
                             at: 0,
+                            _editorTrack: 1,
                             type: "attack",
                             bulletPattern: {
                                 isAsset: true,

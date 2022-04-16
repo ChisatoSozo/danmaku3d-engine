@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useContext, useEffect } from "react";
+import { AnimationsContext } from "../containers/AnimationsContext";
 import { ControlsContext } from "../containers/ControlsContext";
-import { PauseContext } from "../containers/PauseContext";
 
 interface ControlsToStateProps {
     setFocused: Dispatch<SetStateAction<boolean>>;
@@ -8,7 +8,7 @@ interface ControlsToStateProps {
 
 export const ControlsToState: React.FC<ControlsToStateProps> = ({ setFocused }) => {
     const { downKeys } = useContext(ControlsContext);
-    const { setPaused } = useContext(PauseContext);
+    const { setPaused } = useContext(AnimationsContext);
     useEffect(() => {
         if (downKeys.MENU) {
             setPaused((paused) => !paused);

@@ -1,8 +1,19 @@
-import { createContext, Dispatch, SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { Scene } from "@babylonjs/core";
+import {
+    createContext,
+    Dispatch,
+    MutableRefObject,
+    SetStateAction,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+} from "react";
 import { ViewableAsset } from "../components/AssetEditors/AssetEditors";
 import { AssetType } from "../types/gameDefinition/AssetDefinition";
 import { BulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
-import { GameDefinition } from "../types/gameDefinition/GameDefinition";
+import { GameDefinition, SpawnEnemyInstruction } from "../types/gameDefinition/GameDefinition";
 import { assetHost } from "../utils/Utils";
 
 interface GameDetails {
@@ -26,7 +37,15 @@ interface BulletPatternDetails {
     bulletPattern: BulletPatternDefinition;
 }
 
-type SelectedDetails = GameDetails | StageDetails | PhaseDetails | BulletPatternDetails;
+interface EnemyInstructionDetails {
+    type: "spawnEnemyInstruction";
+    stage: number;
+    phase: number;
+    instructionIndex: number;
+    spawnEnemyInstruction: SpawnEnemyInstruction;
+}
+
+type SelectedDetails = GameDetails | StageDetails | PhaseDetails | BulletPatternDetails | EnemyInstructionDetails;
 interface AssetFiles {
     meshes: string[];
     sounds: string[];
@@ -44,6 +63,10 @@ export const assetTypeToAssetFileMap: { [key in AssetType]?: keyof AssetFiles } 
 };
 
 interface IEditorContext {
+    paused: boolean;
+    setPaused: Dispatch<SetStateAction<boolean>>;
+    time: MutableRefObject<number>;
+    scene?: Scene;
     gameDefinitionName: string;
     gameDefinition: GameDefinition | undefined;
     setGameDefinition: Dispatch<SetStateAction<GameDefinition | undefined>>;
@@ -59,6 +82,9 @@ interface IEditorContext {
 }
 
 const makeDefaultIEditor = (): IEditorContext => ({
+    paused: false,
+    setPaused: () => {},
+    time: { current: 0 },
     gameDefinitionName: "",
     overrideGameDefinition: undefined,
     gameDefinition: undefined,
@@ -78,6 +104,10 @@ export const useEditor = () => {
 };
 
 interface EditorContainerProps {
+    paused: boolean;
+    setPaused: Dispatch<SetStateAction<boolean>>;
+    time: MutableRefObject<number>;
+    scene?: Scene;
     gameDefinitionName: string;
     overrideGameDefinition: GameDefinition | undefined;
     setOverrideGameDefinition: Dispatch<SetStateAction<GameDefinition | undefined>>;
@@ -87,6 +117,10 @@ interface EditorContainerProps {
 }
 
 export const EditorContainer: React.FC<EditorContainerProps> = ({
+    paused,
+    setPaused,
+    time,
+    scene,
     children,
     gameDefinitionName,
     overrideGameDefinition,
@@ -139,6 +173,10 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
 
     const editorContextValue = useMemo(
         () => ({
+            paused,
+            setPaused,
+            time,
+            scene,
             gameDefinitionName,
             selectedDetails,
             setSelectedDetails,
@@ -153,6 +191,10 @@ export const EditorContainer: React.FC<EditorContainerProps> = ({
             setCurrentAsset,
         }),
         [
+            paused,
+            setPaused,
+            time,
+            scene,
             gameDefinitionName,
             selectedDetails,
             assetFiles,
