@@ -14,6 +14,7 @@ import { ViewableAsset } from "../components/AssetEditors/AssetEditors";
 import { AssetType } from "../types/gameDefinition/AssetDefinition";
 import { BulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
 import { GameDefinition, SpawnEnemyInstruction } from "../types/gameDefinition/GameDefinition";
+import gameDefinitionSchema from "../types/gameDefinition/GameDefinition.json";
 import { assetHost } from "../utils/Utils";
 
 interface GameDetails {
@@ -45,7 +46,22 @@ interface EnemyInstructionDetails {
     spawnEnemyInstruction: SpawnEnemyInstruction;
 }
 
-type SelectedDetails = GameDetails | StageDetails | PhaseDetails | BulletPatternDetails | EnemyInstructionDetails;
+interface SingleEnemyInstructionDetails {
+    type: "singleEnemyInstruction";
+    stage: number;
+    phase: number;
+    instructionIndex: number;
+    enemyInstructionIndex: number;
+    schemaIndex: keyof typeof gameDefinitionSchema.definitions;
+}
+
+type SelectedDetails =
+    | GameDetails
+    | StageDetails
+    | PhaseDetails
+    | BulletPatternDetails
+    | EnemyInstructionDetails
+    | SingleEnemyInstructionDetails;
 interface AssetFiles {
     meshes: string[];
     sounds: string[];

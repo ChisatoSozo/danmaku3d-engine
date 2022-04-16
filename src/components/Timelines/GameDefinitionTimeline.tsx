@@ -21,7 +21,7 @@ export type InstructionPoint = {
 };
 
 export const GameDefinitionTimeline: React.FC<GameDefinitionTimelineProps> = ({ currentStage, currentPhase }) => {
-    const { gameDefinition, setGameDefinition, setCurrentAsset, setSelectedDetails } = useEditor();
+    const { gameDefinition, setGameDefinition, setCurrentAsset, setSelectedDetails, time } = useEditor();
 
     const instructions = useMemo(
         () => gameDefinition?.stages[currentStage].phases[currentPhase].instructions,
@@ -56,8 +56,9 @@ export const GameDefinitionTimeline: React.FC<GameDefinitionTimelineProps> = ({ 
                 stage: currentStage,
                 spawnEnemyInstruction: instruction as unknown as SpawnEnemyInstruction,
             });
+            time.current = 0;
         },
-        [currentPhase, currentStage, setCurrentAsset, setSelectedDetails]
+        [currentPhase, currentStage, setCurrentAsset, setSelectedDetails, time]
     );
 
     return instructions ? (

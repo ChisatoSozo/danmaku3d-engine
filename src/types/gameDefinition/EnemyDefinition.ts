@@ -1,3 +1,4 @@
+import { defaultAssets } from "../../utils/DefaultAssets";
 import { BulletPatternAssetDefinition } from "./AssetDefinition";
 import { EditorInstruction } from "./CommonDefinition";
 import { IVector3 } from "./UtilTypes";
@@ -19,6 +20,23 @@ export type EnemyAttackInstruction = {
     bulletPattern: BulletPatternAssetDefinition;
 };
 
-export type BaseEnemyInstruction = EnemyMoveToInstruction | EnemyAttackInstruction;
+export const makeEnemyAttackInstruction = (): EnemyAttackInstruction => ({
+    type: "attack",
+    bulletPattern: {
+        type: "bulletPattern",
+        isAsset: true,
+        url: defaultAssets.bulletPattern,
+    },
+});
+
+export type EnemyLeaveInstruction = {
+    type: "leave";
+};
+
+export const makeEnemyLeaveInstruction = (): EnemyLeaveInstruction => ({
+    type: "leave",
+});
+
+export type BaseEnemyInstruction = EnemyMoveToInstruction | EnemyAttackInstruction | EnemyLeaveInstruction;
 
 export type EnemyInstruction = BaseEnemyInstruction & EditorInstruction;

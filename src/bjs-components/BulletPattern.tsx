@@ -38,6 +38,7 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
     const timingsAsset = useTimingAsset(bulletPatternAsset.timings);
 
     const [mesh, setMesh] = useState<Mesh>();
+    const transformNodeRef = useRef<TransformNode>();
 
     const count = useMemo(
         () => bulletPatternAsset.initialPositions.generator._count,
@@ -67,6 +68,9 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
             }
         });
         mesh.parent = null;
+        mesh.position.copyFromFloats(0, 0, 0);
+        mesh.rotation.copyFromFloats(0, 0, 0);
+        mesh.scaling.copyFromFloats(1, 1, 1);
         setMesh(mesh);
     }, []);
 
@@ -77,6 +81,8 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         if (!scene) return;
         if (!bulletMaterialAsset) return;
         if (!mesh) return;
+        const parent = transformNodeRef.current;
+        if (!parent) return;
 
         const newVersion = bulletMaterialAssetVersions[bulletMaterialAsset.shader] ?? 0;
         bulletMaterialAssetVersions[bulletMaterialAsset.shader] = newVersion + 1;
@@ -98,6 +104,8 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         material.setTexture("velocitySampler", _startVelocitiesState);
         material.setTexture("collisionSampler", _startCollisionsState);
         material.setFloat("timeSinceStart", timeSinceStart.current);
+        material.setFloat("size", bulletPatternAsset.size);
+        material.setVector3("parentPosition", parent.getAbsolutePosition());
 
         makeInstances(mesh, bulletPatternAsset.initialPositions.generator._count);
 
@@ -119,6 +127,8 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
                     texture.setTexture("initialVelocitySampler", initialVelocitiesSampler);
                     texture.setTexture("timingsSampler", timingsAsset);
                     texture.setFloat("timeSinceStart", timeSinceStart.current);
+                    texture.setVector3("parentPosition", parent.getAbsolutePosition());
+                    texture.setFloat("size", bulletPatternAsset.size);
                 },
             }),
             material,
@@ -144,9 +154,12 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
 
     useDeltaBeforeRender((scene, deltaS) => {
         if (!dpvcsMaterial) return;
+        const parent = transformNodeRef.current;
+        if (!parent) return;
         timeSinceStart.current += deltaS;
         const updateResult = dpvcsMaterial.dpvcs.update(deltaS, (texture) => {
             texture.setFloat("timeSinceStart", timeSinceStart.current);
+            texture.setVector3("parentPosition", parent.getAbsolutePosition());
         });
 
         if (!updateResult) return;
@@ -157,6 +170,7 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         dpvcsMaterial.material.setTexture("velocitySampler", newVelocities);
         dpvcsMaterial.material.setTexture("collisionSampler", newCollisions);
         dpvcsMaterial.material.setFloat("timeSinceStart", timeSinceStart.current);
+        dpvcsMaterial.material.setVector3("parentPosition", parent.getAbsolutePosition());
     });
 
     useEffect(() => {
@@ -167,5 +181,10 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         };
     }, [dpvcsMaterial]);
 
-    return <MeshFromAssetDefinition onMeshLoaded={setRootNodes} name="" assetDefinition={bulletPatternAsset.mesh} />;
+    return (
+        <>
+            <transformNode name="" ref={transformNodeRef} />
+            <MeshFromAssetDefinition onMeshLoaded={setRootNodes} name="" assetDefinition={bulletPatternAsset.mesh} />
+        </>
+    );
 };

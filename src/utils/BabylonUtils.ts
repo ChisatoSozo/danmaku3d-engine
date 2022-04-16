@@ -22,6 +22,9 @@ export const uniforms = glsl`
     uniform sampler2D initialPositionSampler;
     uniform sampler2D initialVelocitySampler;
     uniform sampler2D timingsSampler;
+
+    uniform float size;
+    uniform vec3 parentPosition;
 `;
 
 export const processUniforms = glsl`

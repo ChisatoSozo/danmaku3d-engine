@@ -15,6 +15,7 @@ import { MeshFromAssetDefinition } from "./MeshFromAssetDefinition";
 
 interface EnemyProps {
     enemyInstruction: SpawnEnemyInstruction;
+    removeMe: () => void;
 }
 
 const useMovement = (
@@ -44,12 +45,13 @@ const useMovement = (
     });
 };
 
-export const Enemy: React.FC<EnemyProps> = ({ enemyInstruction }) => {
+export const Enemy: React.FC<EnemyProps> = ({ enemyInstruction, removeMe }) => {
     const transformNodeRef = useRef<TransformNode>(null);
 
     const [movementInstruction, setMovementInstruction] = useState<EnemyMoveToInstruction>();
     const [bulletPatterns, setBulletPatterns] = useState<KeyedInstruction<EnemyAttackInstruction>[]>([]);
     const position = useVectorMemo(enemyInstruction.position);
+    const [diedOrLeft, setDiedOrLeft] = useState(false);
 
     useExecutor((instruction: EnemyInstruction, index) => {
         if (instruction.type === "moveTo") {
@@ -58,13 +60,16 @@ export const Enemy: React.FC<EnemyProps> = ({ enemyInstruction }) => {
         if (instruction.type === "attack") {
             setBulletPatterns((patterns) => [...patterns, { instruction, key: index }]);
         }
+        if (instruction.type === "leave") {
+            setDiedOrLeft(true);
+        }
     }, enemyInstruction.instructions);
 
     useMovement(movementInstruction, transformNodeRef);
 
     return (
         <transformNode name="" ref={transformNodeRef} position={position}>
-            {!enemyInstruction.hidden && (
+            {!enemyInstruction.hidden && !diedOrLeft && (
                 <transformNode name="" rotation-y={Math.PI}>
                     <MeshFromAssetDefinition name="" assetDefinition={enemyInstruction.asset} />
                 </transformNode>

@@ -185,6 +185,19 @@
       ],
       "type": "object"
     },
+    "BaseEnemyInstruction": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/EnemyMoveToInstruction"
+        },
+        {
+          "$ref": "#/definitions/EnemyAttackInstruction"
+        },
+        {
+          "$ref": "#/definitions/EnemyLeaveInstruction"
+        }
+      ]
+    },
     "BaseStageInstruction": {
       "anyOf": [
         {
@@ -308,16 +321,22 @@
             "required": [
               "at",
               "positionInitializationGLSL",
-              "velocityInitializationGLSL",
               "positionUpdateGLSL",
+              "velocityInitializationGLSL",
               "velocityUpdateGLSL"
             ],
             "type": "object"
           },
           "type": "array"
         },
+        "size": {
+          "type": "number"
+        },
         "timings": {
           "$ref": "#/definitions/TimingAssetDefinition"
+        },
+        "vertex": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
         }
       },
       "required": [
@@ -325,8 +344,10 @@
         "_startPositionsState",
         "_startVelocitiesState",
         "_startCollisionsState",
+        "size",
         "parented",
         "downsampleCollisions",
+        "vertex",
         "material",
         "mesh",
         "initialPositions",
@@ -416,6 +437,22 @@
       ],
       "type": "object"
     },
+    "EditorInstruction": {
+      "additionalProperties": false,
+      "properties": {
+        "_editorTrack": {
+          "type": "number"
+        },
+        "at": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "_editorTrack",
+        "at"
+      ],
+      "type": "object"
+    },
     "EmitterDefinition": {
       "additionalProperties": false,
       "properties": {
@@ -461,6 +498,9 @@
         {
           "additionalProperties": false,
           "properties": {
+            "_editorTrack": {
+              "type": "number"
+            },
             "at": {
               "type": "number"
             },
@@ -476,6 +516,7 @@
             }
           },
           "required": [
+            "_editorTrack",
             "at",
             "position",
             "speed",
@@ -486,6 +527,9 @@
         {
           "additionalProperties": false,
           "properties": {
+            "_editorTrack": {
+              "type": "number"
+            },
             "at": {
               "type": "number"
             },
@@ -498,13 +542,48 @@
             }
           },
           "required": [
+            "_editorTrack",
             "at",
             "bulletPattern",
             "type"
           ],
           "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "_editorTrack": {
+              "type": "number"
+            },
+            "at": {
+              "type": "number"
+            },
+            "type": {
+              "const": "leave",
+              "type": "string"
+            }
+          },
+          "required": [
+            "_editorTrack",
+            "at",
+            "type"
+          ],
+          "type": "object"
         }
       ]
+    },
+    "EnemyLeaveInstruction": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "leave",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
     },
     "EnemyMoveToInstruction": {
       "additionalProperties": false,
@@ -672,6 +751,14 @@
       ],
       "type": "object"
     },
+    "NamedParameters<typeof makeEnemyAttackInstruction>": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "NamedParameters<typeof makeEnemyLeaveInstruction>": {
+      "additionalProperties": false,
+      "type": "object"
+    },
     "NamedParameters<typeof makeFillVectorAssetDefinition>": {
       "additionalProperties": false,
       "type": "object"
@@ -700,7 +787,19 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "NamedParameters<typeof makeMoveToInstruction>": {
+      "additionalProperties": false,
+      "type": "object"
+    },
     "NamedParameters<typeof makePhaseDefinition>": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "NamedParameters<typeof makePlayMusicInstruction>": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "NamedParameters<typeof makeSpawnEnemyInstruction>": {
       "additionalProperties": false,
       "type": "object"
     },
@@ -904,6 +1003,9 @@
         {
           "additionalProperties": false,
           "properties": {
+            "_editorTrack": {
+              "type": "number"
+            },
             "asset": {
               "$ref": "#/definitions/SoundAssetDefinition"
             },
@@ -916,6 +1018,7 @@
             }
           },
           "required": [
+            "_editorTrack",
             "asset",
             "at",
             "type"
@@ -925,6 +1028,9 @@
         {
           "additionalProperties": false,
           "properties": {
+            "_editorTrack": {
+              "type": "number"
+            },
             "asset": {
               "$ref": "#/definitions/MeshAssetDefinition"
             },
@@ -949,6 +1055,7 @@
             }
           },
           "required": [
+            "_editorTrack",
             "asset",
             "at",
             "hidden",
@@ -959,6 +1066,13 @@
           "type": "object"
         }
       ]
+    },
+    "StageInstructionType": {
+      "enum": [
+        "playMusic",
+        "spawnEnemy"
+      ],
+      "type": "string"
     },
     "StageMeshDefinition": {
       "additionalProperties": false,

@@ -96,6 +96,14 @@ export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setG
                 setOverrideGameDefinition(tempGameDefinition);
             }
 
+            if (currentAsset?.assetType === "spawnEnemyInstruction") {
+                const newGameDefinition = makeGameDefinition();
+                newGameDefinition.stages[0].phases[0].instructions = [
+                    { ...currentAsset.spawnEnemyInstruction, at: 0, _editorTrack: 1 },
+                ];
+                setOverrideGameDefinition(newGameDefinition);
+            }
+
             return;
         };
         setOverride();

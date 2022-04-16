@@ -1,8 +1,14 @@
 import { useCallback, useMemo } from "react";
 import { useEditor } from "../../containers/EditorContainer";
 import { EditorInstruction } from "../../types/gameDefinition/CommonDefinition";
-import { EnemyInstruction, makeMoveToInstruction } from "../../types/gameDefinition/EnemyDefinition";
+import {
+    EnemyInstruction,
+    makeEnemyAttackInstruction,
+    makeEnemyLeaveInstruction,
+    makeMoveToInstruction,
+} from "../../types/gameDefinition/EnemyDefinition";
 import { SpawnEnemyInstruction } from "../../types/gameDefinition/GameDefinition";
+import gameDefinitionSchema from "../../types/gameDefinition/GameDefinition.json";
 import { SpawnEnemyInstructionViewable } from "../AssetEditors/AssetEditors";
 import { EditorInstructionTimeline } from "./EditorInstructionTimeline";
 
@@ -16,10 +22,23 @@ export type InstructionPoint = {
     phaseInstructionIndex: number;
 };
 
+const schemaMap: { [key in EnemyInstruction["type"]]: keyof typeof gameDefinitionSchema.definitions } = {
+    moveTo: "EnemyMoveToInstruction",
+    attack: "EnemyAttackInstruction",
+    leave: "EnemyLeaveInstruction",
+};
+
 export const SpawnEnemyInstructionTimeline: React.FC<SpawnEnemyInstructionTimelineProps> = ({
     spawnEnemyInstructionViewable,
 }) => {
-    const { gameDefinition, setGameDefinition, overrideGameDefinition, setOverrideGameDefinition } = useEditor();
+    const {
+        gameDefinition,
+        setGameDefinition,
+        overrideGameDefinition,
+        setOverrideGameDefinition,
+        time,
+        setSelectedDetails,
+    } = useEditor();
     const { phase: phaseIndex, stage: stageIndex, instructionIndex } = spawnEnemyInstructionViewable;
 
     const instructions = useMemo(
@@ -39,42 +58,24 @@ export const SpawnEnemyInstructionTimeline: React.FC<SpawnEnemyInstructionTimeli
             const updatedGameDefinition = { ...gameDefinition };
             const updatedOverrideGameDefinition = { ...overrideGameDefinition };
             (
-                gameDefinition.stages[stageIndex].phases[phaseIndex].instructions[
+                updatedGameDefinition.stages[stageIndex].phases[phaseIndex].instructions[
                     instructionIndex
                 ] as SpawnEnemyInstruction
             ).instructions = instructions as unknown as EnemyInstruction[];
 
-            (
-                gameDefinition.stages[stageIndex].phases[phaseIndex].instructions[
-                    instructionIndex
-                ] as SpawnEnemyInstruction
-            ).instructions = [
-                ...(
-                    gameDefinition.stages[stageIndex].phases[phaseIndex].instructions[
-                        instructionIndex
-                    ] as SpawnEnemyInstruction
-                ).instructions,
-            ];
+            (updatedOverrideGameDefinition.stages[0].phases[0].instructions[0] as SpawnEnemyInstruction).instructions =
+                [
+                    ...(updatedOverrideGameDefinition.stages[0].phases[0].instructions[0] as SpawnEnemyInstruction)
+                        .instructions,
+                ];
 
-            gameDefinition.stages[stageIndex].phases[phaseIndex].instructions = [
-                ...gameDefinition.stages[stageIndex].phases[phaseIndex].instructions,
-            ];
-
-            (
-                overrideGameDefinition.stages[stageIndex].phases[phaseIndex].instructions[0] as SpawnEnemyInstruction
-            ).instructions = [
-                ...(
-                    overrideGameDefinition.stages[stageIndex].phases[phaseIndex]
-                        .instructions[0] as SpawnEnemyInstruction
-                ).instructions,
-            ];
-
-            overrideGameDefinition.stages[stageIndex].phases[phaseIndex].instructions = [
-                ...overrideGameDefinition.stages[stageIndex].phases[phaseIndex].instructions,
+            updatedOverrideGameDefinition.stages[0].phases[0].instructions = [
+                ...updatedOverrideGameDefinition.stages[0].phases[0].instructions,
             ];
 
             setGameDefinition(updatedGameDefinition);
             setOverrideGameDefinition(updatedOverrideGameDefinition);
+            time.current = 0;
         },
         [
             gameDefinition,
@@ -84,7 +85,24 @@ export const SpawnEnemyInstructionTimeline: React.FC<SpawnEnemyInstructionTimeli
             instructionIndex,
             setGameDefinition,
             setOverrideGameDefinition,
+            time,
         ]
+    );
+
+    const instructionClicked = useCallback(
+        (editorInstruction: EditorInstruction, instructionIndex: number) => {
+            const instruction = editorInstruction as EnemyInstruction;
+            setSelectedDetails({
+                type: "singleEnemyInstruction",
+                instructionIndex: spawnEnemyInstructionViewable.instructionIndex,
+                enemyInstructionIndex: instructionIndex,
+                phase: phaseIndex,
+                stage: stageIndex,
+                schemaIndex: schemaMap[instruction.type],
+            });
+            time.current = 0;
+        },
+        [phaseIndex, setSelectedDetails, spawnEnemyInstructionViewable.instructionIndex, stageIndex, time]
     );
 
     return instructions ? (
@@ -93,12 +111,25 @@ export const SpawnEnemyInstructionTimeline: React.FC<SpawnEnemyInstructionTimeli
                 {
                     accessor: "moveTo",
                     label: "Move To",
-                    color: "#00ff00",
+                    color: "#aaaaaa",
                     instructionGenerator: makeMoveToInstruction,
+                },
+                {
+                    accessor: "attack",
+                    label: "Attack",
+                    color: "#ff0000",
+                    instructionGenerator: makeEnemyAttackInstruction,
+                },
+                {
+                    accessor: "leave",
+                    label: "Leave",
+                    color: "#ffff00",
+                    instructionGenerator: makeEnemyLeaveInstruction,
                 },
             ]}
             instructions={instructions}
             setInstructions={setInstructions}
+            instructionClicked={instructionClicked}
         />
     ) : null;
 };

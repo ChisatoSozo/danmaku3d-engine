@@ -1,1 +1,1 @@
-updatedValue = initialPosition;
+updatedValue = initialPosition + parentPosition;

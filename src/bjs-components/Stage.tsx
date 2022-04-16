@@ -39,6 +39,10 @@ export const Stage: React.FC<StageProps> = ({
     const [enemies, setEnemies] = useState<KeyedInstruction<SpawnEnemyInstruction>[]>([]);
     const lastTime = useRef(0);
 
+    const removeEnemy = (enemy: KeyedInstruction<SpawnEnemyInstruction>) => {
+        setEnemies((enemies) => enemies.filter((e) => e.key !== enemy.key));
+    };
+
     useDeltaBeforeRender(() => {
         if (!time) return;
         if (time.current < lastTime.current) {
@@ -83,7 +87,7 @@ export const Stage: React.FC<StageProps> = ({
                 <Music key={music.key} musicInstruction={music.instruction} />
             ))}
             {enemies.map((enemy) => (
-                <Enemy key={enemy.key} enemyInstruction={enemy.instruction} />
+                <Enemy key={enemy.key} enemyInstruction={enemy.instruction} removeMe={() => removeEnemy(enemy)} />
             ))}
             {gameDefinition.playableCharacters.length > 0 ? (
                 <PlayerMovement

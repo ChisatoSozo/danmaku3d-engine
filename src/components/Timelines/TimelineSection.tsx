@@ -1,4 +1,6 @@
+import { useEditor } from "../../containers/EditorContainer";
 import { theme } from "../../utils/theme";
+import { SpawnEnemyInstructionTimeline } from "./EnemyInstructionTimeline";
 import { GameDefinitionTimeline } from "./GameDefinitionTimeline";
 
 interface TimelineSectionProps {
@@ -6,7 +8,8 @@ interface TimelineSectionProps {
     currentPhase: number;
 }
 
-export const TimelineSection: React.FC<TimelineSectionProps> = ({ currentStage, currentPhase, children }) => {
+export const TimelineSection: React.FC<TimelineSectionProps> = ({ currentStage, currentPhase }) => {
+    const { currentAsset } = useEditor();
     return (
         <div
             style={{
@@ -19,7 +22,11 @@ export const TimelineSection: React.FC<TimelineSectionProps> = ({ currentStage, 
                 pointerEvents: "all",
             }}
         >
-            <GameDefinitionTimeline currentStage={currentStage} currentPhase={currentPhase} />
+            {currentAsset?.assetType === "spawnEnemyInstruction" ? (
+                <SpawnEnemyInstructionTimeline spawnEnemyInstructionViewable={currentAsset} />
+            ) : (
+                <GameDefinitionTimeline currentStage={currentStage} currentPhase={currentPhase} />
+            )}
         </div>
     );
 };

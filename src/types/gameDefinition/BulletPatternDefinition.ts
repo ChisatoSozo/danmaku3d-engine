@@ -50,6 +50,7 @@ export type BulletPatternDefinition = {
     _startVelocitiesState: VectorAssetDefinition;
     _startCollisionsState: VectorAssetDefinition;
 
+    size: number;
     parented: boolean;
     downsampleCollisions: boolean;
     vertex: GLSLAssetDefinition;
@@ -70,6 +71,7 @@ export type BulletPatternDefinition = {
 
 export const makeBulletPatternDefinition = (refURL: string): BulletPatternDefinition => ({
     _url: refURL,
+    size: 0.2,
     parented: false,
     downsampleCollisions: true,
     vertex: makeGLSLAssetDefinition("standardVertex.vs", "vertex"),

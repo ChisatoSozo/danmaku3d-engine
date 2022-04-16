@@ -24,7 +24,7 @@ export const useExecutor = <T extends Instruction>(
         if (scene.paused) return;
         const instructionsToRemove: T[] = [];
         instructions.forEach((instruction, index) => {
-            if (instruction.at <= usedTimeRef.current && instruction.at > lastTime.current) {
+            if (instruction.at <= usedTimeRef.current && instruction.at >= lastTime.current) {
                 executorFunction(instruction, index);
                 instructionsToRemove.push(instruction);
             }

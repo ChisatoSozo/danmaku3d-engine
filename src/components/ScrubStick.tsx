@@ -1,5 +1,5 @@
 import { BubbleDataPoint, ScatterDataPoint } from "chart.js";
-import { MutableRefObject, useCallback, useMemo, useRef } from "react";
+import { MutableRefObject, useCallback, useRef } from "react";
 import { ChartJSOrUndefined } from "react-chartjs-2/dist/types";
 import { useEveryFrame } from "../hooks/useEveryFrame";
 
@@ -11,12 +11,6 @@ interface ScrubStickProps {
 export const ScrubStick: React.FC<ScrubStickProps> = ({ chart, xRef }) => {
     const handleRef = useRef<HTMLDivElement>(null);
     const divRef = useRef<HTMLDivElement>(null);
-    const height = useMemo(() => {
-        if (!chart) return 0;
-        const top = chart.chartArea.top;
-        const bottom = chart.chartArea.bottom;
-        return bottom - top;
-    }, [chart]);
 
     const update = useCallback(() => {
         if (!chart) return;
@@ -111,8 +105,8 @@ export const ScrubStick: React.FC<ScrubStickProps> = ({ chart, xRef }) => {
                 style={{
                     position: "absolute",
                     zIndex: 1,
-                    width: "2px",
-                    height: height,
+                    width: "1px",
+                    height: "250px",
                     backgroundColor: "white",
                 }}
             />

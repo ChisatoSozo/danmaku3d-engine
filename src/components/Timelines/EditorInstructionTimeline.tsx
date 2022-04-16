@@ -42,7 +42,7 @@ export const EditorInstructionTimeline: React.FC<EditorInstructionTimelineProps>
 }) => {
     const { width, height, ref } = useResizeDetector();
     const { time, scene, paused, setPaused } = useEditor();
-    const [instructionToAdd, setInstructionToAdd] = useState<StageInstructionType>("spawnEnemy");
+    const [instructionToAdd, setInstructionToAdd] = useState<string>(instructionTypes[0].accessor);
 
     const dataTypes = useMemo(() => {
         const dataTypes: { [key: string]: InstructionPoint[] } = {};
@@ -116,7 +116,7 @@ export const EditorInstructionTimeline: React.FC<EditorInstructionTimelineProps>
 
             setInstructions([...instructions, stageInstruction]);
         },
-        [instructionClicked, instructionToAdd, instructions, setInstructions]
+        [instructionClicked, instructionToAdd, instructionTypes, instructions, setInstructions]
     );
 
     const chartRightClicked = useCallback(

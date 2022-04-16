@@ -36,11 +36,6 @@ export const Timeline: React.FC<TimelineProps> = ({
         datapointChangedRef.current = datapointChanged;
     }, [datapointChanged]);
 
-    const chartClickedRef = useRef(chartClicked);
-    useEffect(() => {
-        chartClickedRef.current = chartClicked;
-    }, [chartClicked]);
-
     const chartRef = useRef<
         ChartJSOrUndefined<"scatter", (number | ScatterDataPoint | BubbleDataPoint | null)[], unknown> | undefined
     >();
@@ -92,51 +87,57 @@ export const Timeline: React.FC<TimelineProps> = ({
 
             const roundedY = Math.round(7 - newY);
 
+            if (roundedY < 1) return;
             chartRightClicked({ x: newX, y: roundedY });
         },
         [chartRightClicked]
     );
 
-    const options = useMemo(
+    const handleClick: MouseEventHandler<HTMLDivElement> = useCallback(
+        (event) => {
+            if (!chartRef.current) return;
+            if (!event.nativeEvent) return;
+            if (!chartClicked) return;
+            const nativeEvent = event.nativeEvent as PointerEvent;
+            const chart = chartRef.current;
+            const yTop = chart.chartArea.top;
+            const yBottom = chart.chartArea.bottom;
+
+            const yMin = chart.scales["yAxis"].min;
+            const yMax = chart.scales["yAxis"].max;
+            let newY = 0;
+
+            if (nativeEvent.offsetY <= yBottom && nativeEvent.offsetY >= yTop) {
+                newY = Math.abs((nativeEvent.offsetY - yTop) / (yBottom - yTop));
+                newY = (newY - 1) * -1;
+                newY = newY * Math.abs(yMax - yMin) + yMin;
+            }
+
+            const xTop = chart.chartArea.left;
+            const xBottom = chart.chartArea.right;
+            const xMin = chart.scales["xAxis"].min;
+            const xMax = chart.scales["xAxis"].max;
+            let newX = 0;
+
+            if (nativeEvent.offsetX <= xBottom && nativeEvent.offsetX >= xTop) {
+                newX = Math.abs((nativeEvent.offsetX - xTop) / (xBottom - xTop));
+                newX = newX * Math.abs(xMax - xMin) + xMin;
+            }
+
+            const roundedY = Math.round(7 - newY);
+
+            if (roundedY < 1) return;
+            chartClicked({ x: newX, y: roundedY });
+        },
+        [chartClicked]
+    );
+
+    const options = useMemo<ChartOptions<"scatter">>(
         () =>
             ({
                 maintainAspectRatio: false,
                 animation: {
                     duration: 0,
-                },
-                onClick: (event) => {
-                    if (!chartRef.current) return;
-                    if (!chartClickedRef.current) return;
-                    if (!event.native) return;
-                    const nativeEvent = event.native as PointerEvent;
-                    const chart = chartRef.current;
-                    const yTop = chart.chartArea.top;
-                    const yBottom = chart.chartArea.bottom;
-
-                    const yMin = chart.scales["yAxis"].min;
-                    const yMax = chart.scales["yAxis"].max;
-                    let newY = 0;
-
-                    if (nativeEvent.offsetY <= yBottom && nativeEvent.offsetY >= yTop) {
-                        newY = Math.abs((nativeEvent.offsetY - yTop) / (yBottom - yTop));
-                        newY = (newY - 1) * -1;
-                        newY = newY * Math.abs(yMax - yMin) + yMin;
-                    }
-
-                    const xTop = chart.chartArea.left;
-                    const xBottom = chart.chartArea.right;
-                    const xMin = chart.scales["xAxis"].min;
-                    const xMax = chart.scales["xAxis"].max;
-                    let newX = 0;
-
-                    if (nativeEvent.offsetX <= xBottom && nativeEvent.offsetX >= xTop) {
-                        newX = Math.abs((nativeEvent.offsetX - xTop) / (xBottom - xTop));
-                        newX = newX * Math.abs(xMax - xMin) + xMin;
-                    }
-
-                    const roundedY = Math.round(7 - newY);
-
-                    chartClickedRef.current({ x: newX, y: roundedY });
                 },
                 scales: {
                     xAxis: {
@@ -146,6 +147,10 @@ export const Timeline: React.FC<TimelineProps> = ({
                             color: theme.colors.chartLines,
                         },
                         ticks: {
+                            callback: function (value) {
+                                return Math.round(parseFloat(value.toString()));
+                            },
+                            maxTicksLimit: 40,
                             color: theme.colors.text, // labels such as 10, 20, etc
                             showLabelBackdrop: false, // hide square behind text
                         },
@@ -213,7 +218,7 @@ export const Timeline: React.FC<TimelineProps> = ({
     const data = useMemo(() => ({ datasets }), [datasets]);
 
     return (
-        <div style={{ position: "relative" }} onContextMenu={handleRightClick}>
+        <div style={{ position: "relative" }} onContextMenu={handleRightClick} onClick={handleClick}>
             {chartStateRef && <ScrubStick chart={chartStateRef} xRef={timeRef} />}
             <Scatter
                 ref={(ref) => setChartStateRef(ref)}
