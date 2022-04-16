@@ -42,17 +42,29 @@
                     "instructions": [
                         {
                             "at": 0,
+                            "_editorTrack": 1,
                             "type": "playMusic",
-                            "asset": { "isAsset": true, "type": "sound", "url": "eternalMelody.mp3" }
+                            "asset": {
+                                "isAsset": true,
+                                "type": "sound",
+                                "url": "Dolls in Pseudo Paradise - Eternal Shrine Maiden.mp3"
+                            }
                         },
                         {
                             "at": 1000,
+                            "_editorTrack": 1,
                             "type": "spawnEnemy",
                             "hidden": false,
                             "asset": { "isAsset": true, "type": "mesh", "url": "blueFairy.glb" },
                             "position": { "x": 0, "y": 0, "z": 0 },
                             "instructions": [
-                                { "at": 1000, "type": "moveTo", "position": { "x": 10, "y": 10, "z": 0 }, "speed": 1 }
+                                {
+                                    "at": 1000,
+                                    "_editorTrack": 1,
+                                    "type": "moveTo",
+                                    "position": { "x": 10, "y": 10, "z": 0 },
+                                    "speed": 1
+                                }
                             ]
                         }
                     ]

@@ -153,7 +153,7 @@ export const GLSLViewer: React.FC<GLSLViewerProps> = ({ gameDefinitionName, url 
                             fontSize: 12,
                             fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
                             width: "100%",
-                            height: "100%",
+                            minHeight: "100%",
                         }}
                     />
                 </div>

@@ -4,7 +4,7 @@ uniform vec3 cameraPosition;
 
 void main() {
   vec3 color = vec3(1., 1., 1.);
-  vec3 toColor = vec3(0., 0., 0.);
+  vec3 toColor = vec3(1., 0., 0.);
 
   vec3 vNormalW2 = vNormalW;
 

@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { useEditor } from "../../containers/EditorContainer";
 import { AssetType } from "../../types/gameDefinition/AssetDefinition";
 import { BulletPatternDefinition } from "../../types/gameDefinition/BulletPatternDefinition";
@@ -19,28 +19,8 @@ interface AssetEditorsProps {
 }
 
 export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setGameDefinition }) => {
-    const { setSelectedDetails, setOverrideGameDefinition, gameDefinitionName } = useEditor();
-    const [currentAssets, setCurrentAssets] = useState<ViewableAsset[]>([]);
-
-    const currentAsset = useMemo(
-        () => (currentAssets.length ? currentAssets[currentAssets.length - 1] : undefined),
-        [currentAssets]
-    );
-    const setCurrentAsset = useCallback((asset: ViewableAsset | undefined) => {
-        if (!asset) {
-            setCurrentAssets((currentAssets) => {
-                if (!currentAssets.length) return currentAssets;
-                const newAssets = [...currentAssets];
-                newAssets.pop();
-                return newAssets;
-            });
-        } else {
-            setCurrentAssets((currentAssets) => {
-                const newAssets = [...currentAssets].filter((a) => a.assetType !== asset.assetType);
-                return [...newAssets, asset];
-            });
-        }
-    }, []);
+    const { setSelectedDetails, setOverrideGameDefinition, gameDefinitionName, currentAsset, setCurrentAsset } =
+        useEditor();
 
     useEffect(() => {
         if (!setOverrideGameDefinition) return;
@@ -53,6 +33,7 @@ export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setG
                 const tempGameDefinition = makeGameDefinition();
                 tempGameDefinition.stages[0].phases[0].instructions.push({
                     at: 0,
+                    _editorTrack: 1,
                     type: "spawnEnemy",
                     position: { x: 0, y: 0, z: 0 },
                     hidden: false,
@@ -74,6 +55,7 @@ export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setG
                 const tempGameDefinition = makeGameDefinition();
                 tempGameDefinition.stages[0].phases[0].instructions.push({
                     at: 0,
+                    _editorTrack: 1,
                     type: "spawnEnemy",
                     position: { x: 0, y: 0, z: 0 },
                     hidden: true,

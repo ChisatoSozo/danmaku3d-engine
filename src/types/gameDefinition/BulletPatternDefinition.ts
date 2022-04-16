@@ -9,6 +9,7 @@ import {
     TimingAssetDefinition,
     VectorAssetDefinition,
 } from "./AssetDefinition";
+import { Instruction } from "./CommonDefinition";
 import { IVector3 } from "./UtilTypes";
 
 export type BaseVectorGenerator = {
@@ -58,13 +59,12 @@ export type BulletPatternDefinition = {
     initialVelocities: VectorAssetDefinition;
     timings: TimingAssetDefinition;
 
-    phases: {
-        at: number;
+    phases: (Instruction & {
         positionInitializationGLSL: GLSLAssetDefinition;
         velocityInitializationGLSL: GLSLAssetDefinition;
         positionUpdateGLSL: GLSLAssetDefinition;
         velocityUpdateGLSL: GLSLAssetDefinition;
-    }[];
+    })[];
     collisionFunctionGLSL: GLSLAssetDefinition;
 };
 

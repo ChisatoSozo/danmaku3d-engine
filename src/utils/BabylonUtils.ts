@@ -1,4 +1,5 @@
 import { Matrix, Mesh, Quaternion, TransformNode, Vector3 } from "@babylonjs/core";
+import { Instruction } from "../types/gameDefinition/CommonDefinition";
 import { MAX_BULLETS_PER_GROUP } from "./EngineConstants";
 
 export const glsl = (template: TemplateStringsArray, ...args: (string | number)[]) => {
@@ -52,8 +53,7 @@ export const otherUniforms = glsl`
     vec3 initialVelocity
 `;
 
-export type BulletPhase = {
-    at: number;
+export type BulletPhase = Instruction & {
     initializationFunction: string;
     updateFunction: string;
 };

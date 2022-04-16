@@ -50,3 +50,7 @@ export const twoLayerCopy = <T extends string>(object: TwoLayerDeepObject<T>) =>
     }
     return copy;
 };
+
+export const camelCaseToSpaces = (str: string) => {
+    return str.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
+};

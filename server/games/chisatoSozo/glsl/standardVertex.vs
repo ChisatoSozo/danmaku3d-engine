@@ -39,7 +39,7 @@ void main() {
   makeRotation(normalize(vec3(instVel)), rotation);
   vec4 rotatedVert = vec4(rotation * position, 1.0);
 
-  float size = 1.0;
+  float size = 0.01;
 
   rotatedVert *= size * 3. + 1.;
 

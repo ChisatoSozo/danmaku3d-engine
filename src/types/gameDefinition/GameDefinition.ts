@@ -1,5 +1,5 @@
 import { MeshAssetDefinition, SoundAssetDefinition } from "./AssetDefinition";
-import { Instruction } from "./CommonDefinition";
+import { EditorInstruction } from "./CommonDefinition";
 import { EnemyInstruction } from "./EnemyDefinition";
 import { PlayableCharacterDefinition } from "./PlayableCharacterDefinition";
 import { IVector3 } from "./UtilTypes";
@@ -19,7 +19,7 @@ export type SpawnEnemyInstruction = {
 
 export type BaseStageInstruction = PlayMusicInstruction | SpawnEnemyInstruction;
 
-export type StageInstruction = BaseStageInstruction & Instruction;
+export type StageInstruction = BaseStageInstruction & EditorInstruction;
 
 export type PhaseDefinition = {
     delayAfter: number;

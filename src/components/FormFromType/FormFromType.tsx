@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Schema } from "ts-json-schema-generator";
+import { camelCaseToSpaces } from "../../utils/Utils";
 import { Category } from "../Category";
 import { BooleanField } from "./BooleanField";
 import { GLSLAssetField } from "./GLSLAssetField";
@@ -51,9 +52,6 @@ type ExtendedSchemaTypeTypes =
 // e.g. "thisIsATest" -> "This Is A Test"
 // e.g. "thisIsANOTHER" -> "This Is ANOTHER"
 // preserves all caps words
-const camelCaseToSpaces = (str: string) => {
-    return str.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
-};
 
 const humanReadableLabel = (label: string | undefined) => {
     if (!label) {

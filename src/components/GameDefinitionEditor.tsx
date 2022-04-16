@@ -3,8 +3,8 @@ import { EditorContainer } from "../containers/EditorContainer";
 import { GameDefinition } from "../types/gameDefinition/GameDefinition";
 import { theme } from "../utils/theme";
 import { AssetEditors } from "./AssetEditors/AssetEditors";
-import { GameDefinitionTimeline } from "./GameDefinitionTimeline";
 import { StagePhasePicker } from "./StagePhasePicker";
+import { TimelineSection } from "./TimelineSection";
 
 interface GameDefinitionEditorProps {
     gameDefinitionName: string;
@@ -83,11 +83,7 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
                         currentPhase={currentPhase}
                         setCurrentPhase={setCurrentPhase}
                     />
-                    <GameDefinitionTimeline
-                        gameDefinition={gameDefinition}
-                        currentStage={currentStage}
-                        currentPhase={currentPhase}
-                    />
+                    <TimelineSection currentStage={currentStage} currentPhase={currentPhase} />
                 </div>
             </div>
         </EditorContainer>
