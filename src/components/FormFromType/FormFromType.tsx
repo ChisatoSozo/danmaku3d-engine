@@ -149,7 +149,7 @@ export const FormFromType: React.FC<FormFromTypeProps> = ({
                             <FormFromType
                                 topLevel={false}
                                 label={`${label}[${i}]`}
-                                key={i}
+                                key={`${label}[${i}]`}
                                 value={valueInst}
                                 setValue={setters[i]}
                                 localSchema={newLocalSchema as Schema}
@@ -175,7 +175,7 @@ export const FormFromType: React.FC<FormFromTypeProps> = ({
                             <FormFromType
                                 topLevel={false}
                                 label={`${label}.${key}`}
-                                key={key}
+                                key={`${label}.${key}`}
                                 value={objectValue[key]}
                                 setValue={setters[i]}
                                 localSchema={property as Schema}

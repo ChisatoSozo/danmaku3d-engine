@@ -17,6 +17,7 @@ interface TimelineProps {
     datasets: ChartDataset<"scatter", (number | ScatterDataPoint | null)[]>[];
     datapointChanged?: (datasetIndex: number, index: number, value: InstructionPoint) => void;
     chartClicked?: (point: { x: number; y: number }) => void;
+    chartDoubleClicked?: (point: { x: number; y: number }) => void;
     chartRightClicked?: (point: { x: number; y: number }) => void;
     width?: number;
     height?: number;
@@ -27,6 +28,7 @@ export const Timeline: React.FC<TimelineProps> = ({
     datasets,
     datapointChanged,
     chartClicked,
+    chartDoubleClicked,
     chartRightClicked,
     width,
     height,
@@ -93,11 +95,11 @@ export const Timeline: React.FC<TimelineProps> = ({
         [chartRightClicked]
     );
 
-    const handleClick: MouseEventHandler<HTMLDivElement> = useCallback(
-        (event) => {
+    const baseHandleClick = useCallback(
+        (event: React.MouseEvent<HTMLDivElement, MouseEvent>, callback?: (point: { x: number; y: number }) => void) => {
             if (!chartRef.current) return;
             if (!event.nativeEvent) return;
-            if (!chartClicked) return;
+            if (!callback) return;
             const nativeEvent = event.nativeEvent as PointerEvent;
             const chart = chartRef.current;
             const yTop = chart.chartArea.top;
@@ -127,9 +129,23 @@ export const Timeline: React.FC<TimelineProps> = ({
             const roundedY = Math.round(7 - newY);
 
             if (roundedY < 1) return;
-            chartClicked({ x: newX, y: roundedY });
+            callback({ x: newX, y: roundedY });
         },
-        [chartClicked]
+        []
+    );
+
+    const handleClick: MouseEventHandler<HTMLDivElement> = useCallback(
+        (event) => {
+            baseHandleClick(event, chartClicked);
+        },
+        [baseHandleClick, chartClicked]
+    );
+
+    const handleDoubleClick: MouseEventHandler<HTMLDivElement> = useCallback(
+        (event) => {
+            baseHandleClick(event, chartDoubleClicked);
+        },
+        [baseHandleClick, chartDoubleClicked]
     );
 
     const options = useMemo<ChartOptions<"scatter">>(
@@ -218,7 +234,12 @@ export const Timeline: React.FC<TimelineProps> = ({
     const data = useMemo(() => ({ datasets }), [datasets]);
 
     return (
-        <div style={{ position: "relative" }} onContextMenu={handleRightClick} onClick={handleClick}>
+        <div
+            style={{ position: "relative" }}
+            onContextMenu={handleRightClick}
+            onClick={handleClick}
+            onDoubleClick={handleDoubleClick}
+        >
             {chartStateRef && <ScrubStick chart={chartStateRef} xRef={timeRef} />}
             <Scatter
                 ref={(ref) => setChartStateRef(ref)}

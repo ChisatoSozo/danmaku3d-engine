@@ -1,6 +1,8 @@
 import { Mesh, ShaderMaterial, TransformNode } from "@babylonjs/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useScene } from "react-babylonjs";
+import { globalUniformRefs } from "../containers/GameContainer";
+import { CustomFloatProceduralTexture } from "../forks/CustomFloatProceduralTexture";
 import { useDeltaBeforeRender } from "../hooks/useDeltaBeforeRender";
 import { useBulletPatternAsset } from "../loaders/bulletPatternLoader";
 import { useGLSLAsset } from "../loaders/glslLoader";
@@ -16,6 +18,11 @@ interface BulletPatternComponentProps {
 }
 
 const bulletMaterialAssetVersions: { [key: string]: number } = {};
+
+const bindGlobalUniformRefs = (bindTo: ShaderMaterial | CustomFloatProceduralTexture) => {
+    bindTo.setVector3("playerPosition", globalUniformRefs.playerPosition);
+    bindTo.setFloat("greyscaleDistance", globalUniformRefs.greyscaleDistance);
+};
 
 export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ bulletPatternDefinition }) => {
     const scene = useScene();
@@ -106,6 +113,7 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         material.setFloat("timeSinceStart", timeSinceStart.current);
         material.setFloat("size", bulletPatternAsset.size);
         material.setVector3("parentPosition", parent.getAbsolutePosition());
+        bindGlobalUniformRefs(material);
 
         makeInstances(mesh, bulletPatternAsset.initialPositions.generator._count);
 
@@ -129,6 +137,7 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
                     texture.setFloat("timeSinceStart", timeSinceStart.current);
                     texture.setVector3("parentPosition", parent.getAbsolutePosition());
                     texture.setFloat("size", bulletPatternAsset.size);
+                    bindGlobalUniformRefs(texture);
                 },
             }),
             material,
@@ -171,6 +180,7 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         dpvcsMaterial.material.setTexture("collisionSampler", newCollisions);
         dpvcsMaterial.material.setFloat("timeSinceStart", timeSinceStart.current);
         dpvcsMaterial.material.setVector3("parentPosition", parent.getAbsolutePosition());
+        bindGlobalUniformRefs(dpvcsMaterial.material);
     });
 
     useEffect(() => {

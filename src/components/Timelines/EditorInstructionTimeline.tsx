@@ -25,6 +25,7 @@ interface EditorInstructionTimelineProps {
     })[];
     setInstructions: (instructions: EditorInstruction[]) => void;
     instructionClicked?: (instruction: EditorInstruction, instructionIndex: number) => void;
+    instructionDoubleClicked?: (instruction: EditorInstruction, instructionIndex: number) => void;
 }
 
 export type InstructionPoint = {
@@ -38,6 +39,7 @@ export const EditorInstructionTimeline: React.FC<EditorInstructionTimelineProps>
     instructions,
     setInstructions,
     instructionClicked,
+    instructionDoubleClicked,
     children,
 }) => {
     const { width, height, ref } = useResizeDetector();
@@ -85,15 +87,18 @@ export const EditorInstructionTimeline: React.FC<EditorInstructionTimelineProps>
         [instructions, setInstructions]
     );
 
-    const chartClicked = useCallback(
-        (point: { x: number; y: number }) => {
+    const chartAnyClicked = useCallback(
+        (
+            point: { x: number; y: number },
+            callback?: (instruction: EditorInstruction, instructionIndex: number) => void
+        ) => {
             const closeToExistingInstructionIndex = instructions.findIndex((instruction) => {
                 return Math.abs(instruction.at - point.x) < 25 && instruction._editorTrack === point.y;
             });
 
             if (closeToExistingInstructionIndex !== -1) {
-                if (instructionClicked) {
-                    instructionClicked(instructions[closeToExistingInstructionIndex], closeToExistingInstructionIndex);
+                if (callback) {
+                    callback(instructions[closeToExistingInstructionIndex], closeToExistingInstructionIndex);
                 }
                 return;
             }
@@ -116,7 +121,21 @@ export const EditorInstructionTimeline: React.FC<EditorInstructionTimelineProps>
 
             setInstructions([...instructions, stageInstruction]);
         },
-        [instructionClicked, instructionToAdd, instructionTypes, instructions, setInstructions]
+        [instructionToAdd, instructionTypes, instructions, setInstructions]
+    );
+
+    const chartClicked = useCallback(
+        (point: { x: number; y: number }) => {
+            chartAnyClicked(point, instructionClicked);
+        },
+        [chartAnyClicked, instructionClicked]
+    );
+
+    const chartDoubleClicked = useCallback(
+        (point: { x: number; y: number }) => {
+            chartAnyClicked(point, instructionDoubleClicked);
+        },
+        [chartAnyClicked, instructionDoubleClicked]
     );
 
     const chartRightClicked = useCallback(
@@ -184,6 +203,7 @@ export const EditorInstructionTimeline: React.FC<EditorInstructionTimelineProps>
                     height={height}
                     datapointChanged={datapointChanged}
                     chartClicked={chartClicked}
+                    chartDoubleClicked={chartDoubleClicked}
                     chartRightClicked={chartRightClicked}
                     datasets={Object.keys(dataTypes).map((dataKey) => {
                         const data = dataTypes[dataKey];

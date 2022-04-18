@@ -42,13 +42,6 @@ export const GameDefinitionTimeline: React.FC<GameDefinitionTimelineProps> = ({ 
 
     const instructionClicked = useCallback(
         (instruction: EditorInstruction, instructionIndex: number) => {
-            setCurrentAsset({
-                spawnEnemyInstruction: instruction as unknown as SpawnEnemyInstruction,
-                instructionIndex: instructionIndex,
-                assetType: "spawnEnemyInstruction",
-                phase: currentPhase,
-                stage: currentStage,
-            });
             setSelectedDetails({
                 type: "spawnEnemyInstruction",
                 instructionIndex,
@@ -56,9 +49,22 @@ export const GameDefinitionTimeline: React.FC<GameDefinitionTimelineProps> = ({ 
                 stage: currentStage,
                 spawnEnemyInstruction: instruction as unknown as SpawnEnemyInstruction,
             });
+        },
+        [currentPhase, currentStage, setSelectedDetails]
+    );
+
+    const instructionDoubleClicked = useCallback(
+        (instruction: EditorInstruction, instructionIndex: number) => {
+            setCurrentAsset({
+                spawnEnemyInstruction: instruction as unknown as SpawnEnemyInstruction,
+                instructionIndex: instructionIndex,
+                assetType: "spawnEnemyInstruction",
+                phase: currentPhase,
+                stage: currentStage,
+            });
             time.current = 0;
         },
-        [currentPhase, currentStage, setCurrentAsset, setSelectedDetails, time]
+        [currentPhase, currentStage, setCurrentAsset, time]
     );
 
     return instructions ? (
@@ -80,6 +86,7 @@ export const GameDefinitionTimeline: React.FC<GameDefinitionTimelineProps> = ({ 
             instructions={instructions}
             setInstructions={setInstructions}
             instructionClicked={instructionClicked}
+            instructionDoubleClicked={instructionDoubleClicked}
         />
     ) : null;
 };
