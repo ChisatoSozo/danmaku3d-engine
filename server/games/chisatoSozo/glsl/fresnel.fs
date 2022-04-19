@@ -19,7 +19,9 @@ void main() {
   float grey = dot(color, vec3(0.299, 0.587, 0.114));
   float greyscale = float(distance(playerPosition, vPositionW) > greyscaleDistance);
 
-  color = greyscale * vec3(grey) + (1. - greyscale) * color;
+  vec3 kindagrey = mix(vec3(grey), color, 0.2);
+
+  color = greyscale * kindagrey + (1. - greyscale) * color;
 
   gl_FragColor = vec4(color, 1.0);
 }

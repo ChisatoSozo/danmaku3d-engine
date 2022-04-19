@@ -78,6 +78,14 @@ app.post("/upload-asset", async (req, res) => {
     }
 });
 
+app.patch("/games/:gameDefinitionName", async (req, res) => {
+    const gameDefinitionName = req.params.gameDefinitionName;
+    const gameDefinition = req.body.gameDefinition;
+    const gameDefinitionPath = path.join(__dirname, `./games/${gameDefinitionName}/definition.json`);
+    await promises.writeFile(gameDefinitionPath, gameDefinition);
+    res.sendStatus(200);
+});
+
 const readDirOrEmpty = async (dir: string) => {
     try {
         const files = await promises.readdir(dir);
@@ -101,6 +109,15 @@ app.get("/listAssets/:gameDefinitionName", async (req, res) => {
     try {
         const assets = await listAssets(gameDefinitionName);
         res.send(assets);
+    } catch (err) {
+        res.send(err);
+    }
+});
+
+app.get("/listGames", async (req, res) => {
+    try {
+        const files = await promises.readdir(path.join(__dirname, "./games/"));
+        res.send(files);
     } catch (err) {
         res.send(err);
     }

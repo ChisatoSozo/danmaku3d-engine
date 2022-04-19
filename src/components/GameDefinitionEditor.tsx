@@ -1,8 +1,9 @@
 import { Scene } from "@babylonjs/core";
-import { Dispatch, MutableRefObject, SetStateAction } from "react";
+import { Dispatch, MutableRefObject, SetStateAction, useEffect } from "react";
 import { EditorContainer } from "../containers/EditorContainer";
 import { GameDefinition } from "../types/gameDefinition/GameDefinition";
 import { theme } from "../utils/theme";
+import { assetHost } from "../utils/Utils";
 import { AssetEditors } from "./AssetEditors/AssetEditors";
 import { StagePhasePicker } from "./StagePhasePicker";
 import { TimelineSection } from "./Timelines/TimelineSection";
@@ -40,7 +41,18 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
     setCurrentPhase,
     setAssetToReload,
 }) => {
+    useEffect(() => {
+        if (gameDefinition) {
+            const formData = new FormData();
+            formData.append("gameDefinition", JSON.stringify(gameDefinition));
+            fetch(`${assetHost}games/${gameDefinitionName}`, {
+                method: "PATCH",
+                body: formData,
+            });
+        }
+    }, [gameDefinition, gameDefinitionName]);
     if (!gameDefinition) return null;
+
     return (
         <EditorContainer
             paused={paused}
@@ -78,7 +90,11 @@ export const GameDefinitionEditor: React.FC<GameDefinitionEditorProps> = ({
                         maxHeight: "calc(100vh - 250px)",
                     }}
                 >
-                    <AssetEditors gameDefinition={gameDefinition} setGameDefinition={setGameDefinition} />
+                    <AssetEditors
+                        gameDefinition={gameDefinition}
+                        setGameDefinition={setGameDefinition}
+                        currentStage={currentStage}
+                    />
                 </div>
                 <div
                     style={{

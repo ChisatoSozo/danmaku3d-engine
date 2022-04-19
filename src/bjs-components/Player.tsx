@@ -1,4 +1,4 @@
-import { Color3, Mesh } from "@babylonjs/core";
+import { Mesh } from "@babylonjs/core";
 import { useRef } from "react";
 import { globalUniformRefs } from "../containers/GameContainer";
 import { useDeltaBeforeRender } from "../hooks/useDeltaBeforeRender";
@@ -29,7 +29,7 @@ export const Player: React.FC<PlayerProps> = ({ playableCharacterDefinition, foc
 
     return (
         <>
-            <sphere ref={sphereRef} name="bulletGreyscaleView" diameter={2}>
+            {/* <sphere ref={sphereRef} name="bulletGreyscaleView" diameter={2}>
                 <standardMaterial
                     name="bulletGreyscaleViewMaterial"
                     diffuseColor={new Color3(0.0, 0.0, 0.0)}
@@ -38,7 +38,7 @@ export const Player: React.FC<PlayerProps> = ({ playableCharacterDefinition, foc
                     alpha={0.5}
                     backFaceCulling={false}
                 />
-            </sphere>
+            </sphere> */}
             {playableCharacterDefinition.emitters.map((emitterDefinition, i) => {
                 return <Emitter key={i} focused={focused} emitterDefinition={emitterDefinition} />;
             })}

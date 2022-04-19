@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import { ViewableAsset } from "./AssetEditors";
 import { GLSLViewer } from "./GLSLViewer";
@@ -11,6 +12,17 @@ interface AssetViewerProps {
 }
 
 export const AssetViewer: React.FC<AssetViewerProps> = ({ gameDefinitionName, currentAsset, setCurrentAsset }) => {
+    //listen for the escape key to close the asset viewer
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setCurrentAsset(undefined);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [setCurrentAsset]);
+
     return (
         <div
             style={{

@@ -64,14 +64,7 @@ export const SpawnEnemyInstructionTimeline: React.FC<SpawnEnemyInstructionTimeli
             ).instructions = instructions as unknown as EnemyInstruction[];
 
             (updatedOverrideGameDefinition.stages[0].phases[0].instructions[0] as SpawnEnemyInstruction).instructions =
-                [
-                    ...(updatedOverrideGameDefinition.stages[0].phases[0].instructions[0] as SpawnEnemyInstruction)
-                        .instructions,
-                ];
-
-            updatedOverrideGameDefinition.stages[0].phases[0].instructions = [
-                ...updatedOverrideGameDefinition.stages[0].phases[0].instructions,
-            ];
+                instructions as unknown as EnemyInstruction[];
 
             setGameDefinition(updatedGameDefinition);
             setOverrideGameDefinition(updatedOverrideGameDefinition);

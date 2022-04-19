@@ -53,6 +53,7 @@ export const Emitter: React.FC<EmitterProps> = ({ emitterDefinition, focused }) 
         <transformNode ref={transformNodeRef} position={position} name={""}>
             <MeshFromAssetDefinition
                 name=""
+                alpha={focused ? 0.4 : 1}
                 scaling={scaling}
                 assetDefinition={emitterDefinition.asset}
                 activeAnimation="default"

@@ -110,6 +110,7 @@ export const Game = () => {
                         <GameContainer assets={gameLoaderOutput.loadedAssets} paused={paused} setPaused={setPaused}>
                             <BindControls />
                             <Stage
+                                editing={editing}
                                 time={time}
                                 currentStage={currentStage}
                                 setCurrentStage={setCurrentStage}

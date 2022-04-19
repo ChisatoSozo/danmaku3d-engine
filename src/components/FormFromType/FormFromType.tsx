@@ -3,6 +3,7 @@ import { Schema } from "ts-json-schema-generator";
 import { camelCaseToSpaces } from "../../utils/Utils";
 import { Category } from "../Category";
 import { BooleanField } from "./BooleanField";
+import { BulletPatternAssetField } from "./BulletPatternAssetField";
 import { GLSLAssetField } from "./GLSLAssetField";
 import { LabeledField } from "./LabeledField";
 import { MeshAssetField } from "./MeshAssetField";
@@ -39,6 +40,7 @@ const ExtendedSchemaTypes = [
     "GLSLAssetDefinition",
     "VectorAssetDefinition",
     "TimingAssetDefinition",
+    "BulletPatternAssetDefinition",
 ];
 type ExtendedSchemaTypeTypes =
     | "IVector3"
@@ -46,7 +48,8 @@ type ExtendedSchemaTypeTypes =
     | "TextureAssetDefinition"
     | "GLSLAssetDefinition"
     | "VectorAssetDefinition"
-    | "TimingAssetDefinition";
+    | "TimingAssetDefinition"
+    | "BulletPatternAssetDefinition";
 
 // converts camel case strings to title case strings
 // e.g. "thisIsATest" -> "This Is A Test"
@@ -196,7 +199,7 @@ export const FormFromType: React.FC<FormFromTypeProps> = ({
         case "number":
             formElement = (
                 <LabeledField label={readableLabel}>
-                    <NumberField value={value} setValue={setValue} />
+                    <NumberField value={value} setValue={setValue} propName={propName} />
                 </LabeledField>
             );
             break;
@@ -240,6 +243,13 @@ export const FormFromType: React.FC<FormFromTypeProps> = ({
             break;
         case "TimingAssetDefinition":
             formElement = <TimingAssetField value={value} setValue={setValue} schema={schema} label={label} />;
+            break;
+        case "BulletPatternAssetDefinition":
+            formElement = (
+                <LabeledField label={readableLabel}>
+                    <BulletPatternAssetField value={value} setValue={setValue} />
+                </LabeledField>
+            );
             break;
         default:
             console.log("unknown type", type);

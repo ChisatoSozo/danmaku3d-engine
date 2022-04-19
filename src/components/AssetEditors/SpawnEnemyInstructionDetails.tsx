@@ -2,7 +2,7 @@ import { useCallback, useMemo } from "react";
 import { Schema } from "ts-json-schema-generator";
 import { useEditor } from "../../containers/EditorContainer";
 import { EditorInstruction } from "../../types/gameDefinition/CommonDefinition";
-import { makeGameDefinition, SpawnEnemyInstruction } from "../../types/gameDefinition/GameDefinition";
+import { SpawnEnemyInstruction } from "../../types/gameDefinition/GameDefinition";
 import gameDefinitionSchema from "../../types/gameDefinition/GameDefinition.json";
 import { FormFromType } from "../FormFromType/FormFromType";
 
@@ -17,7 +17,8 @@ export const SpawnEnemyInstructionDetails: React.FC<SpawnEnemyInstructionDetails
     phaseIndex,
     instructionIndex,
 }) => {
-    const { gameDefinition, setGameDefinition, setOverrideGameDefinition, currentAsset, time } = useEditor();
+    const { gameDefinition, setGameDefinition, setOverrideGameDefinition, currentAsset, time, overrideGameDefinition } =
+        useEditor();
 
     const instruction = useMemo(
         () => gameDefinition?.stages[stageIndex].phases[phaseIndex].instructions[instructionIndex],
@@ -34,10 +35,10 @@ export const SpawnEnemyInstructionDetails: React.FC<SpawnEnemyInstructionDetails
             ];
             setGameDefinition(updatedGameDefinition);
 
-            if (currentAsset?.assetType === "spawnEnemyInstruction") {
+            if (currentAsset?.assetType === "spawnEnemyInstruction" && overrideGameDefinition) {
                 time.current = 0;
-                const newGameDefinition = makeGameDefinition();
-                newGameDefinition.stages[0].phases[0].instructions = [{ ...newInstruction, at: 0 }];
+                const newGameDefinition = { ...overrideGameDefinition };
+                overrideGameDefinition.stages[0].phases[0].instructions = [{ ...newInstruction, at: 0 }];
                 setOverrideGameDefinition(newGameDefinition);
             }
         },
@@ -48,6 +49,7 @@ export const SpawnEnemyInstructionDetails: React.FC<SpawnEnemyInstructionDetails
             instructionIndex,
             setGameDefinition,
             currentAsset?.assetType,
+            overrideGameDefinition,
             time,
             setOverrideGameDefinition,
         ]

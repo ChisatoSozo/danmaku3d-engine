@@ -26,9 +26,10 @@ export type ViewableAsset =
 interface AssetEditorsProps {
     gameDefinition: GameDefinition;
     setGameDefinition: Dispatch<SetStateAction<GameDefinition | undefined>>;
+    currentStage: number;
 }
 
-export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setGameDefinition }) => {
+export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setGameDefinition, currentStage }) => {
     const { setSelectedDetails, setOverrideGameDefinition, gameDefinitionName, currentAsset, setCurrentAsset } =
         useEditor();
 
@@ -39,9 +40,10 @@ export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setG
                 setOverrideGameDefinition(undefined);
                 return;
             }
+            const newGameDefinition = makeGameDefinition();
+            newGameDefinition.stages[0].bounds = { ...gameDefinition.stages[currentStage].bounds };
             if (currentAsset?.assetType === "mesh") {
-                const tempGameDefinition = makeGameDefinition();
-                tempGameDefinition.stages[0].phases[0].instructions.push({
+                newGameDefinition.stages[0].phases[0].instructions.push({
                     at: 0,
                     _editorTrack: 1,
                     type: "spawnEnemy",
@@ -54,7 +56,7 @@ export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setG
                     },
                     instructions: [],
                 });
-                setOverrideGameDefinition(tempGameDefinition);
+                setOverrideGameDefinition(newGameDefinition);
             }
 
             if (currentAsset?.assetType === "bulletPattern") {
@@ -62,12 +64,18 @@ export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setG
                     `${assetHost}${gameDefinitionName}/bulletPatterns/${currentAsset.assetURL}`
                 ).then((res) => res.json())) as BulletPatternDefinition;
 
-                const tempGameDefinition = makeGameDefinition();
-                tempGameDefinition.stages[0].phases[0].instructions.push({
+                newGameDefinition.stages[0].phases[0].instructions.push({
                     at: 0,
                     _editorTrack: 1,
                     type: "spawnEnemy",
-                    position: { x: 0, y: 0, z: 0 },
+                    position: {
+                        x: 0,
+                        y:
+                            (gameDefinition.stages[currentStage].bounds.max.y +
+                                gameDefinition.stages[currentStage].bounds.min.y) /
+                            2,
+                        z: 0,
+                    },
                     hidden: true,
                     asset: {
                         isAsset: true,
@@ -93,17 +101,15 @@ export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setG
                     fileName: currentAsset.assetURL,
                     bulletPattern: bulletPatternDefinitionJson,
                 });
-                setOverrideGameDefinition(tempGameDefinition);
-            }
-
-            if (currentAsset?.assetType === "spawnEnemyInstruction") {
-                const newGameDefinition = makeGameDefinition();
-                newGameDefinition.stages[0].phases[0].instructions = [
-                    { ...currentAsset.spawnEnemyInstruction, at: 0, _editorTrack: 1 },
-                ];
                 setOverrideGameDefinition(newGameDefinition);
             }
 
+            if (currentAsset?.assetType === "spawnEnemyInstruction") {
+                newGameDefinition.stages[0].phases[0].instructions = [
+                    { ...currentAsset.spawnEnemyInstruction, at: 0, _editorTrack: 1 },
+                ];
+            }
+            setOverrideGameDefinition(newGameDefinition);
             return;
         };
         setOverride();

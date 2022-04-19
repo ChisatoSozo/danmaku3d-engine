@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
+import { assetHost } from "../utils/Utils";
 
 interface Game {
     name: string;
@@ -6,15 +7,23 @@ interface Game {
 }
 
 export const useGamesList = () => {
-    const gamesList = useMemo(
-        () => [
-            {
-                name: "chisatoSozo",
-                description: "lorem ipsum",
-            },
-        ],
-        []
-    );
+    const [gamesList, setGamesList] = useState<Game[]>([]);
+
+    useEffect(() => {
+        const fetchGamesList = async () => {
+            const response = await fetch(`${assetHost}listGames`);
+            const games = (await response.json()) as string[];
+            setGamesList(
+                games.map((game) => {
+                    return {
+                        name: game,
+                        description: "",
+                    };
+                })
+            );
+        };
+        fetchGamesList();
+    }, []);
 
     return gamesList as Game[] | undefined;
 };

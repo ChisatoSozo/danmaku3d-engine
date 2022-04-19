@@ -191,6 +191,13 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         };
     }, [dpvcsMaterial]);
 
+    useEffect(() => {
+        const oldMesh = mesh;
+        return () => {
+            if (oldMesh) oldMesh.dispose();
+        };
+    }, [mesh]);
+
     return (
         <>
             <transformNode name="" ref={transformNodeRef} />

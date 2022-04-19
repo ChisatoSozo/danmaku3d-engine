@@ -9,6 +9,7 @@ export const Games = () => {
                 gamesList.map((game) => (
                     <li key={game.name}>
                         <Link to={`/game/${game.name}`}>{game.name}</Link>
+                        {"   "}
                         <Link to={`/game/${game.name}?editing=true`}>edit</Link>
                     </li>
                 ))}
