@@ -9,6 +9,7 @@ import { Stage } from "../bjs-components/Stage";
 import { GameDefinitionEditor } from "../components/GameDefinitionEditor";
 import { Overlay } from "../components/Overlay";
 import { GameContainer } from "../containers/GameContainer";
+import { SettingsContext } from "../containers/SettingsContext";
 import Engine from "../forks/Engine";
 import { PausableScene } from "../hooks/useDeltaBeforeRender";
 import { useLoadGame } from "../hooks/useLoadGame";
@@ -108,16 +109,20 @@ export const Game = () => {
                     !gameLoaderOutput.loadingAssets &&
                     gameDefinitionToUse ? (
                         <GameContainer assets={gameLoaderOutput.loadedAssets} paused={paused} setPaused={setPaused}>
-                            <BindControls />
-                            <Stage
-                                editing={editing}
-                                time={time}
-                                currentStage={currentStage}
-                                setCurrentStage={setCurrentStage}
-                                currentPhase={currentPhase}
-                                setCurrentPhase={setCurrentPhase}
-                                gameDefinition={gameDefinitionToUse}
-                            />
+                            <SettingsContext.Provider
+                                value={{ selectedCharacter: gameDefinitionToUse.playableCharacters[0] }}
+                            >
+                                <BindControls />
+                                <Stage
+                                    editing={editing}
+                                    time={time}
+                                    currentStage={currentStage}
+                                    setCurrentStage={setCurrentStage}
+                                    currentPhase={currentPhase}
+                                    setCurrentPhase={setCurrentPhase}
+                                    gameDefinition={gameDefinitionToUse}
+                                />
+                            </SettingsContext.Provider>
                         </GameContainer>
                     ) : (
                         <arcRotateCamera

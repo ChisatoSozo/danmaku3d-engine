@@ -27,4 +27,5 @@ export type PlayableCharacterDefinition = {
     speed: number;
     portraits: CharacterPortraitTextures;
     emitters: EmitterDefinition[];
+    grazeDistance: number;
 };

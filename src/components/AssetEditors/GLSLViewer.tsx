@@ -2,7 +2,7 @@ import CodeEditor from "@uiw/react-textarea-code-editor";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useEditor } from "../../containers/EditorContainer";
 import { useSave } from "../../hooks/useSave";
-import { lintConstructPixelShader, otherUniforms, uniforms } from "../../utils/BabylonUtils";
+import { constants, lintConstructPixelShader, otherUniforms, uniforms } from "../../utils/BabylonUtils";
 import { theme } from "../../utils/theme";
 import { assetHost, uploadText } from "../../utils/Utils";
 
@@ -120,6 +120,10 @@ export const GLSLViewer: React.FC<GLSLViewerProps> = ({ gameDefinitionName, url 
                     }}
                 >
                     {"\n"}
+                    Available Constants:
+                    {"\n"}
+                    {constants.replaceAll("const ", "")}
+                    {"\n"}
                     Available Uniforms:
                     {"\n"}
                     {uniforms.replaceAll("uniform ", "")}
@@ -163,10 +167,10 @@ export const GLSLViewer: React.FC<GLSLViewerProps> = ({ gameDefinitionName, url 
                         style={{
                             width: "100%",
                             backgroundColor: theme.colors.errorBackground,
-                            cursor: "pointer",
-                            pointerEvents: "all",
                             fontSize: 12,
                             fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
+                            maxHeight: "100px",
+                            overflowY: "auto",
                         }}
                     >
                         <pre>{error}</pre>

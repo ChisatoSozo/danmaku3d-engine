@@ -868,6 +868,9 @@
           },
           "type": "array"
         },
+        "grazeDistance": {
+          "type": "number"
+        },
         "name": {
           "type": "string"
         },
@@ -882,7 +885,8 @@
         "name",
         "speed",
         "portraits",
-        "emitters"
+        "emitters",
+        "grazeDistance"
       ],
       "type": "object"
     },

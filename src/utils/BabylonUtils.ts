@@ -56,6 +56,10 @@ export const otherUniforms = glsl`
     vec3 initialVelocity
 `;
 
+export const constants = glsl`
+    const int MAX_BOMBS = 8;
+`;
+
 export type BulletPhase = Instruction & {
     initializationFunction: string;
     updateFunction: string;
@@ -64,6 +68,7 @@ export type BulletPhase = Instruction & {
 export const lintConstructPixelShader = (body: string) => {
     return glsl`
     ${uniforms}
+    ${constants}
     void main() {
         ${processUniforms}
         ${body}
@@ -74,6 +79,7 @@ export const lintConstructPixelShader = (body: string) => {
 export const constructPixelShader = (phases: BulletPhase[], type: PixelShaderType) => {
     return glsl`
     ${uniforms}
+    ${constants}
     void main() {
         ${processUniforms}
 

@@ -2,6 +2,7 @@ import { Mesh, ShaderMaterial, TransformNode } from "@babylonjs/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useScene } from "react-babylonjs";
 import { globalUniformRefs } from "../containers/GameContainer";
+import { Settings, useSettings } from "../containers/SettingsContext";
 import { CustomFloatProceduralTexture } from "../forks/CustomFloatProceduralTexture";
 import { useDeltaBeforeRender } from "../hooks/useDeltaBeforeRender";
 import { useBulletPatternAsset } from "../loaders/bulletPatternLoader";
@@ -24,8 +25,11 @@ const bindGlobalUniformRefs = (bindTo: ShaderMaterial | CustomFloatProceduralTex
     bindTo.setFloat("greyscaleDistance", globalUniformRefs.greyscaleDistance);
 };
 
+const bindSettingsUniforms = (bindTo: ShaderMaterial | CustomFloatProceduralTexture, settings: Settings) => {};
+
 export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ bulletPatternDefinition }) => {
     const scene = useScene();
+    const settings = useSettings();
     const bulletPatternAsset = useBulletPatternAsset(bulletPatternDefinition);
 
     const bulletVertexAsset = useGLSLAsset(bulletPatternAsset.vertex);
@@ -113,6 +117,7 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         material.setFloat("timeSinceStart", timeSinceStart.current);
         material.setFloat("size", bulletPatternAsset.size);
         material.setVector3("parentPosition", parent.getAbsolutePosition());
+
         bindGlobalUniformRefs(material);
 
         makeInstances(mesh, bulletPatternAsset.initialPositions.generator._count);
