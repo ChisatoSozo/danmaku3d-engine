@@ -210,8 +210,8 @@ export class CustomFloatProceduralTexture extends ProceduralTexture {
     public readPixelsAsync(
         faceIndex?: number | undefined,
         level?: number | undefined,
-        buffer?: Nullable<ArrayBufferView> | undefined
-    ): Promise<ArrayBufferView> | undefined {
+        buffer?: Nullable<Float32Array> | undefined
+    ): Promise<Float32Array> | undefined {
         if (faceIndex === void 0) {
             faceIndex = 0;
         }

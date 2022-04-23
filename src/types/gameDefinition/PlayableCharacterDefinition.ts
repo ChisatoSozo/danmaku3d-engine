@@ -1,4 +1,4 @@
-import { MeshAssetDefinition, TextureAssetDefinition } from "./AssetDefinition";
+import { BulletPatternAssetDefinition, MeshAssetDefinition, TextureAssetDefinition } from "./AssetDefinition";
 import { IVector3 } from "./UtilTypes";
 
 export type CharacterPortraitTexture = {
@@ -15,11 +15,17 @@ export type CharacterPortraitTextures = {
     tired?: CharacterPortraitTexture;
 };
 
+export type SubEmitterDefinition = {
+    bulletPattern: BulletPatternAssetDefinition;
+    position: IVector3;
+};
+
 export type EmitterDefinition = {
     asset: MeshAssetDefinition;
     position: IVector3;
     focusPosition: IVector3;
-    mirrored?: boolean;
+    mirrored: boolean;
+    subEmitters: SubEmitterDefinition[];
 };
 
 export type PlayableCharacterDefinition = {

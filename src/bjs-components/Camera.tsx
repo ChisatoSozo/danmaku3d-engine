@@ -1,6 +1,7 @@
 import { Matrix, Node, Quaternion, TransformNode, Vector3 } from "@babylonjs/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useEngine } from "react-babylonjs";
+import { globalUniformRefs } from "../containers/GlobalUniforms";
 
 interface CameraProps {
     mode: "player" | "free";
@@ -53,6 +54,9 @@ export const Camera: React.FC<CameraProps> = ({ mode }) => {
             matrix.decompose(_, rotation);
 
             transformNodeRef.current.rotationQuaternion = rotation;
+
+            const forwardVector = new Vector3(0, 0, 1).rotateByQuaternionToRef(rotation, new Vector3());
+            globalUniformRefs.target = forwardVector.scale(20).add(transformNodeRef.current.position);
         },
         [mode]
     );

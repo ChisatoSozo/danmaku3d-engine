@@ -1,9 +1,12 @@
 import { Animation, TransformNode, Vector3 } from "@babylonjs/core";
 import { useEffect, useMemo, useRef } from "react";
+import { useBeforeRender } from "react-babylonjs";
 import { useRegisterAnimation } from "../containers/AnimationsContext";
+import { globalUniformRefs } from "../containers/GlobalUniforms";
 import { useVectorMemo } from "../hooks/useVectorMemo";
 import { EmitterDefinition } from "../types/gameDefinition/PlayableCharacterDefinition";
 import { MeshFromAssetDefinition } from "./MeshFromAssetDefinition";
+import { SubEmitter } from "./SubEmitter";
 
 interface EmitterProps {
     emitterDefinition: EmitterDefinition;
@@ -49,8 +52,20 @@ export const Emitter: React.FC<EmitterProps> = ({ emitterDefinition, focused }) 
         }
     }, [focusPosition, focused, registerAnimation, unfocusPosition]);
 
+    useBeforeRender(() => {
+        if (!transformNodeRef.current) return;
+        transformNodeRef.current.lookAt(globalUniformRefs.target);
+    });
+
     return (
         <transformNode ref={transformNodeRef} position={position} name={""}>
+            {emitterDefinition.subEmitters.map((subEmitterDefinition, index) => (
+                <SubEmitter
+                    key={index}
+                    position={subEmitterDefinition.position}
+                    bulletPatternDefinition={subEmitterDefinition.bulletPattern}
+                />
+            ))}
             <MeshFromAssetDefinition
                 name=""
                 alpha={focused ? 0.4 : 1}

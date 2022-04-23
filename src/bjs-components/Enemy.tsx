@@ -1,5 +1,7 @@
 import { TransformNode, Vector3 } from "@babylonjs/core";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useBeforeRender } from "react-babylonjs";
+import { globalUniformRefs, insertNewGlobalEnemyRef } from "../containers/GlobalUniforms";
 import { useDeltaBeforeRender } from "../hooks/useDeltaBeforeRender";
 import { useExecutor } from "../hooks/useExecutor";
 import { useVectorMemo } from "../hooks/useVectorMemo";
@@ -52,6 +54,7 @@ export const Enemy: React.FC<EnemyProps> = ({ enemyInstruction, removeMe }) => {
     const [bulletPatterns, setBulletPatterns] = useState<KeyedInstruction<EnemyAttackInstruction>[]>([]);
     const position = useVectorMemo(enemyInstruction.position);
     const [diedOrLeft, setDiedOrLeft] = useState(false);
+    const [globalEnemyRefIndex, setGlobalEnemyRefIndex] = useState<number>();
 
     useExecutor((instruction: EnemyInstruction, index) => {
         if (instruction.type === "moveTo") {
@@ -66,6 +69,24 @@ export const Enemy: React.FC<EnemyProps> = ({ enemyInstruction, removeMe }) => {
     }, enemyInstruction.instructions);
 
     useMovement(movementInstruction, transformNodeRef);
+
+    useEffect(() => {
+        if (!transformNodeRef.current) return;
+        const globalEnemyRefIndex = insertNewGlobalEnemyRef({
+            position: transformNodeRef.current.position,
+            radius: 1,
+            health: 100,
+            active: true,
+        });
+        setGlobalEnemyRefIndex(globalEnemyRefIndex);
+    }, []);
+
+    useBeforeRender(() => {
+        if (!transformNodeRef.current) return;
+        if (!globalEnemyRefIndex) return;
+        const globalEnemyRef = globalUniformRefs.enemies[globalEnemyRefIndex];
+        globalEnemyRef.position = transformNodeRef.current.position;
+    });
 
     return (
         <transformNode name="" ref={transformNodeRef} position={position}>

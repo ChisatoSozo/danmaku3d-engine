@@ -1,8 +1,10 @@
 {
     "_url": "defaultBulletPattern.json",
-    "bulletPatternType": "enemy",
+    "bulletPatternType": "player",
     "parented": false,
-    "size": 0.2,
+    "size": 0.1,
+    "fireRate": 10,
+    "fireVelocity": 10,
     "downsampleCollisions": true,
     "vertex": { "isAsset": true, "type": "glsl", "shaderType": "vertex", "url": "standardVertex.vs" },
     "material": { "isAsset": true, "type": "glsl", "shaderType": "fragment", "url": "fresnel.fs" },
@@ -15,7 +17,7 @@
         "type": "vector",
         "generator": {
             "type": "burst",
-            "_count": 500,
+            "_count": 1024,
             "radius": 1,
             "startTheta": 0,
             "thetaLength": 6.283185307179586,
@@ -28,7 +30,7 @@
         "type": "vector",
         "generator": {
             "type": "burst",
-            "_count": 500,
+            "_count": 1024,
             "radius": 1,
             "startTheta": 0,
             "thetaLength": 6.283185307179586,
@@ -36,35 +38,13 @@
             "yLength": 2
         }
     },
-    "timings": { "isAsset": true, "type": "timing", "generator": { "type": "uniform", "_count": 500, "time": 0 } },
-    "phases": [
-        {
-            "at": 0,
-            "positionInitializationGLSL": {
-                "isAsset": true,
-                "type": "glsl",
-                "shaderType": "pixel",
-                "url": "initializePosition.glsl"
-            },
-            "velocityInitializationGLSL": {
-                "isAsset": true,
-                "type": "glsl",
-                "shaderType": "pixel",
-                "url": "initializeVelocity.glsl"
-            },
-            "positionUpdateGLSL": {
-                "isAsset": true,
-                "type": "glsl",
-                "shaderType": "pixel",
-                "url": "linearPosition.glsl"
-            },
-            "velocityUpdateGLSL": {
-                "isAsset": true,
-                "type": "glsl",
-                "shaderType": "pixel",
-                "url": "linearVelocity.glsl"
-            }
-        }
-    ],
+    "timings": { "isAsset": true, "type": "timing", "generator": { "type": "uniform", "_count": 1024, "time": 0 } },
+    "positionUpdateGLSL": {
+        "isAsset": true,
+        "type": "glsl",
+        "shaderType": "pixel",
+        "url": "linearPositionDieWhenStuck.glsl"
+    },
+    "velocityUpdateGLSL": { "isAsset": true, "type": "glsl", "shaderType": "pixel", "url": "linearVelocity.glsl" },
     "collisionFunctionGLSL": { "isAsset": true, "type": "glsl", "shaderType": "pixel", "url": "collision.glsl" }
 }

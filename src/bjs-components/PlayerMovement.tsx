@@ -1,7 +1,7 @@
 import { TransformNode, Vector3 } from "@babylonjs/core";
 import React, { useMemo, useRef } from "react";
 import { keyObject } from "../containers/ControlsContext";
-import { globalUniformRefs } from "../containers/GameContainer";
+import { globalUniformRefs } from "../containers/GlobalUniforms";
 import { useDeltaBeforeRender } from "../hooks/useDeltaBeforeRender";
 import { useVectorMemo } from "../hooks/useVectorMemo";
 import { StageDefinition } from "../types/gameDefinition/GameDefinition";

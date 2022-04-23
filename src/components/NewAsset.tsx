@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { assetTypeToAssetFileMap, useEditor } from "../containers/EditorContainer";
 import { AssetType } from "../types/gameDefinition/AssetDefinition";
-import { makeBulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
+import { makeEnemyBulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
 import { uploadJSON } from "../utils/Utils";
 
 interface NewAssetProps {
@@ -10,7 +10,7 @@ interface NewAssetProps {
 }
 
 const newAssetGenerators: { [key: string]: (url: string) => any } = {
-    bulletPattern: makeBulletPatternDefinition,
+    bulletPattern: makeEnemyBulletPatternDefinition,
 };
 
 const findNewFileName = (files: string[], fileName: string): string => {

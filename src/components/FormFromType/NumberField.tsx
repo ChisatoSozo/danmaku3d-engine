@@ -16,7 +16,6 @@ export const NumberField: React.FC<NumberFieldProps> = ({ value, setValue, min, 
     }, [value]);
 
     useEffect(() => {
-        console.log(numberString);
         const floatValue = parseFloat(numberString);
         const isValid = !isNaN(floatValue);
         if (isValid) {

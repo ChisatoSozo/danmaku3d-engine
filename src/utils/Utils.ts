@@ -7,8 +7,25 @@ export const assertNever = (shouldBeNever: never) => {
     throw new Error("Was not never: " + JSON.stringify(shouldBeNever));
 };
 
-export const uploadJSON = async (fileName: string, fileType: AssetType, gameDefinitionName: string, object: {}) => {
+const removeAllInstancesOfKey = (obj: any, key: string) => {
+    const newObj = { ...obj };
+    delete newObj[key];
+
+    for (const k in newObj) {
+        if (newObj.hasOwnProperty(k)) {
+            if (typeof newObj[k] === "object") {
+                newObj[k] = removeAllInstancesOfKey(newObj[k], key);
+            }
+        }
+    }
+
+    return newObj;
+};
+
+export const uploadJSON = async (fileName: string, fileType: AssetType, gameDefinitionName: string, _object: {}) => {
     const formData = new FormData();
+
+    const object = removeAllInstancesOfKey(_object, "hash");
     const json = JSON.stringify(object);
     const blob = new Blob([json], { type: "text/json" });
 

@@ -1,10 +1,10 @@
-import { Mesh, ShaderMaterial, TransformNode } from "@babylonjs/core";
+import { Matrix, Mesh, Quaternion, ShaderMaterial, TransformNode, Vector3 } from "@babylonjs/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useScene } from "react-babylonjs";
-import { globalUniformRefs } from "../containers/GameContainer";
-import { Settings, useSettings } from "../containers/SettingsContext";
+import { globalUniformRefs } from "../containers/GlobalUniforms";
 import { CustomFloatProceduralTexture } from "../forks/CustomFloatProceduralTexture";
 import { useDeltaBeforeRender } from "../hooks/useDeltaBeforeRender";
+import { useNormalizedFrameSkipRef } from "../hooks/useNormalizedFrameSkipRef";
 import { useBulletPatternAsset } from "../loaders/bulletPatternLoader";
 import { useGLSLAsset } from "../loaders/glslLoader";
 import { useTimingAsset } from "../loaders/timingsLoader";
@@ -23,13 +23,55 @@ const bulletMaterialAssetVersions: { [key: string]: number } = {};
 const bindGlobalUniformRefs = (bindTo: ShaderMaterial | CustomFloatProceduralTexture) => {
     bindTo.setVector3("playerPosition", globalUniformRefs.playerPosition);
     bindTo.setFloat("greyscaleDistance", globalUniformRefs.greyscaleDistance);
+    bindTo.setFloat("firing", globalUniformRefs.firing);
+
+    const enemyPositionArray = globalUniformRefs.enemies
+        .map((enemy) => [enemy.position.x, enemy.position.y, enemy.position.z])
+        .flat();
+    const enemyRadiiArray = globalUniformRefs.enemies.map((enemy) => enemy.radius);
+    bindTo.setFloats("enemyPositions", enemyPositionArray);
+    bindTo.setFloats("enemyRadii", enemyRadiiArray);
 };
 
-const bindSettingsUniforms = (bindTo: ShaderMaterial | CustomFloatProceduralTexture, settings: Settings) => {};
+interface FrameStateUniforms {
+    timeSinceStart: number;
+    parentWorldMatrix: Matrix;
+    fireRate: number;
+}
+
+const bindFrameStateUniforms = (
+    bindTo: ShaderMaterial | CustomFloatProceduralTexture,
+    { timeSinceStart, parentWorldMatrix, fireRate }: FrameStateUniforms
+) => {
+    const position = new Vector3();
+    const rotation = new Quaternion();
+    const scale = new Vector3();
+    parentWorldMatrix.decompose(scale, rotation, position);
+
+    bindTo.setFloat("timeSinceStart", timeSinceStart);
+    bindTo.setVector3("parentPosition", position);
+
+    const forward = rotation ? Vector3.Forward().rotateByQuaternionToRef(rotation, Vector3.Zero()) : Vector3.Forward();
+
+    bindTo.setVector3("parentForward", forward);
+    bindTo.setFloat("fireRate", Number(fireRate.toPrecision(1)));
+};
+
+interface InitialStateUniforms {
+    size: number;
+    fireVelocity: number;
+}
+
+const bindInitialStateUniforms = (
+    bindTo: ShaderMaterial | CustomFloatProceduralTexture,
+    { size, fireVelocity }: InitialStateUniforms
+) => {
+    bindTo.setFloat("size", size);
+    bindTo.setFloat("fireVelocity", fireVelocity);
+};
 
 export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ bulletPatternDefinition }) => {
     const scene = useScene();
-    const settings = useSettings();
     const bulletPatternAsset = useBulletPatternAsset(bulletPatternDefinition);
 
     const bulletVertexAsset = useGLSLAsset(bulletPatternAsset.vertex);
@@ -50,6 +92,16 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
 
     const [mesh, setMesh] = useState<Mesh>();
     const transformNodeRef = useRef<TransformNode>();
+
+    const _fireRate = useMemo(() => {
+        return bulletPatternAsset.bulletPatternType === "player" ? bulletPatternAsset.fireRate : 0;
+    }, [bulletPatternAsset]);
+
+    const fireVelocity = useMemo(() => {
+        return bulletPatternAsset.bulletPatternType === "player" ? bulletPatternAsset.fireVelocity : 0;
+    }, [bulletPatternAsset]);
+
+    const frameSkipRef = useNormalizedFrameSkipRef(60 / _fireRate);
 
     const count = useMemo(
         () => bulletPatternAsset.initialPositions.generator._count,
@@ -114,9 +166,17 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         material.setTexture("positionSampler", _startPositionsState);
         material.setTexture("velocitySampler", _startVelocitiesState);
         material.setTexture("collisionSampler", _startCollisionsState);
-        material.setFloat("timeSinceStart", timeSinceStart.current);
-        material.setFloat("size", bulletPatternAsset.size);
-        material.setVector3("parentPosition", parent.getAbsolutePosition());
+
+        bindInitialStateUniforms(material, {
+            size: bulletPatternAsset.size,
+            fireVelocity,
+        });
+
+        bindFrameStateUniforms(material, {
+            timeSinceStart: timeSinceStart.current,
+            parentWorldMatrix: parent.getWorldMatrix(),
+            fireRate: 1 / frameSkipRef.current,
+        });
 
         bindGlobalUniformRefs(material);
 
@@ -139,9 +199,18 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
                     texture.setTexture("initialPositionSampler", initialPositionSampler);
                     texture.setTexture("initialVelocitySampler", initialVelocitiesSampler);
                     texture.setTexture("timingsSampler", timingsAsset);
-                    texture.setFloat("timeSinceStart", timeSinceStart.current);
-                    texture.setVector3("parentPosition", parent.getAbsolutePosition());
-                    texture.setFloat("size", bulletPatternAsset.size);
+
+                    bindInitialStateUniforms(texture, {
+                        size: bulletPatternAsset.size,
+                        fireVelocity,
+                    });
+
+                    bindFrameStateUniforms(texture, {
+                        timeSinceStart: timeSinceStart.current,
+                        parentWorldMatrix: parent.getWorldMatrix(),
+                        fireRate: 1 / frameSkipRef.current,
+                    });
+
                     bindGlobalUniformRefs(texture);
                 },
             }),
@@ -156,6 +225,7 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         _startVelocitiesState,
         _startCollisionsState,
         bulletPatternAsset,
+        frameSkipRef,
         count,
         positionShader,
         velocityShader,
@@ -164,6 +234,7 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         initialPositionSampler,
         initialVelocitiesSampler,
         timingsAsset,
+        fireVelocity,
     ]);
 
     useDeltaBeforeRender((scene, deltaS) => {
@@ -172,19 +243,32 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         if (!parent) return;
         timeSinceStart.current += deltaS;
         const updateResult = dpvcsMaterial.dpvcs.update(deltaS, (texture) => {
-            texture.setFloat("timeSinceStart", timeSinceStart.current);
-            texture.setVector3("parentPosition", parent.getAbsolutePosition());
+            bindFrameStateUniforms(texture, {
+                timeSinceStart: timeSinceStart.current,
+                parentWorldMatrix: parent.getWorldMatrix(),
+                fireRate: 1 / frameSkipRef.current,
+            });
+            bindGlobalUniformRefs(texture);
         });
 
         if (!updateResult) return;
 
         const [newPositions, newVelocities, newCollisions] = updateResult;
 
+        newCollisions.readPixelsAsync()?.then((collisions) => {
+            if (collisions.some((c) => c !== 0)) {
+                console.log("collision");
+            }
+        });
+
         dpvcsMaterial.material.setTexture("positionSampler", newPositions);
         dpvcsMaterial.material.setTexture("velocitySampler", newVelocities);
         dpvcsMaterial.material.setTexture("collisionSampler", newCollisions);
-        dpvcsMaterial.material.setFloat("timeSinceStart", timeSinceStart.current);
-        dpvcsMaterial.material.setVector3("parentPosition", parent.getAbsolutePosition());
+        bindFrameStateUniforms(dpvcsMaterial.material, {
+            timeSinceStart: timeSinceStart.current,
+            parentWorldMatrix: parent.getWorldMatrix(),
+            fireRate: 1 / frameSkipRef.current,
+        });
         bindGlobalUniformRefs(dpvcsMaterial.material);
     });
 

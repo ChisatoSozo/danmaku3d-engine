@@ -62,12 +62,12 @@ export type VectorAssetDefinition = BaseAssetDefinition<"vector"> & {
     generator: VectorGenerator;
 };
 
-export const makeVectorAssetDefinition = (): VectorAssetDefinition => ({
+export const makeVectorAssetDefinition = (count = 100): VectorAssetDefinition => ({
     isAsset: true,
     type: "vector",
     generator: {
         type: "burst",
-        _count: 100,
+        _count: count,
         radius: 1,
         startTheta: 0,
         thetaLength: 2 * Math.PI,
@@ -76,21 +76,21 @@ export const makeVectorAssetDefinition = (): VectorAssetDefinition => ({
     },
 });
 
-export const makeBlankVectorAssetDefinition = (): VectorAssetDefinition => ({
+export const makeBlankVectorAssetDefinition = (count = 100): VectorAssetDefinition => ({
     isAsset: true,
     type: "vector",
     generator: {
         type: "blank",
-        _count: 100,
+        _count: count,
     },
 });
 
-export const makeFillVectorAssetDefinition = (): VectorAssetDefinition => ({
+export const makeFillVectorAssetDefinition = (count = 100): VectorAssetDefinition => ({
     isAsset: true,
     type: "vector",
     generator: {
         type: "fill",
-        _count: 100,
+        _count: count,
         vector: {
             x: 0,
             y: 0,

@@ -44,7 +44,7 @@ export type UniformTimingGenerator = {
 
 export type TimingGenerator = UniformTimingGenerator;
 
-export type BulletPatternDefinition = {
+export type BaseBulletPatternDefinition = {
     _url: string;
     _startPositionsState: VectorAssetDefinition;
     _startVelocitiesState: VectorAssetDefinition;
@@ -52,27 +52,41 @@ export type BulletPatternDefinition = {
 
     size: number;
     parented: boolean;
-    downsampleCollisions: boolean;
+    downsampleCollisions: true;
     vertex: GLSLAssetDefinition;
     material: GLSLAssetDefinition;
     mesh: MeshAssetDefinition;
     initialPositions: VectorAssetDefinition;
     initialVelocities: VectorAssetDefinition;
     timings: TimingAssetDefinition;
+    collisionFunctionGLSL: GLSLAssetDefinition;
+};
 
+export type EnemyBulletPatternDefinition = {
+    bulletPatternType: "enemy";
     phases: (Instruction & {
         positionInitializationGLSL: GLSLAssetDefinition;
         velocityInitializationGLSL: GLSLAssetDefinition;
         positionUpdateGLSL: GLSLAssetDefinition;
         velocityUpdateGLSL: GLSLAssetDefinition;
     })[];
-    collisionFunctionGLSL: GLSLAssetDefinition;
-};
+} & BaseBulletPatternDefinition;
 
-export const makeBulletPatternDefinition = (refURL: string): BulletPatternDefinition => ({
+export type PlayerBulletPatternDefinition = {
+    bulletPatternType: "player";
+    positionUpdateGLSL: GLSLAssetDefinition;
+    velocityUpdateGLSL: GLSLAssetDefinition;
+    fireRate: number;
+    fireVelocity: number;
+} & BaseBulletPatternDefinition;
+
+export type BulletPatternDefinition = EnemyBulletPatternDefinition | PlayerBulletPatternDefinition;
+
+export const makeEnemyBulletPatternDefinition = (refURL: string): EnemyBulletPatternDefinition => ({
     _url: refURL,
     size: 0.2,
     parented: false,
+    bulletPatternType: "enemy",
     downsampleCollisions: true,
     vertex: makeGLSLAssetDefinition("standardVertex.vs", "vertex"),
     material: makeGLSLAssetDefinition("fresnel.fs", "fragment"),

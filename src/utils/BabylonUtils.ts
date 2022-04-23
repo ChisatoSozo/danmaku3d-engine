@@ -1,6 +1,6 @@
 import { Matrix, Mesh, Quaternion, TransformNode, Vector3 } from "@babylonjs/core";
 import { Instruction } from "../types/gameDefinition/CommonDefinition";
-import { MAX_BULLETS_PER_GROUP } from "./EngineConstants";
+import { MAX_ACTIVE_ENEIMIES, MAX_BULLETS_PER_GROUP } from "./EngineConstants";
 
 export const glsl = (template: TemplateStringsArray, ...args: (string | number)[]) => {
     let str = "";
@@ -22,9 +22,17 @@ export const uniforms = glsl`
     uniform sampler2D initialPositionSampler;
     uniform sampler2D initialVelocitySampler;
     uniform sampler2D timingsSampler;
+    uniform float enemyPositions[${MAX_ACTIVE_ENEIMIES * 3}];
+    uniform float enemyRadii[${MAX_ACTIVE_ENEIMIES}];
 
     uniform float size;
     uniform vec3 parentPosition;
+    uniform vec3 parentForward;
+
+    //only used for player bullets
+    uniform float firing;
+    uniform float fireRate;
+    uniform float fireVelocity;
 `;
 
 export const processUniforms = glsl`
@@ -56,8 +64,13 @@ export const otherUniforms = glsl`
     vec3 initialVelocity
 `;
 
+export const MAX_BOMBS = 8;
+export const PLAYER_BULLET_WHEEL_SIZE = 1024;
+
 export const constants = glsl`
-    const int MAX_BOMBS = 8;
+    const int MAX_BOMBS = ${MAX_BOMBS};
+    const int PLAYER_BULLET_WHEEL_SIZE = ${PLAYER_BULLET_WHEEL_SIZE};
+    const int MAX_ACTIVE_ENEIMIES = ${MAX_ACTIVE_ENEIMIES};
 `;
 
 export type BulletPhase = Instruction & {
@@ -115,6 +128,53 @@ export const constructPixelShader = (phases: BulletPhase[], type: PixelShaderTyp
         }
     }
 `;
+};
+
+export const constructPlayerPixelShader = (updateFunction: string, type: PixelShaderType) => {
+    return glsl`
+    ${uniforms}
+    ${constants}
+    void main() {
+        ${processUniforms}
+        //0. is non initialized
+        //1. is initialized
+        float phaseState = positionWithW.w;
+        float frameState = velocityWithW.w;
+        
+
+        float currentWindowStart = frameState;
+        float currentWindowEnd = frameState + (fireRate * 2.);
+        float shouldBulletInitialize = float(id > currentWindowStart && id < currentWindowEnd) * firing;
+
+        if(shouldBulletInitialize == 1.) {
+            position = parentPosition;
+            velocity = parentForward * fireVelocity;
+            phaseState = 1.0;
+        }
+
+        frameState = frameState + fireRate;
+
+        ${
+            type === "position"
+                ? glsl`float outState = phaseState;`
+                : glsl`float outState = mod(frameState, float(PLAYER_BULLET_WHEEL_SIZE / 2));`
+        }
+
+        ${
+            type === "position"
+                ? glsl`vec3 zero = vec3(-510., -510., -510.);`
+                : glsl`vec3 zero = vec3(0.001, 0.001, 0.001);`
+        }
+
+        if(phaseState == 0.) {
+            gl_FragColor = vec4(zero, outState);
+        }
+        else{
+            vec3 updatedValue = vec3(0.);
+            ${updateFunction}
+            gl_FragColor = vec4(updatedValue, outState);
+        }
+    }`;
 };
 
 const getLines = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number) => {

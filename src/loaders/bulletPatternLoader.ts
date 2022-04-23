@@ -4,8 +4,12 @@ import { getAsset, useAssets } from "../hooks/useAsset";
 import { findAndLoadAssetDefinitions } from "../hooks/useLoadGame";
 import { Assets, BulletPatternAsset } from "../types/Assets";
 import { BulletPatternAssetDefinition, GLSLAssetDefinition } from "../types/gameDefinition/AssetDefinition";
-import { BulletPatternDefinition } from "../types/gameDefinition/BulletPatternDefinition";
-import { BulletPhase, constructPixelShader } from "../utils/BabylonUtils";
+import {
+    BulletPatternDefinition,
+    EnemyBulletPatternDefinition,
+    PlayerBulletPatternDefinition,
+} from "../types/gameDefinition/BulletPatternDefinition";
+import { BulletPhase, constructPixelShader, constructPlayerPixelShader } from "../utils/BabylonUtils";
 import { assetHost } from "../utils/Utils";
 import { manualLoadGLSL } from "./glslLoader";
 
@@ -72,19 +76,7 @@ const glslAssetDefinitionToContent = (glslAssetDefinition: GLSLAssetDefinition, 
     return shaderContent;
 };
 
-export const loadBulletPattern = async (
-    gameDefinitionName: string,
-    assetDefinition: BulletPatternAssetDefinition,
-    scene: Scene,
-    assets: Assets,
-    setStatus: (status: string) => void
-) => {
-    const URI = `${assetHost}${gameDefinitionName}/bulletPatterns/${assetDefinition.url}`;
-    const patternDefinition = (await fetch(URI).then((response) => response.json())) as BulletPatternDefinition;
-    await findAndLoadAssetDefinitions(gameDefinitionName, patternDefinition, scene, assets, undefined, setStatus);
-
-    const hash = hashBulletPattern(assetDefinition);
-
+const makeEnemyBulletPatternGLSL = (patternDefinition: EnemyBulletPatternDefinition, assets: Assets) => {
     const positionPhases = patternDefinition.phases.map((phase): BulletPhase => {
         const at = phase.at;
         const positionInitializationGLSL = glslAssetDefinitionToContent(phase.positionInitializationGLSL, assets);
@@ -111,6 +103,35 @@ export const loadBulletPattern = async (
 
     const positionFunctionGLSL = constructPixelShader(positionPhases, "position");
     const velocityFunctionGLSL = constructPixelShader(velocityPhases, "velocity");
+    return { positionFunctionGLSL, velocityFunctionGLSL };
+};
+
+const makePlayerBulletPatternGLSL = (patternDefinition: PlayerBulletPatternDefinition, assets: Assets) => {
+    const positionUpdateGLSL = glslAssetDefinitionToContent(patternDefinition.positionUpdateGLSL, assets);
+    const velocityUpdateGLSL = glslAssetDefinitionToContent(patternDefinition.velocityUpdateGLSL, assets);
+
+    const positionFunctionGLSL = constructPlayerPixelShader(positionUpdateGLSL, "position");
+    const velocityFunctionGLSL = constructPlayerPixelShader(velocityUpdateGLSL, "velocity");
+    return { positionFunctionGLSL, velocityFunctionGLSL };
+};
+
+export const loadBulletPattern = async (
+    gameDefinitionName: string,
+    assetDefinition: BulletPatternAssetDefinition,
+    scene: Scene,
+    assets: Assets,
+    setStatus: (status: string) => void
+) => {
+    const URI = `${assetHost}${gameDefinitionName}/bulletPatterns/${assetDefinition.url}`;
+    const patternDefinition = (await fetch(URI).then((response) => response.json())) as BulletPatternDefinition;
+    await findAndLoadAssetDefinitions(gameDefinitionName, patternDefinition, scene, assets, undefined, setStatus);
+
+    const hash = hashBulletPattern(assetDefinition);
+
+    const { positionFunctionGLSL, velocityFunctionGLSL } =
+        patternDefinition.bulletPatternType === "enemy"
+            ? makeEnemyBulletPatternGLSL(patternDefinition, assets)
+            : makePlayerBulletPatternGLSL(patternDefinition, assets);
 
     const positionFunctionGLSLName = hashString(positionFunctionGLSL) + "PositionFunction";
     const velocityFunctionGLSLName = hashString(velocityFunctionGLSL) + "VelocityFunction";

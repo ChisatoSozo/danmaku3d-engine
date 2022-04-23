@@ -1,4 +1,3 @@
-import { Vector3 } from "@babylonjs/core";
 import { createContext, Dispatch, SetStateAction } from "react";
 import { Assets, makeDefaultAssets } from "../types/Assets";
 import { AnimationsContext, useAnimations } from "./AnimationsContext";
@@ -10,16 +9,6 @@ interface GameContainerProps {
     paused: boolean;
     setPaused: Dispatch<SetStateAction<boolean>>;
 }
-
-interface GlobalUniformRefs {
-    playerPosition: Vector3;
-    greyscaleDistance: number;
-}
-
-export const globalUniformRefs: GlobalUniformRefs = {
-    playerPosition: new Vector3(-510, -510, -510),
-    greyscaleDistance: 200,
-};
 
 export const AssetsContext = createContext<Assets>(makeDefaultAssets());
 

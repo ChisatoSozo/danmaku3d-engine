@@ -98,8 +98,6 @@ export const Stage: React.FC<StageProps> = ({
         return stageBoundsExtents;
     }, [stageDefinition]);
 
-    console.log(stageBoundsExtents);
-
     return (
         <>
             {editing && (

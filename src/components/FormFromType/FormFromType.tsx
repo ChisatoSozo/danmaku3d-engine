@@ -252,7 +252,7 @@ export const FormFromType: React.FC<FormFromTypeProps> = ({
             );
             break;
         default:
-            console.log("unknown type", type);
+            console.warn("unknown type", type);
     }
 
     return <>{formElement}</>;
