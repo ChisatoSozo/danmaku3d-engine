@@ -16,7 +16,7 @@ interface GlobalUniformRefs {
     enemies: GlobalEnemyRef[];
 }
 
-const makeGlobalEnemyRef = () => {
+export const makeGlobalEnemyRef = () => {
     return {
         position: new Vector3(-510, -510, -510),
         radius: 0,
@@ -25,7 +25,7 @@ const makeGlobalEnemyRef = () => {
     };
 };
 
-const times = <T>(n: number, f: () => T): T[] => {
+export const times = <T>(n: number, f: () => T): T[] => {
     const result: T[] = [];
     for (let i = 0; i < n; i++) {
         result.push(f());
@@ -48,4 +48,8 @@ export const insertNewGlobalEnemyRef = (enemy: GlobalEnemyRef) => {
     }
     globalUniformRefs.enemies[index] = enemy;
     return index;
+};
+
+export const removeGlobalEnemyRef = (index: number) => {
+    globalUniformRefs.enemies[index] = makeGlobalEnemyRef();
 };

@@ -61,7 +61,7 @@ app.post("/upload-asset", async (req, res) => {
             const files = req.files;
 
             const error = await attemptUpload(files, body);
-            console.log(error);
+            console.error(error);
             if (error) {
                 res.send({
                     status: false,

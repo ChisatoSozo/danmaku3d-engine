@@ -1,5 +1,5 @@
 import { defaultAssets } from "../../utils/DefaultAssets";
-import { MeshAssetDefinition, SoundAssetDefinition } from "./AssetDefinition";
+import { makeSoundAssetDefinition, MeshAssetDefinition, SoundAssetDefinition } from "./AssetDefinition";
 import { EditorInstruction } from "./CommonDefinition";
 import { EnemyInstruction } from "./EnemyDefinition";
 import { PlayableCharacterDefinition } from "./PlayableCharacterDefinition";
@@ -27,6 +27,7 @@ export type SpawnEnemyInstruction = {
     asset: MeshAssetDefinition;
     position: IVector3;
     hidden: boolean;
+    hurtSound: SoundAssetDefinition;
     instructions: EnemyInstruction[];
 };
 
@@ -39,6 +40,7 @@ export const makeSpawnEnemyInstruction = (): SpawnEnemyInstruction => ({
     },
     position: { x: 0, y: 5, z: 0 },
     hidden: false,
+    hurtSound: makeSoundAssetDefinition(),
     instructions: [],
 });
 

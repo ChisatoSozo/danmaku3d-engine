@@ -99,8 +99,12 @@
                             "asset": {
                                 "isAsset": true,
                                 "type": "mesh",
-                                "url": "blueFairy.glb",
-                                "hash": "blueFairy.glb"
+                                "url": "blueFairy.glb"
+                            },
+                            "hurtSound": {
+                                "isAsset": true,
+                                "type": "sound",
+                                "url": "damage.wav"
                             },
                             "position": { "x": 0, "y": 0, "z": 15 },
                             "instructions": []

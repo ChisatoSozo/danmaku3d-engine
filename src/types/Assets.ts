@@ -16,6 +16,7 @@ export interface MeshAsset {
 export type BulletPatternAsset = {
     positionFunctionGLSL: GLSLAssetDefinition;
     velocityFunctionGLSL: GLSLAssetDefinition;
+    collisionFunctionGLSL: GLSLAssetDefinition;
 } & BulletPatternDefinition;
 
 export type GLSLAsset = {

@@ -1,3 +1,4 @@
+import { defaultAssets } from "../../utils/DefaultAssets";
 import { TimingGenerator, VectorGenerator } from "./BulletPatternDefinition";
 
 export type AssetType = "mesh" | "sound" | "texture" | "bulletPattern" | "glsl" | "timing" | "vector";
@@ -40,6 +41,12 @@ export type SoundAssetDefinition = BaseAssetDefinition<"sound"> & {
     url: string;
 };
 
+export const makeSoundAssetDefinition = (): SoundAssetDefinition => ({
+    isAsset: true,
+    type: "sound",
+    url: defaultAssets.damageSound,
+});
+
 export type TextureAssetDefinition = BaseAssetDefinition<"texture"> & {
     url: string;
 };
@@ -62,7 +69,7 @@ export type VectorAssetDefinition = BaseAssetDefinition<"vector"> & {
     generator: VectorGenerator;
 };
 
-export const makeVectorAssetDefinition = (count = 100): VectorAssetDefinition => ({
+export const makeVectorAssetDefinition = (count: number = 100): VectorAssetDefinition => ({
     isAsset: true,
     type: "vector",
     generator: {
@@ -76,7 +83,7 @@ export const makeVectorAssetDefinition = (count = 100): VectorAssetDefinition =>
     },
 });
 
-export const makeBlankVectorAssetDefinition = (count = 100): VectorAssetDefinition => ({
+export const makeBlankVectorAssetDefinition = (count: number = 100): VectorAssetDefinition => ({
     isAsset: true,
     type: "vector",
     generator: {
@@ -85,7 +92,7 @@ export const makeBlankVectorAssetDefinition = (count = 100): VectorAssetDefiniti
     },
 });
 
-export const makeFillVectorAssetDefinition = (count = 100): VectorAssetDefinition => ({
+export const makeFillVectorAssetDefinition = (count: number = 100): VectorAssetDefinition => ({
     isAsset: true,
     type: "vector",
     generator: {

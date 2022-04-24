@@ -3,7 +3,7 @@
     "bulletPatternType": "enemy",
     "parented": false,
     "size": 0.2,
-    "downsampleCollisions": true,
+    "_downsampleCollisions": true,
     "vertex": { "isAsset": true, "type": "glsl", "shaderType": "vertex", "url": "standardVertex.vs" },
     "material": { "isAsset": true, "type": "glsl", "shaderType": "fragment", "url": "fresnel.fs" },
     "mesh": { "isAsset": true, "type": "mesh", "url": "sphere.glb" },
@@ -66,5 +66,5 @@
             }
         }
     ],
-    "collisionFunctionGLSL": { "isAsset": true, "type": "glsl", "shaderType": "pixel", "url": "collision.glsl" }
+    "_collisionFunctionGLSL": { "isAsset": true, "type": "glsl", "shaderType": "pixel", "url": "collision.glsl" }
 }

@@ -9,7 +9,12 @@ import {
     EnemyBulletPatternDefinition,
     PlayerBulletPatternDefinition,
 } from "../types/gameDefinition/BulletPatternDefinition";
-import { BulletPhase, constructPixelShader, constructPlayerPixelShader } from "../utils/BabylonUtils";
+import {
+    BulletPhase,
+    constructPixelShader,
+    constructPlayerPixelShader,
+    constructRawPixelShader,
+} from "../utils/BabylonUtils";
 import { assetHost } from "../utils/Utils";
 import { manualLoadGLSL } from "./glslLoader";
 
@@ -112,7 +117,15 @@ const makePlayerBulletPatternGLSL = (patternDefinition: PlayerBulletPatternDefin
 
     const positionFunctionGLSL = constructPlayerPixelShader(positionUpdateGLSL, "position");
     const velocityFunctionGLSL = constructPlayerPixelShader(velocityUpdateGLSL, "velocity");
+
     return { positionFunctionGLSL, velocityFunctionGLSL };
+};
+
+const makeCollisionGLSL = (patternDefinition: BulletPatternDefinition, assets: Assets) => {
+    const collisionUpdateGLSL = glslAssetDefinitionToContent(patternDefinition._collisionFunctionGLSL, assets);
+    const collisionFunctionGLSL = constructRawPixelShader(collisionUpdateGLSL);
+
+    return collisionFunctionGLSL;
 };
 
 export const loadBulletPattern = async (
@@ -132,12 +145,15 @@ export const loadBulletPattern = async (
         patternDefinition.bulletPatternType === "enemy"
             ? makeEnemyBulletPatternGLSL(patternDefinition, assets)
             : makePlayerBulletPatternGLSL(patternDefinition, assets);
+    const collisionFunctionGLSL = makeCollisionGLSL(patternDefinition, assets);
 
     const positionFunctionGLSLName = hashString(positionFunctionGLSL) + "PositionFunction";
     const velocityFunctionGLSLName = hashString(velocityFunctionGLSL) + "VelocityFunction";
+    const collisionFunctionGLSLName = hashString(collisionFunctionGLSL) + "CollisionFunction";
 
     const positionFunctionGLSLHash = manualLoadGLSL(positionFunctionGLSLName, positionFunctionGLSL, "pixel", assets);
     const velocityFunctionGLSLHash = manualLoadGLSL(velocityFunctionGLSLName, velocityFunctionGLSL, "pixel", assets);
+    const collisionFunctionGLSLHash = manualLoadGLSL(collisionFunctionGLSLName, collisionFunctionGLSL, "pixel", assets);
 
     const bulletPattern: BulletPatternAsset = {
         ...patternDefinition,
@@ -151,6 +167,13 @@ export const loadBulletPattern = async (
         velocityFunctionGLSL: {
             isAsset: true,
             hash: velocityFunctionGLSLHash,
+            type: "glsl",
+            shaderType: "pixel",
+            url: "",
+        },
+        collisionFunctionGLSL: {
+            isAsset: true,
+            hash: collisionFunctionGLSLHash,
             type: "glsl",
             shaderType: "pixel",
             url: "",

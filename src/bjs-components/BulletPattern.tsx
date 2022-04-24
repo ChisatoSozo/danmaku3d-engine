@@ -12,7 +12,9 @@ import { useVectorAsset } from "../loaders/vectorLoader";
 import { BulletPatternAssetDefinition } from "../types/gameDefinition/AssetDefinition";
 import { findMeshChild, makeInstances } from "../utils/BabylonUtils";
 import DifferentialPositionVelocityCollisionSystem from "../utils/DifferentialPositionVelocityCollisionSystem";
+import { MAX_ACTIVE_ENEIMIES } from "../utils/EngineConstants";
 import { MeshFromAssetDefinition } from "./MeshFromAssetDefinition";
+import { makeClickParticles } from "./wordfind-vr-particles.ts/clickParticles";
 
 interface BulletPatternComponentProps {
     bulletPatternDefinition: BulletPatternAssetDefinition;
@@ -51,7 +53,7 @@ const bindFrameStateUniforms = (
     bindTo.setFloat("timeSinceStart", timeSinceStart);
     bindTo.setVector3("parentPosition", position);
 
-    const forward = rotation ? Vector3.Forward().rotateByQuaternionToRef(rotation, Vector3.Zero()) : Vector3.Forward();
+    const forward = Vector3.Forward().rotateByQuaternionToRef(rotation, Vector3.Zero());
 
     bindTo.setVector3("parentForward", forward);
     bindTo.setFloat("fireRate", Number(fireRate.toPrecision(1)));
@@ -68,6 +70,23 @@ const bindInitialStateUniforms = (
 ) => {
     bindTo.setFloat("size", size);
     bindTo.setFloat("fireVelocity", fireVelocity);
+};
+
+interface PlayerBulletCollision {
+    enemyIndex: number;
+    enemyPosition: Vector3;
+}
+
+const readPlayerBulletCollisions = (collisions: Float32Array) => {
+    const collisionsOut: PlayerBulletCollision[] = [];
+    for (let i = 0; i < collisions.length; i += 4) {
+        const enemyIndex = collisions[i + 3];
+        if (enemyIndex) {
+            const enemyPosition = new Vector3(collisions[i], collisions[i + 1], collisions[i + 2]);
+            collisionsOut.push({ enemyIndex: enemyIndex - MAX_ACTIVE_ENEIMIES, enemyPosition });
+        }
+    }
+    return collisionsOut;
 };
 
 export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ bulletPatternDefinition }) => {
@@ -108,8 +127,8 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         [bulletPatternAsset.initialPositions.generator._count]
     );
     const downsampleCollisions = useMemo(
-        () => bulletPatternAsset.downsampleCollisions,
-        [bulletPatternAsset.downsampleCollisions]
+        () => bulletPatternAsset._downsampleCollisions,
+        [bulletPatternAsset._downsampleCollisions]
     );
 
     const setRootNodes = useCallback((rootNodes: TransformNode[]) => {
@@ -256,8 +275,12 @@ export const BulletPatternComponent: React.FC<BulletPatternComponentProps> = ({ 
         const [newPositions, newVelocities, newCollisions] = updateResult;
 
         newCollisions.readPixelsAsync()?.then((collisions) => {
-            if (collisions.some((c) => c !== 0)) {
-                console.log("collision");
+            if (bulletPatternAsset.bulletPatternType === "player") {
+                const collisionResults = readPlayerBulletCollisions(collisions);
+                collisionResults.forEach((result) => {
+                    globalUniformRefs.enemies[result.enemyIndex].health -= bulletPatternAsset.value;
+                    makeClickParticles(scene, [result.enemyPosition]);
+                });
             }
         });
 

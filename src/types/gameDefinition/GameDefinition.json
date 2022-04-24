@@ -185,6 +185,66 @@
       ],
       "type": "object"
     },
+    "BaseBulletPatternDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "_startCollisionsState": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "_startPositionsState": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "_startVelocitiesState": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "_url": {
+          "type": "string"
+        },
+        "collisionFunctionGLSL": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        "initialPositions": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "initialVelocities": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "material": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        "mesh": {
+          "$ref": "#/definitions/MeshAssetDefinition"
+        },
+        "parented": {
+          "type": "boolean"
+        },
+        "size": {
+          "type": "number"
+        },
+        "timings": {
+          "$ref": "#/definitions/TimingAssetDefinition"
+        },
+        "vertex": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        }
+      },
+      "required": [
+        "_url",
+        "_startPositionsState",
+        "_startVelocitiesState",
+        "_startCollisionsState",
+        "size",
+        "parented",
+        "vertex",
+        "material",
+        "mesh",
+        "initialPositions",
+        "initialVelocities",
+        "timings",
+        "collisionFunctionGLSL"
+      ],
+      "type": "object"
+    },
     "BaseEnemyInstruction": {
       "anyOf": [
         {
@@ -263,100 +323,14 @@
       "type": "object"
     },
     "BulletPatternDefinition": {
-      "additionalProperties": false,
-      "properties": {
-        "_startCollisionsState": {
-          "$ref": "#/definitions/VectorAssetDefinition"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/EnemyBulletPatternDefinition"
         },
-        "_startPositionsState": {
-          "$ref": "#/definitions/VectorAssetDefinition"
-        },
-        "_startVelocitiesState": {
-          "$ref": "#/definitions/VectorAssetDefinition"
-        },
-        "_url": {
-          "type": "string"
-        },
-        "collisionFunctionGLSL": {
-          "$ref": "#/definitions/GLSLAssetDefinition"
-        },
-        "downsampleCollisions": {
-          "type": "boolean"
-        },
-        "initialPositions": {
-          "$ref": "#/definitions/VectorAssetDefinition"
-        },
-        "initialVelocities": {
-          "$ref": "#/definitions/VectorAssetDefinition"
-        },
-        "material": {
-          "$ref": "#/definitions/GLSLAssetDefinition"
-        },
-        "mesh": {
-          "$ref": "#/definitions/MeshAssetDefinition"
-        },
-        "parented": {
-          "type": "boolean"
-        },
-        "phases": {
-          "items": {
-            "additionalProperties": false,
-            "properties": {
-              "at": {
-                "type": "number"
-              },
-              "positionInitializationGLSL": {
-                "$ref": "#/definitions/GLSLAssetDefinition"
-              },
-              "positionUpdateGLSL": {
-                "$ref": "#/definitions/GLSLAssetDefinition"
-              },
-              "velocityInitializationGLSL": {
-                "$ref": "#/definitions/GLSLAssetDefinition"
-              },
-              "velocityUpdateGLSL": {
-                "$ref": "#/definitions/GLSLAssetDefinition"
-              }
-            },
-            "required": [
-              "at",
-              "positionInitializationGLSL",
-              "positionUpdateGLSL",
-              "velocityInitializationGLSL",
-              "velocityUpdateGLSL"
-            ],
-            "type": "object"
-          },
-          "type": "array"
-        },
-        "size": {
-          "type": "number"
-        },
-        "timings": {
-          "$ref": "#/definitions/TimingAssetDefinition"
-        },
-        "vertex": {
-          "$ref": "#/definitions/GLSLAssetDefinition"
+        {
+          "$ref": "#/definitions/PlayerBulletPatternDefinition"
         }
-      },
-      "required": [
-        "_url",
-        "_startPositionsState",
-        "_startVelocitiesState",
-        "_startCollisionsState",
-        "size",
-        "parented",
-        "downsampleCollisions",
-        "vertex",
-        "material",
-        "mesh",
-        "initialPositions",
-        "initialVelocities",
-        "timings",
-        "phases",
-        "collisionFunctionGLSL"
-      ],
-      "type": "object"
+      ]
     },
     "BurstVectorGenerator": {
       "additionalProperties": false,
@@ -467,12 +441,20 @@
         },
         "position": {
           "$ref": "#/definitions/IVector3"
+        },
+        "subEmitters": {
+          "items": {
+            "$ref": "#/definitions/SubEmitterDefinition"
+          },
+          "type": "array"
         }
       },
       "required": [
         "asset",
         "position",
-        "focusPosition"
+        "focusPosition",
+        "mirrored",
+        "subEmitters"
       ],
       "type": "object"
     },
@@ -490,6 +472,108 @@
       "required": [
         "type",
         "bulletPattern"
+      ],
+      "type": "object"
+    },
+    "EnemyBulletPatternDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "_downsampleCollisions": {
+          "const": true,
+          "type": "boolean"
+        },
+        "_startCollisionsState": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "_startPositionsState": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "_startVelocitiesState": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "_url": {
+          "type": "string"
+        },
+        "bulletPatternType": {
+          "const": "enemy",
+          "type": "string"
+        },
+        "collisionFunctionGLSL": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        "initialPositions": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "initialVelocities": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "material": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        "mesh": {
+          "$ref": "#/definitions/MeshAssetDefinition"
+        },
+        "parented": {
+          "type": "boolean"
+        },
+        "phases": {
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "at": {
+                "type": "number"
+              },
+              "positionInitializationGLSL": {
+                "$ref": "#/definitions/GLSLAssetDefinition"
+              },
+              "positionUpdateGLSL": {
+                "$ref": "#/definitions/GLSLAssetDefinition"
+              },
+              "velocityInitializationGLSL": {
+                "$ref": "#/definitions/GLSLAssetDefinition"
+              },
+              "velocityUpdateGLSL": {
+                "$ref": "#/definitions/GLSLAssetDefinition"
+              }
+            },
+            "required": [
+              "at",
+              "positionInitializationGLSL",
+              "positionUpdateGLSL",
+              "velocityInitializationGLSL",
+              "velocityUpdateGLSL"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "size": {
+          "type": "number"
+        },
+        "timings": {
+          "$ref": "#/definitions/TimingAssetDefinition"
+        },
+        "vertex": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        }
+      },
+      "required": [
+        "_downsampleCollisions",
+        "_startCollisionsState",
+        "_startPositionsState",
+        "_startVelocitiesState",
+        "_url",
+        "bulletPatternType",
+        "collisionFunctionGLSL",
+        "initialPositions",
+        "initialVelocities",
+        "material",
+        "mesh",
+        "parented",
+        "phases",
+        "size",
+        "timings",
+        "vertex"
       ],
       "type": "object"
     },
@@ -737,9 +821,18 @@
     },
     "NamedParameters<typeof makeBlankVectorAssetDefinition>": {
       "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "number"
+        }
+      },
       "type": "object"
     },
-    "NamedParameters<typeof makeBulletPatternDefinition>": {
+    "NamedParameters<typeof makeEnemyAttackInstruction>": {
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "NamedParameters<typeof makeEnemyBulletPatternDefinition>": {
       "additionalProperties": false,
       "properties": {
         "refURL": {
@@ -751,16 +844,17 @@
       ],
       "type": "object"
     },
-    "NamedParameters<typeof makeEnemyAttackInstruction>": {
-      "additionalProperties": false,
-      "type": "object"
-    },
     "NamedParameters<typeof makeEnemyLeaveInstruction>": {
       "additionalProperties": false,
       "type": "object"
     },
     "NamedParameters<typeof makeFillVectorAssetDefinition>": {
       "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "number"
+        }
+      },
       "type": "object"
     },
     "NamedParameters<typeof makeGLSLAssetDefinition>": {
@@ -821,6 +915,11 @@
     },
     "NamedParameters<typeof makeVectorAssetDefinition>": {
       "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "number"
+        }
+      },
       "type": "object"
     },
     "PhaseDefinition": {
@@ -887,6 +986,92 @@
         "portraits",
         "emitters",
         "grazeDistance"
+      ],
+      "type": "object"
+    },
+    "PlayerBulletPatternDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "_downsampleCollisions": {
+          "const": false,
+          "type": "boolean"
+        },
+        "_startCollisionsState": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "_startPositionsState": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "_startVelocitiesState": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "_url": {
+          "type": "string"
+        },
+        "bulletPatternType": {
+          "const": "player",
+          "type": "string"
+        },
+        "collisionFunctionGLSL": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        "fireRate": {
+          "type": "number"
+        },
+        "fireVelocity": {
+          "type": "number"
+        },
+        "initialPositions": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "initialVelocities": {
+          "$ref": "#/definitions/VectorAssetDefinition"
+        },
+        "material": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        "mesh": {
+          "$ref": "#/definitions/MeshAssetDefinition"
+        },
+        "parented": {
+          "type": "boolean"
+        },
+        "positionUpdateGLSL": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        "size": {
+          "type": "number"
+        },
+        "timings": {
+          "$ref": "#/definitions/TimingAssetDefinition"
+        },
+        "velocityUpdateGLSL": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        },
+        "vertex": {
+          "$ref": "#/definitions/GLSLAssetDefinition"
+        }
+      },
+      "required": [
+        "_downsampleCollisions",
+        "_startCollisionsState",
+        "_startPositionsState",
+        "_startVelocitiesState",
+        "_url",
+        "bulletPatternType",
+        "collisionFunctionGLSL",
+        "fireRate",
+        "fireVelocity",
+        "initialPositions",
+        "initialVelocities",
+        "material",
+        "mesh",
+        "parented",
+        "positionUpdateGLSL",
+        "size",
+        "timings",
+        "velocityUpdateGLSL",
+        "vertex"
       ],
       "type": "object"
     },
@@ -1091,6 +1276,22 @@
       "required": [
         "asset",
         "length"
+      ],
+      "type": "object"
+    },
+    "SubEmitterDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "bulletPattern": {
+          "$ref": "#/definitions/BulletPatternAssetDefinition"
+        },
+        "position": {
+          "$ref": "#/definitions/IVector3"
+        }
+      },
+      "required": [
+        "bulletPattern",
+        "position"
       ],
       "type": "object"
     },

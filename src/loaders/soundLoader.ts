@@ -1,4 +1,5 @@
 import { Scene, Sound } from "@babylonjs/core";
+import { LimitSound } from "../bjs-components/LimitSound";
 import { getAsset, useAssets } from "../hooks/useAsset";
 import { Assets } from "../types/Assets";
 import { SoundAssetDefinition } from "../types/gameDefinition/AssetDefinition";
@@ -44,6 +45,11 @@ export const loadSound = (
 export const useSoundAsset = (assetDefinition: SoundAssetDefinition) => {
     const assets = useAssets();
     return getAsset(assets, assetDefinition) as Sound;
+};
+
+export const useLimitSoundAsset = (assetDefinition: SoundAssetDefinition, limit: number) => {
+    const assets = useAssets();
+    return new LimitSound(getAsset(assets, assetDefinition) as Sound, limit);
 };
 
 export const useSoundAssetArray = (assetDefinitions: SoundAssetDefinition[]) => {

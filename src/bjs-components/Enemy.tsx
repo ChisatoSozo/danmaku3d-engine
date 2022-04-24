@@ -1,10 +1,11 @@
 import { TransformNode, Vector3 } from "@babylonjs/core";
 import React, { useEffect, useRef, useState } from "react";
 import { useBeforeRender } from "react-babylonjs";
-import { globalUniformRefs, insertNewGlobalEnemyRef } from "../containers/GlobalUniforms";
+import { globalUniformRefs, insertNewGlobalEnemyRef, removeGlobalEnemyRef } from "../containers/GlobalUniforms";
 import { useDeltaBeforeRender } from "../hooks/useDeltaBeforeRender";
 import { useExecutor } from "../hooks/useExecutor";
 import { useVectorMemo } from "../hooks/useVectorMemo";
+import { useLimitSoundAsset } from "../loaders/soundLoader";
 import {
     EnemyAttackInstruction,
     EnemyInstruction,
@@ -55,6 +56,7 @@ export const Enemy: React.FC<EnemyProps> = ({ enemyInstruction, removeMe }) => {
     const position = useVectorMemo(enemyInstruction.position);
     const [diedOrLeft, setDiedOrLeft] = useState(false);
     const [globalEnemyRefIndex, setGlobalEnemyRefIndex] = useState<number>();
+    const hurtSound = useLimitSoundAsset(enemyInstruction.hurtSound, 100);
 
     useExecutor((instruction: EnemyInstruction, index) => {
         if (instruction.type === "moveTo") {
@@ -74,19 +76,38 @@ export const Enemy: React.FC<EnemyProps> = ({ enemyInstruction, removeMe }) => {
         if (!transformNodeRef.current) return;
         const globalEnemyRefIndex = insertNewGlobalEnemyRef({
             position: transformNodeRef.current.position,
-            radius: 1,
-            health: 100,
+            radius: 2,
+            health: 1000,
             active: true,
         });
         setGlobalEnemyRefIndex(globalEnemyRefIndex);
     }, []);
 
+    const lastHealth = useRef(1000);
+
     useBeforeRender(() => {
         if (!transformNodeRef.current) return;
-        if (!globalEnemyRefIndex) return;
+        if (globalEnemyRefIndex === undefined) return;
         const globalEnemyRef = globalUniformRefs.enemies[globalEnemyRefIndex];
+        if (globalEnemyRef.health <= 0) {
+            removeMe();
+            return;
+        }
+        if (globalEnemyRef.health < lastHealth.current) {
+            hurtSound.play();
+        }
+        lastHealth.current = globalEnemyRef.health;
         globalEnemyRef.position = transformNodeRef.current.position;
     });
+
+    useEffect(() => {
+        const oldGlobalEnemyRefIndex = globalEnemyRefIndex;
+        return () => {
+            if (oldGlobalEnemyRefIndex === undefined) return;
+            console.log(oldGlobalEnemyRefIndex);
+            removeGlobalEnemyRef(oldGlobalEnemyRefIndex);
+        };
+    }, [globalEnemyRefIndex]);
 
     return (
         <transformNode name="" ref={transformNodeRef} position={position}>

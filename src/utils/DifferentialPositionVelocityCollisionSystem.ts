@@ -231,7 +231,7 @@ export default class DifferentialPositionVelocityCollisionSystem {
         bindSouceTextures(this.velocityTextures[dest]);
         bindSouceTextures(this.collisionTextures[dest]);
 
-        if (this.reducerLayers) {
+        if (this.reducerLayers.length) {
             this.reducerLayers[0].setTexture("source", this.collisionTextures[dest]);
         } else {
             this.collisionResult = this.collisionTextures[dest];

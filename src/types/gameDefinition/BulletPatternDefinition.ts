@@ -50,20 +50,21 @@ export type BaseBulletPatternDefinition = {
     _startVelocitiesState: VectorAssetDefinition;
     _startCollisionsState: VectorAssetDefinition;
 
+    value: number;
     size: number;
     parented: boolean;
-    downsampleCollisions: true;
     vertex: GLSLAssetDefinition;
     material: GLSLAssetDefinition;
     mesh: MeshAssetDefinition;
     initialPositions: VectorAssetDefinition;
     initialVelocities: VectorAssetDefinition;
     timings: TimingAssetDefinition;
-    collisionFunctionGLSL: GLSLAssetDefinition;
+    _collisionFunctionGLSL: GLSLAssetDefinition;
 };
 
 export type EnemyBulletPatternDefinition = {
     bulletPatternType: "enemy";
+    _downsampleCollisions: true;
     phases: (Instruction & {
         positionInitializationGLSL: GLSLAssetDefinition;
         velocityInitializationGLSL: GLSLAssetDefinition;
@@ -74,8 +75,10 @@ export type EnemyBulletPatternDefinition = {
 
 export type PlayerBulletPatternDefinition = {
     bulletPatternType: "player";
+    _downsampleCollisions: false;
     positionUpdateGLSL: GLSLAssetDefinition;
     velocityUpdateGLSL: GLSLAssetDefinition;
+    collisionUpdateGLSL: GLSLAssetDefinition;
     fireRate: number;
     fireVelocity: number;
 } & BaseBulletPatternDefinition;
@@ -85,9 +88,10 @@ export type BulletPatternDefinition = EnemyBulletPatternDefinition | PlayerBulle
 export const makeEnemyBulletPatternDefinition = (refURL: string): EnemyBulletPatternDefinition => ({
     _url: refURL,
     size: 0.2,
+    value: 1,
     parented: false,
     bulletPatternType: "enemy",
-    downsampleCollisions: true,
+    _downsampleCollisions: true,
     vertex: makeGLSLAssetDefinition("standardVertex.vs", "vertex"),
     material: makeGLSLAssetDefinition("fresnel.fs", "fragment"),
     mesh: makeMeshAssetDefinition(),
@@ -106,5 +110,5 @@ export const makeEnemyBulletPatternDefinition = (refURL: string): EnemyBulletPat
             velocityUpdateGLSL: makeGLSLAssetDefinition("linearVelocity.glsl", "pixel"),
         },
     ],
-    collisionFunctionGLSL: makeGLSLAssetDefinition("collision.glsl", "pixel"),
+    _collisionFunctionGLSL: makeGLSLAssetDefinition("collision.glsl", "pixel"),
 });

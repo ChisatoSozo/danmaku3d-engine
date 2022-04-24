@@ -54,6 +54,11 @@ export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setG
                         type: "mesh",
                         url: currentAsset.assetURL,
                     },
+                    hurtSound: {
+                        isAsset: true,
+                        type: "sound",
+                        url: "damage.wav",
+                    },
                     instructions: [],
                 });
                 setOverrideGameDefinition(newGameDefinition);
@@ -81,6 +86,11 @@ export const AssetEditors: React.FC<AssetEditorsProps> = ({ gameDefinition, setG
                         isAsset: true,
                         type: "mesh",
                         url: "sphere.glb",
+                    },
+                    hurtSound: {
+                        isAsset: true,
+                        type: "sound",
+                        url: "damage.wav",
                     },
                     instructions: [
                         {

@@ -65,7 +65,7 @@ export const otherUniforms = glsl`
 `;
 
 export const MAX_BOMBS = 8;
-export const PLAYER_BULLET_WHEEL_SIZE = 1024;
+export const PLAYER_BULLET_WHEEL_SIZE = 256;
 
 export const constants = glsl`
     const int MAX_BOMBS = ${MAX_BOMBS};
@@ -85,7 +85,6 @@ export const lintConstructPixelShader = (body: string) => {
     void main() {
         ${processUniforms}
         ${body}
-        gl_FragColor = vec4(updatedValue, 1.0);
     }`;
 };
 
@@ -130,6 +129,17 @@ export const constructPixelShader = (phases: BulletPhase[], type: PixelShaderTyp
 `;
 };
 
+export const constructRawPixelShader = (mainFunction: string) => {
+    return glsl`
+    ${uniforms}
+    ${constants}
+    void main() {
+        ${processUniforms}
+        ${mainFunction}
+    }
+    `;
+};
+
 export const constructPlayerPixelShader = (updateFunction: string, type: PixelShaderType) => {
     return glsl`
     ${uniforms}
@@ -143,8 +153,12 @@ export const constructPlayerPixelShader = (updateFunction: string, type: PixelSh
         
 
         float currentWindowStart = frameState;
-        float currentWindowEnd = frameState + (fireRate * 2.);
-        float shouldBulletInitialize = float(id > currentWindowStart && id < currentWindowEnd) * firing;
+        float currentWindowEnd = frameState + fireRate;
+        float shouldBulletInitialize = float(id >= currentWindowStart && id < currentWindowEnd) * firing;
+
+        if(phaseState == 1. && length(velocity) < 0.01) {
+            shouldBulletInitialize = 1.;
+        }
 
         if(shouldBulletInitialize == 1.) {
             position = parentPosition;
@@ -152,12 +166,16 @@ export const constructPlayerPixelShader = (updateFunction: string, type: PixelSh
             phaseState = 1.0;
         }
 
+        if(collision > 0.) {
+            phaseState = 0.;
+        }
+
         frameState = frameState + fireRate;
 
         ${
             type === "position"
                 ? glsl`float outState = phaseState;`
-                : glsl`float outState = mod(frameState, float(PLAYER_BULLET_WHEEL_SIZE / 2));`
+                : glsl`float outState = frameState > float(PLAYER_BULLET_WHEEL_SIZE) ? 0. : frameState;`
         }
 
         ${
@@ -166,7 +184,7 @@ export const constructPlayerPixelShader = (updateFunction: string, type: PixelSh
                 : glsl`vec3 zero = vec3(0.001, 0.001, 0.001);`
         }
 
-        if(phaseState == 0.) {
+        if(phaseState == 0. || collision > 0.) {
             gl_FragColor = vec4(zero, outState);
         }
         else{
